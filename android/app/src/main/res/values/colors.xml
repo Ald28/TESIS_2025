@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#00FF00</color> <!-- Verde -->
+    <color name="primary_dark">#008000</color> <!-- Verde oscuro -->
+    <color name="accent">#FFFF00</color> <!-- Amarillo -->
+    <color name="text_color">#000000</color> <!-- Negro -->
+    <color name="splash_background">#2196F3</color>
+</resources>
