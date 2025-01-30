@@ -7,6 +7,7 @@ import Dashboard from "./components/Admin/Dashboard";
 import Usuarios from "./components/Admin/Usuarios";
 import Ajustes from "./components/Admin/Ajustes";
 import PerfilDoctor from "./components/Admin/PerfilDoctor";
+import VerificarCodigo from "./components/Auth/VerificarCodigo";
 import NotFound from "./components/Common/NotFound";
 import "./index.css";
 
@@ -16,6 +17,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/verificar-codigo" element={<VerificarCodigo />} />
         
         <Route
           path="/admin/*"

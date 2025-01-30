@@ -13,9 +13,13 @@ export const registroPsicologo = async (datos) => {
 };
 
 // Verificación de código
-export const verificarCodigo = async (codigo) => {
+export const verificarCodigo = async ({email, numero_colegiatura, codigo}) => {
   try {
-    const response = await axios.post(`${API_URL}/verificar_codigo`, { codigo });
+    const response = await axios.post(`${API_URL}/verificar_codigo`, { 
+      email, 
+      numero_colegiatura, 
+      codigo
+     });
     return response.data;
   } catch (error) {
     console.error("Error en la API de verificación:", error);
@@ -29,6 +33,7 @@ export const loginPsicologo = async (credenciales) => {
     const response = await axios.post(`${API_URL}/login_psicologo`, credenciales);
     return response.data;
   } catch (error) {
+    console.error("Error en la API de login:", error.response?.data || error);
     throw error.response ? error.response.data : error;
   }
 };

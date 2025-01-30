@@ -1,8 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FaUsers, FaCog, FaChartBar } from 'react-icons/fa';
 import { Card, Row, Col, Container } from 'react-bootstrap';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/"); // Redirigir a Login si no está autenticado
+    }
+  }, [navigate]);
+
   return (
     <div>
       <Container fluid>

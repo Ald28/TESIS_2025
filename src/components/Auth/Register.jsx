@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { registroPsicologo } from "../Api/api_psicologo"; // Importa la función de la API
+import VerificarCodigo from "./VerificarCodigo"; // Importa el modal de verificación
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../App.css";
 
@@ -15,8 +16,8 @@ const Register = () => {
 
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const [showModal, setShowModal] = useState(false);
 
-    // Manejo de cambios en los inputs
     const handleChange = (e) => {
         setFormData({
             ...formData,
@@ -26,7 +27,7 @@ const Register = () => {
 
     // Validaciones básicas del formulario
     const validarFormulario = () => {
-        if (!formData.nombre || !formData.apellido_paterno || !formData.apellido_materno || 
+        if (!formData.nombre || !formData.apellido_paterno || !formData.apellido_materno ||
             !formData.email || !formData.telefono || !formData.contraseña) {
             setError("Todos los campos son obligatorios.");
             return false;
@@ -46,24 +47,16 @@ const Register = () => {
         setError("");
         return true;
     };
-
-    // Manejo del envío del formulario
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validarFormulario()) return;
 
         try {
             const response = await registroPsicologo(formData);
-            setSuccess("Registro exitoso. Ahora puedes iniciar sesión.");
+            setSuccess("Registro exitoso. Verifica tu código.");
             setError("");
-            setFormData({
-                nombre: "",
-                apellido_paterno: "",
-                apellido_materno: "",
-                email: "",
-                telefono: "",
-                contraseña: "",
-            });
+            setShowModal(true);
         } catch (err) {
             setError(err.message || "Error en el registro.");
         }
@@ -120,6 +113,31 @@ const Register = () => {
                     </div>
                 </div>
             </div>
+
+            {showModal && (
+                <div className="modal fade show d-block" tabIndex={-1} role="dialog" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content" style={{ maxHeight: "680px", width: "4000px" }}>
+                            <div className="modal-header">
+                                <h5 className="modal-title">Verificación de Código</h5>
+                                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+                            </div>
+                            <div className="modal-body" style={{
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                flexDirection: "column",
+                                marginTop: "-130px"
+                            }}>
+                                <VerificarCodigo />
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 };
