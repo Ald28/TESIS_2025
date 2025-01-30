@@ -1,0 +1,27 @@
+src/
+├── components/
+|   ├── Api/
+│   │   ├── api_psicologo.js
+│   ├── Auth/
+│   │   ├── Login.jsx
+│   │   ├── Register.jsx
+|   ├── Common/
+│   │   ├── NotFound.jsx
+│   ├── Admin/
+│   │   ├── Dashboard.jsx       # Vista principal del Dashboard
+│   │   ├── Usuarios.jsx        # Vista para gestión de usuarios
+│   │   ├── Ajustes.jsx         # Vista de ajustes del sistema
+|   |   ├── PerfilDoctor.jsx 
+│   ├── Layout/
+│   │   ├── Layout.jsx          # Layout que combina Sidebar y Navbar
+│   │   ├── Sidebar.jsx         # Menú lateral del administrador
+│   │   ├── Navbar.jsx          # Barra superior del administrador
+├── assets/
+│   ├── images/
+│   │   ├── doctor-login.jpg
+│   │   ├── doctor-register.jpg
+|   |   ├── icon.png
+├── App.jsx                     # Definición de rutas principales
+├── main.jsx                    # Renderizado
+
+EL ARCHIVO REGISTER.JSX SOLO REGISTRA, TRATAR DE CREAR OTRO ARCHIVO PARA VALIDAR LOS DATOS A INGRESAR
