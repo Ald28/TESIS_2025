@@ -8,8 +8,8 @@ const Navbar = ({ collapsed }) => {
       style={{
         position: "fixed",
         top: 0,
-        left: collapsed ? "80px" : "250px", // Cambia la posición del navbar dependiendo del estado del sidebar
-        width: collapsed ? "calc(100% - 80px)" : "calc(100% - 250px)",  // Ajusta el ancho según el estado del sidebar
+        left: collapsed ? "80px" : "250px",
+        width: collapsed ? "calc(100% - 80px)" : "calc(100% - 250px)", 
         zIndex: 10
       }}
     >

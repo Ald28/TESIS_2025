@@ -24,4 +24,7 @@ src/
 ├── App.jsx                     # Definición de rutas principales
 ├── main.jsx                    # Renderizado
 
-EL ARCHIVO REGISTER.JSX SOLO REGISTRA, TRATAR DE CREAR OTRO ARCHIVO PARA VALIDAR LOS DATOS A INGRESAR
+AGREGAR BIEVENIDA AL PSICOLOGO
+AGERGAR PERFIL
+EDITAR PERFIL
+CERRAR SESSION
