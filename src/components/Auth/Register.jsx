@@ -47,7 +47,7 @@ const Register = () => {
         setError("");
         return true;
     };
-    
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validarFormulario()) return;
@@ -79,6 +79,15 @@ const Register = () => {
                         <form onSubmit={handleSubmit}>
                             {error && <div className="alert alert-danger">{error}</div>}
                             {success && <div className="alert alert-success">{success}</div>}
+                            <img
+                                src="/src/assets/images/icon.png"
+                                alt="Icono"
+                                style={{
+                                    borderRadius: "50%",
+                                    objectFit: "cover",
+                                    marginBottom: "10px",
+                                }}
+                            />
                             <div className="row g-3">
                                 <div className="col-md-6">
                                     <label className="form-label">Nombre</label>
