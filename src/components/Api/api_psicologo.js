@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8080/api";
+const API_URL = "http://localhost:8080/api/psicologo/";
 
 // Registro de psicólogo
 export const registroPsicologo = async (datos) => {
