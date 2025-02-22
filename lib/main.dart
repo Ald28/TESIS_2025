@@ -1,84 +1,70 @@
 import 'package:flutter/material.dart';
+import 'package:frondend/pages/home_page.dart';
+import 'package:frondend/pages/quiz_page.dart';
+import 'package:frondend/pages/login.dart';
+import 'package:frondend/pages/verification_page.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        body: Container(
-          width: double.infinity,
-          height: double.infinity,
-          color: const Color(0xFFB2EBF2), // Fondo azul claro
-          child: Column(
-            children: [
-              // Espaciador para empujar el logotipo al centro
-              const Spacer(),
-              // Logotipo en el centro
-              Image.asset(
-                'assets/logologin.png', // Asegúrate de tener tu logo en esta ruta
-                height: 100,
-              ),
-              const SizedBox(height: 20),
-              // Texto debajo del logotipo (opcional, puedes añadirlo)
-              const Text(
-                'CALMATEC',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              // Otro espaciador para empujar el botón hacia abajo
-              const Spacer(),
-              GestureDetector(
-                onTap: () {
-                  print("Continuar con Google");
-                },
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 4,
-                        spreadRadius: 2,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/google_icon.png', 
-                        height: 20,
-                      ),
-                      const SizedBox(width: 10),
-                      const Text(
-                        'Continue with Google',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false, //// con este debugshowc.... se quita el banner que dice debug en flutter cuando se navega
+      ///////en el themedata se especifica como colores primarios o como queremos que sea un texto dándole diseño y demás
+      ///también a los cuadros se les puede dar estilo desde aquí y se llama algo así Theme.of(context).primaryColor
+      ///indicando el color y para ponerle estilo a un texto es así: Theme.of(context).textTheme.headlineLarge,
+      ///y para cambiar el color de fondo a algún lugar es así o definir el color: Theme.of(context).primaryColor 
+      ///en el código hay que revisar, de este modo también es para llamar al body para darle estilo
+      ///a las letras color: Theme.of(context).textTheme.bodyLarge
+      theme: ThemeData(
+        primarySwatch: Colors.indigo,
+        textTheme: TextTheme(
+          headlineSmall: TextStyle(
+            color: Colors.black,
+            fontSize: 22,
+            fontWeight: FontWeight.w500,
+            shadows: [
+              Shadow(
+                color: Colors.green.withOpacity(.3),
+                offset: const Offset(3, 3),
+                blurRadius: 5,
               ),
             ],
           ),
+          headlineMedium: TextStyle(
+            color: Colors.purple.shade200,
+            fontSize: 20,
+          ),
+          bodyLarge: const TextStyle(
+            color: Colors.black,
+            fontSize: 12,
+          ),
+        ),
+        /// los card utilizan el cardTheme por defecto aquí podemos configurarlo cómo se verían 
+        cardTheme: CardTheme(
+          elevation: 6,
+          color: const Color(0xFFB2EBF2),///color del fondo de mi cuadro de preguntas
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       ),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const Login(),
+        '/home': (context) => const HomePage(),
+        '/verification': (context) {
+          final String email = ModalRoute.of(context)!.settings.arguments as String;
+          return VerificationPage(email: email);
+        },
+        '/quiz-page': (context) => const QuizPage(),
+      },
     );
   }
 }

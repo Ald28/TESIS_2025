@@ -1,0 +1,22 @@
+[
+  { "pregunta": "¿Por qué los estudiantes sienten estrés en época de exámenes?", "answer": "Por la presión de obtener buenas calificaciones y la acumulación de tareas." },
+  { "pregunta": "¿Cómo afecta el estrés al rendimiento académico?", "answer": "Puede causar dificultades para concentrarse y recordar información." },
+  { "pregunta": "¿Qué síntomas físicos pueden aparecer por el estrés?", "answer": "Dolores de cabeza, fatiga, insomnio y tensión muscular." },
+  { "pregunta": "¿Cómo influye el estrés en la salud mental?", "answer": "Puede causar ansiedad, irritabilidad y desmotivación." },
+  { "pregunta": "¿Por qué es importante descansar durante el estudio?", "answer": "El descanso ayuda a procesar mejor la información y evita el agotamiento." },
+  { "pregunta": "¿Cuánto tiempo se recomienda estudiar sin pausa?", "answer": "Se recomienda hacer pausas de 5-10 minutos cada 45-50 minutos de estudio." },
+  { "pregunta": "¿El ejercicio ayuda a reducir el estrés?", "answer": "Sí, el ejercicio libera endorfinas y mejora el estado de ánimo." },
+  { "pregunta": "¿Cómo puede ayudar la respiración profunda?", "answer": "Relaja el cuerpo y reduce la ansiedad en momentos de tensión." },
+  { "pregunta": "¿Es recomendable estudiar toda la noche antes de un examen?", "answer": "No, porque la falta de sueño afecta la memoria y el rendimiento." },
+  { "pregunta": "¿Cómo influye la alimentación en el estrés?", "answer": "Una buena alimentación mejora la concentración y reduce la fatiga." },
+  { "pregunta": "¿Tomar cafeína ayuda a estudiar mejor?", "answer": "En pequeñas cantidades puede ayudar, pero en exceso causa ansiedad." },
+  { "pregunta": "¿Qué técnicas de estudio ayudan a reducir el estrés?", "answer": "La planificación, los resúmenes y la técnica Pomodoro son efectivas." },
+  { "pregunta": "¿Cómo puede ayudar la música al estudiar?", "answer": "Música suave o instrumental puede mejorar la concentración y reducir el estrés." },
+  { "pregunta": "¿Es bueno estudiar en grupo?", "answer": "Sí, siempre que se mantenga el enfoque y se repasen los temas correctamente." },
+  { "pregunta": "¿Cómo puede ayudar organizar el tiempo?", "answer": "Evita la acumulación de tareas y reduce la ansiedad." },
+  { "pregunta": "¿El estrés siempre es negativo?", "answer": "No, un poco de estrés puede motivar, pero en exceso es perjudicial." },
+  { "pregunta": "¿Qué pasa si un estudiante se siente muy abrumado?", "answer": "Debe pedir ayuda a un profesor, amigo o profesional si es necesario." },
+  { "pregunta": "¿Las redes sociales afectan el estrés?", "answer": "Sí, pueden ser una distracción y aumentar la ansiedad si no se controlan." },
+  { "pregunta": "¿Es útil escribir sobre el estrés o las preocupaciones?", "answer": "Sí, escribir ayuda a organizar pensamientos y liberar tensiones." },
+  { "pregunta": "¿Qué hacer el día antes de un examen?", "answer": "Repasar con calma, dormir bien y evitar el estrés innecesario." }
+]
