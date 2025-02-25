@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginPsicologo } from "../Api/api_psicologo";
+import Swal from "sweetalert2";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../App.css";
 
@@ -8,11 +9,9 @@ const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [contraseña, setContraseña] = useState("");
-  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
 
     try {
       const response = await loginPsicologo({ email, contraseña });
@@ -20,12 +19,31 @@ const Login = () => {
       if (response.token) {
         localStorage.setItem("token", response.token);
         localStorage.setItem("usuario", JSON.stringify(response.usuario));
-        navigate("admin/dashboard");
+
+        Swal.fire({
+          title: "¡Bienvenido!",
+          text: `Hola, ${response.usuario.nombre}. Has iniciado sesión correctamente.`,
+          icon: "success",
+          confirmButtonText: "Continuar"
+        }).then(() => {
+          navigate("admin/dashboard");
+        });
+
       } else {
-        setError(response.message || "Error en la autenticación.");
+        Swal.fire({
+          title: "Error",
+          text: response.message || "Correo o contraseña incorrectos.",
+          icon: "error",
+          confirmButtonText: "Aceptar"
+        });
       }
     } catch (error) {
-      setError("Correo o contraseña incorrectos.");
+      Swal.fire({
+        title: "Error",
+        text: "Correo o contraseña incorrectos.",
+        icon: "error",
+        confirmButtonText: "Aceptar"
+      });
     }
   };
 
@@ -44,7 +62,6 @@ const Login = () => {
           </div>
           <div className="col-md-6 d-flex flex-column justify-content-center align-items-center">
             <form onSubmit={handleSubmit} className="w-100 text-center">
-              {error && <div className="alert alert-danger">{error}</div>}
               <img
                 src="/src/assets/images/icon.png"
                 alt="Icono"
