@@ -10,6 +10,7 @@ import PerfilDoctor from "./components/Admin/PerfilDoctor";
 import VerificarCodigo from "./components/Auth/VerificarCodigo";
 import NotFound from "./components/Common/NotFound";
 import "./index.css";
+import Cuestionario from "./components/Admin/Cuestionario";
 
 const App = () => {
   return (
@@ -27,6 +28,7 @@ const App = () => {
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="usuarios" element={<Usuarios />} />
                 <Route path="ajustes" element={<Ajustes />} />
+                <Route path="cuestionarios" element={<Cuestionario />} />
                 <Route path="perfil" element={<PerfilDoctor />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

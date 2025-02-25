@@ -1,16 +1,22 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUsers, FaCog, FaChartBar } from 'react-icons/fa';
 import { Card, Row, Col, Container } from 'react-bootstrap';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [usuario, setUsuario] = useState({ nombre: "", apellido_paterno: "" });
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-
     if (!token) {
       navigate("/"); // Redirigir a Login si no está autenticado
+    }
+
+    // Obtener los datos del usuario desde localStorage
+    const storedUser = localStorage.getItem("usuario");
+    if (storedUser) {
+      setUsuario(JSON.parse(storedUser));
     }
   }, [navigate]);
 
@@ -18,7 +24,9 @@ export default function Dashboard() {
     <div>
       <Container fluid>
         <Row className="mb-4">
-          <h2 className="text-primary">Bienvenido al Dashboard</h2>
+          <h2 className="text-primary">
+            Bienvenido, {usuario.nombre} {usuario.apellido_paterno}
+          </h2>
         </Row>
         
         <Row className="mb-4">

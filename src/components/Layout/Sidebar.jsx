@@ -5,6 +5,7 @@ import {
   FaArrowRight,
   FaTachometerAlt,
   FaUsers,
+  FaWpforms,
   FaCog,
   FaSignOutAlt,
 } from "react-icons/fa"; // Importa los íconos
@@ -60,6 +61,12 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
           <Link to="/admin/usuarios" className="nav-link text-white d-flex align-items-center">
             <FaUsers />
             {!collapsed && <span className="ms-2">Usuarios</span>}
+          </Link>
+        </li>
+        <li className="nav-item mb-3">
+          <Link to="/admin/cuestionarios" className="nav-link text-white d-flex align-items-center">
+            <FaWpforms />
+            {!collapsed && <span className="ms-2">Cuestionarios</span>}
           </Link>
         </li>
         <li className="nav-item mb-3">
