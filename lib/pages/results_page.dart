@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frondend/classes/quiz.dart';
+import 'package:frondend/pages/navigation_screen.dart'; // Importa la pantalla con el Navigation Bar
 
 class ResultsPage extends StatelessWidget {
   const ResultsPage({Key? key, required this.quiz}) : super(key: key);
@@ -61,6 +62,23 @@ class ResultsPage extends StatelessWidget {
                     ),
                   );
                 },
+              ),
+            ),
+            // Botón para ir a la pantalla principal con el NavigationBar
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => NavigationScreen()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                ),
+                child: Text('Finalizar', style: TextStyle(fontSize: 18, color: Colors.white)),
               ),
             ),
           ],
