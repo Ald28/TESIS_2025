@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { registroPsicologo } from "../Api/api_psicologo"; // Importa la función de la API
-import VerificarCodigo from "./VerificarCodigo"; // Importa el modal de verificación
+import { registroPsicologo } from "../Api/api_psicologo";
+import VerificarCodigo from "./VerificarCodigo";
+import Swal from "sweetalert2";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../App.css";
 
@@ -14,8 +15,6 @@ const Register = () => {
         contraseña: "",
     });
 
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
     const [showModal, setShowModal] = useState(false);
 
     const handleChange = (e) => {
@@ -25,26 +24,44 @@ const Register = () => {
         });
     };
 
-    // Validaciones básicas del formulario
     const validarFormulario = () => {
         if (!formData.nombre || !formData.apellido_paterno || !formData.apellido_materno ||
             !formData.email || !formData.telefono || !formData.contraseña) {
-            setError("Todos los campos son obligatorios.");
+            Swal.fire({
+                title: "Error",
+                text: "Todos los campos son obligatorios.",
+                icon: "error",
+                confirmButtonText: "Aceptar"
+            });
             return false;
         }
         if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            setError("El correo electrónico no es válido.");
+            Swal.fire({
+                title: "Error",
+                text: "El correo electrónico no es válido.",
+                icon: "error",
+                confirmButtonText: "Aceptar"
+            });
             return false;
         }
         if (formData.telefono.length < 9 || isNaN(Number(formData.telefono))) {
-            setError("El teléfono debe contener al menos 9 dígitos numéricos.");
+            Swal.fire({
+                title: "Error",
+                text: "El teléfono debe contener al menos 9 dígitos numéricos.",
+                icon: "error",
+                confirmButtonText: "Aceptar"
+            });
             return false;
         }
         if (formData.contraseña.length < 6) {
-            setError("La contraseña debe tener al menos 6 caracteres.");
+            Swal.fire({
+                title: "Error",
+                text: "La contraseña debe tener al menos 6 caracteres.",
+                icon: "error",
+                confirmButtonText: "Aceptar"
+            });
             return false;
         }
-        setError("");
         return true;
     };
 
@@ -53,12 +70,20 @@ const Register = () => {
         if (!validarFormulario()) return;
 
         try {
-            const response = await registroPsicologo(formData);
-            setSuccess("Registro exitoso. Verifica tu código.");
-            setError("");
-            setShowModal(true);
+            await registroPsicologo(formData);
+            Swal.fire({
+                title: "Registro Exitoso",
+                text: "Verifica tu código en el correo.",
+                icon: "success",
+                confirmButtonText: "Aceptar"
+            }).then(() => setShowModal(true));
         } catch (err) {
-            setError(err.message || "Error en el registro.");
+            Swal.fire({
+                title: "Error",
+                text: err.message || "Error en el registro.",
+                icon: "error",
+                confirmButtonText: "Aceptar"
+            });
         }
     };
 
@@ -77,8 +102,6 @@ const Register = () => {
                     </div>
                     <div className="col-md-6">
                         <form onSubmit={handleSubmit}>
-                            {error && <div className="alert alert-danger">{error}</div>}
-                            {success && <div className="alert alert-success">{success}</div>}
                             <img
                                 src="/src/assets/images/icon.png"
                                 alt="Icono"
@@ -140,13 +163,10 @@ const Register = () => {
                             }}>
                                 <VerificarCodigo />
                             </div>
-
-
                         </div>
                     </div>
                 </div>
             )}
-
         </div>
     );
 };
