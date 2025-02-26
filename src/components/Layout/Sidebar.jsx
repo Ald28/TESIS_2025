@@ -4,6 +4,7 @@ import {
   FaArrowLeft,
   FaArrowRight,
   FaTachometerAlt,
+  FaTasks ,
   FaUsers,
   FaWpforms,
   FaCog,
@@ -65,7 +66,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
         </li>
         <li className="nav-item mb-3">
           <Link to="/admin/cuestionarios" className="nav-link text-white d-flex align-items-center">
-            <FaWpforms />
+            <FaTasks  />
             {!collapsed && <span className="ms-2">Cuestionarios</span>}
           </Link>
         </li>

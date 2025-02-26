@@ -2,6 +2,7 @@ src/
 ├── components/
 |   ├── Api/
 │   │   ├── api_psicologo.js
+|   |   ├── api_cuestionario.js
 │   ├── Auth/
 │   │   ├── Login.jsx
 │   │   ├── Register.jsx
@@ -12,6 +13,7 @@ src/
 │   │   ├── Usuarios.jsx        # Vista para gestión de usuarios
 │   │   ├── Ajustes.jsx         # Vista de ajustes del sistema
 |   |   ├── PerfilDoctor.jsx 
+|   |   ├── Cuestionario.jsx 
 │   ├── Layout/
 │   │   ├── Layout.jsx          # Layout que combina Sidebar y Navbar
 │   │   ├── Sidebar.jsx         # Menú lateral del administrador
@@ -24,7 +26,6 @@ src/
 ├── App.jsx                     # Definición de rutas principales
 ├── main.jsx                    # Renderizado
 
-AGREGAR BIEVENIDA AL PSICOLOGO
 AGERGAR PERFIL
 EDITAR PERFIL
 CERRAR SESSION
