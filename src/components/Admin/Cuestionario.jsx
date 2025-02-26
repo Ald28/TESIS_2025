@@ -4,7 +4,12 @@ import { Table, Button, Container, Modal, Form } from "react-bootstrap";
 import { FaPlusCircle, FaEdit, FaTrash, FaEye } from "react-icons/fa";
 import { crearCuestaionario, cuestionarioPorPiscologo } from "../Api/api_cuestionarios";
 import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "datatables.net-dt/css/dataTables.dataTables.min.css";
+import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
+import $ from "jquery";
+import "datatables.net";
+import "datatables.net-bs5";
 
 export default function Cuestionario() {
   const navigate = useNavigate();
@@ -21,12 +26,24 @@ export default function Cuestionario() {
     } else {
       navigate("/");
     }
+
+    // Inicializar DataTable después de cargar los datos
+    setTimeout(() => {
+      if (!$.fn.DataTable.isDataTable("#cuestionarioTable")) {
+        $("#cuestionarioTable").DataTable();
+      }
+    }, 500);
+
   }, [navigate]);
+
 
   const fetchCuestionarios = async (psicologo_id) => {
     try {
       const data = await cuestionarioPorPiscologo(psicologo_id);
       setCuestionarios(data);
+      setTimeout(() => {
+        $("#cuestionarioTable").DataTable();
+      }, 500); // Espera un poco para que los datos se rendericen antes de iniciar DataTables
     } catch (error) {
       toast.error("❌ Error al cargar los cuestionarios.", { position: "top-right" });
     }
@@ -60,7 +77,7 @@ export default function Cuestionario() {
       <Button variant="success" onClick={() => setShowModal(true)}>
         <FaPlusCircle /> Agregar Cuestionario
       </Button>
-      <Table striped bordered hover className="mt-3">
+      <Table id="cuestionarioTable" className="table table-striped table-bordered mt-3">
         <thead>
           <tr>
             <th>#</th>
@@ -78,11 +95,7 @@ export default function Cuestionario() {
                 <td>{cuestionario.descripcion}</td>
                 <td>
                   <div className="d-flex gap-2">
-                    <Button
-                      variant="info"
-                      size="sm"
-                      onClick={() => navigate(`/admin/cuestionario/${cuestionario.id}`)}
-                    >
+                    <Button variant="info" size="sm" onClick={() => navigate(`/admin/cuestionario/${cuestionario.id}`)}>
                       <FaEye />
                     </Button>
                     <Button variant="warning" size="sm" onClick={() => setEditing(cuestionario)}>
@@ -93,7 +106,6 @@ export default function Cuestionario() {
                     </Button>
                   </div>
                 </td>
-
               </tr>
             ))
           ) : (
