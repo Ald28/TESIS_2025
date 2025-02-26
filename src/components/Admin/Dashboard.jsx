@@ -25,7 +25,7 @@ export default function Dashboard() {
       <Container fluid>
         <Row className="mb-4">
           <h2 className="text-primary">
-            Bienvenido, {usuario.nombre} {usuario.apellido_paterno}
+            Bienvenido Psicologo, {usuario.nombre} {usuario.apellido_paterno}
           </h2>
         </Row>
         
