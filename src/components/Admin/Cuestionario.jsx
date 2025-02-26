@@ -1,30 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, Form, Button, Container, Row, Col, Modal, ListGroup } from "react-bootstrap";
-import { FaPlusCircle } from "react-icons/fa";
-import { crearCuestaionario } from "../Api/api_cuestionarios";
-import { cuestionarioPorPiscologo } from "../Api/api_cuestionarios";
+import { Table, Button, Container, Modal, Form } from "react-bootstrap";
+import { FaPlusCircle, FaEdit, FaTrash, FaEye } from "react-icons/fa";
+import { crearCuestaionario, cuestionarioPorPiscologo } from "../Api/api_cuestionarios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function Cuestionario() {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    titulo: "",
-    descripcion: "",
-    psicologo_id: "",
-  });
-  const [cuestionarios, setCuestionarios] = useState([]); // Estado para almacenar los cuestionarios
-  const [showModal, setShowModal] = useState(false); // Estado para mostrar/ocultar el modal
+  const [formData, setFormData] = useState({ titulo: "", descripcion: "", psicologo_id: "" });
+  const [cuestionarios, setCuestionarios] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [editing, setEditing] = useState(null);
 
   useEffect(() => {
-    // Obtener datos del psicólogo logueado desde el localStorage
     const user = JSON.parse(localStorage.getItem("usuario"));
     if (user) {
       setFormData((prev) => ({ ...prev, psicologo_id: user.id }));
-      fetchCuestionarios(user.id); // Cargar cuestionarios del psicólogo
+      fetchCuestionarios(user.id);
     } else {
-      navigate("/"); // Si no hay usuario, redirigir al login
+      navigate("/");
     }
   }, [navigate]);
 
@@ -38,91 +33,92 @@ export default function Cuestionario() {
   };
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await crearCuestaionario(formData);
-      toast.success("✅ Cuestionario creado exitosamente!", { position: "top-right" });
+      if (editing) {
+        toast.success("✅ Cuestionario actualizado exitosamente!", { position: "top-right" });
+      } else {
+        await crearCuestaionario(formData);
+        toast.success("✅ Cuestionario creado exitosamente!", { position: "top-right" });
+      }
+      setShowModal(false);
       setFormData({ titulo: "", descripcion: "", psicologo_id: formData.psicologo_id });
-      setShowModal(false); // Cerrar el modal al crear con éxito
-      fetchCuestionarios(formData.psicologo_id); // Actualizar lista de cuestionarios
+      fetchCuestionarios(formData.psicologo_id);
     } catch (err) {
-      toast.error("❌ Error al crear el cuestionario. Inténtalo de nuevo.", { position: "top-right" });
+      toast.error("❌ Error al procesar el cuestionario.", { position: "top-right" });
     }
   };
 
   return (
     <Container className="mt-4">
-      <ToastContainer /> {/* Contenedor de toasts */}
+      <ToastContainer />
+      <h2 className="mb-3 text-primary">Gestión de Cuestionarios</h2>
+      <Button variant="success" onClick={() => setShowModal(true)}>
+        <FaPlusCircle /> Agregar Cuestionario
+      </Button>
+      <Table striped bordered hover className="mt-3">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Título</th>
+            <th>Descripción</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {cuestionarios.length > 0 ? (
+            cuestionarios.map((cuestionario, index) => (
+              <tr key={cuestionario.id}>
+                <td>{index + 1}</td>
+                <td>{cuestionario.titulo}</td>
+                <td>{cuestionario.descripcion}</td>
+                <td>
+                  <div className="d-flex gap-2">
+                    <Button
+                      variant="info"
+                      size="sm"
+                      onClick={() => navigate(`/admin/cuestionario/${cuestionario.id}`)}
+                    >
+                      <FaEye />
+                    </Button>
+                    <Button variant="warning" size="sm" onClick={() => setEditing(cuestionario)}>
+                      <FaEdit />
+                    </Button>
+                    <Button variant="danger" size="sm">
+                      <FaTrash />
+                    </Button>
+                  </div>
+                </td>
 
-      <Row className="justify-content-center">
-        <Col md={8}>
-          <Card className="shadow-sm">
-            <Card.Body>
-              <Card.Title className="text-primary">
-                <FaPlusCircle /> Cuestionarios
-              </Card.Title>
-
-              {/* Botón para abrir el modal */}
-              <Button variant="success" onClick={() => setShowModal(true)}>
-                Agregar Cuestionario
-              </Button>
-
-              {/* Lista de cuestionarios */}
-              <ListGroup className="mt-3">
-                {cuestionarios.length > 0 ? (
-                  cuestionarios.map((cuestionario) => (
-                    <ListGroup.Item key={cuestionario.id}>
-                      <strong>{cuestionario.titulo}</strong> - {cuestionario.descripcion}
-                    </ListGroup.Item>
-                  ))
-                ) : (
-                  <ListGroup.Item>No hay cuestionarios disponibles.</ListGroup.Item>
-                )}
-              </ListGroup>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Modal para agregar cuestionario */}
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="4" className="text-center">No hay cuestionarios disponibles.</td>
+            </tr>
+          )}
+        </tbody>
+      </Table>
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Crear Cuestionario</Modal.Title>
+          <Modal.Title>{editing ? "Editar Cuestionario" : "Crear Cuestionario"}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleSubmit}>
             <Form.Group className="mb-3">
               <Form.Label>Título</Form.Label>
-              <Form.Control
-                type="text"
-                name="titulo"
-                value={formData.titulo}
-                onChange={handleChange}
-                required
-              />
+              <Form.Control type="text" name="titulo" value={formData.titulo} onChange={handleChange} required />
             </Form.Group>
-
             <Form.Group className="mb-3">
               <Form.Label>Descripción</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                name="descripcion"
-                value={formData.descripcion}
-                onChange={handleChange}
-                required
-              />
+              <Form.Control as="textarea" rows={3} name="descripcion" value={formData.descripcion} onChange={handleChange} required />
             </Form.Group>
-
             <Button variant="primary" type="submit">
-              Guardar Cuestionario
+              {editing ? "Actualizar" : "Guardar"} Cuestionario
             </Button>
           </Form>
         </Modal.Body>

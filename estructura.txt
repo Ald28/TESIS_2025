@@ -14,6 +14,7 @@ src/
 │   │   ├── Ajustes.jsx         # Vista de ajustes del sistema
 |   |   ├── PerfilDoctor.jsx 
 |   |   ├── Cuestionario.jsx 
+|   |   ├── Formulario.jsx
 │   ├── Layout/
 │   │   ├── Layout.jsx          # Layout que combina Sidebar y Navbar
 │   │   ├── Sidebar.jsx         # Menú lateral del administrador

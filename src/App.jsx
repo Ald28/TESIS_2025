@@ -7,6 +7,7 @@ import Dashboard from "./components/Admin/Dashboard";
 import Usuarios from "./components/Admin/Usuarios";
 import Ajustes from "./components/Admin/Ajustes";
 import PerfilDoctor from "./components/Admin/PerfilDoctor";
+import Formulario from "./components/Admin/Formulario";
 import VerificarCodigo from "./components/Auth/VerificarCodigo";
 import NotFound from "./components/Common/NotFound";
 import "./index.css";
@@ -29,6 +30,7 @@ const App = () => {
                 <Route path="usuarios" element={<Usuarios />} />
                 <Route path="ajustes" element={<Ajustes />} />
                 <Route path="cuestionarios" element={<Cuestionario />} />
+                <Route path="cuestionario/:id" element={<Formulario />} />
                 <Route path="perfil" element={<PerfilDoctor />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
