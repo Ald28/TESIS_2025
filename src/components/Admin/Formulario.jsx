@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { crearPregunta } from "../Api/api_pregunta";
 
 const Formulario = () => {
+  const navigate = useNavigate();
   const { id } = useParams();
   const [preguntas, setPreguntas] = useState([]);
   const [mensaje, setMensaje] = useState("");
@@ -61,7 +63,7 @@ const Formulario = () => {
         <h1>Agregar preguntas y opciones al Cuestionario</h1>
         <p>ID del Cuestionario: {id}</p>
         <div>
-          <button className="btn btn-outline-success me-2">Volver al Cuestionario</button>
+          <button className="btn btn-outline-success me-2" onClick={() => navigate(`/admin/cuestionarios`)}>Volver al Cuestionario</button>
         </div>
       </div>
 

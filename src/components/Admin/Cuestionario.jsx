@@ -26,23 +26,21 @@ export default function Cuestionario() {
     } else {
       navigate("/");
     }
-
-    setTimeout(() => {
-      if (!$.fn.DataTable.isDataTable("#cuestionarioTable")) {
-        $("#cuestionarioTable").DataTable();
-      }
-    }, 500);
-
   }, [navigate]);
 
+  useEffect(() => {
+    if (cuestionarios.length > 0) {
+      $("#cuestionarioTable").DataTable().destroy();
+      setTimeout(() => {
+        $("#cuestionarioTable").DataTable();
+      }, 500);
+    }
+  }, [cuestionarios]);
 
   const fetchCuestionarios = async (psicologo_id) => {
     try {
       const data = await cuestionarioPorPiscologo(psicologo_id);
       setCuestionarios(data);
-      setTimeout(() => {
-        $("#cuestionarioTable").DataTable();
-      }, 500);
     } catch {
       toast.error("❌ Error al cargar los cuestionarios.", { position: "top-right" });
     }
@@ -56,6 +54,7 @@ export default function Cuestionario() {
     e.preventDefault();
     try {
       if (editing) {
+        // Aquí deberías llamar a la función de actualización si la tienes
         toast.success("✅ Cuestionario actualizado exitosamente!", { position: "top-right" });
       } else {
         await crearCuestaionario(formData);
@@ -63,6 +62,7 @@ export default function Cuestionario() {
       }
       setShowModal(false);
       setFormData({ titulo: "", descripcion: "", psicologo_id: formData.psicologo_id });
+      setEditing(null); // Limpiar el estado de edición
       fetchCuestionarios(formData.psicologo_id);
     } catch {
       toast.error("❌ Error al procesar el cuestionario.", { position: "top-right" });
@@ -97,7 +97,7 @@ export default function Cuestionario() {
                     <Button variant="info" size="sm" onClick={() => navigate(`/admin/cuestionario/${cuestionario.id}`)}>
                       <FaEye />
                     </Button>
-                    <Button variant="warning" size="sm" onClick={() => setEditing(cuestionario)}>
+                    <Button variant="warning" size="sm" onClick={() => { setEditing(cuestionario); setShowModal(true); }}>
                       <FaEdit />
                     </Button>
                     <Button variant="danger" size="sm">
@@ -114,7 +114,7 @@ export default function Cuestionario() {
           )}
         </tbody>
       </Table>
-      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+      <Modal show={showModal} onHide={() => { setShowModal(false); setEditing(null); }} centered>
         <Modal.Header closeButton>
           <Modal.Title>{editing ? "Editar Cuestionario" : "Crear Cuestionario"}</Modal.Title>
         </Modal.Header>
