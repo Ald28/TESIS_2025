@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Table, Button, Container, Modal, Form } from "react-bootstrap";
 import { FaPlusCircle, FaEdit, FaTrash, FaEye } from "react-icons/fa";
@@ -27,7 +27,6 @@ export default function Cuestionario() {
       navigate("/");
     }
 
-    // Inicializar DataTable después de cargar los datos
     setTimeout(() => {
       if (!$.fn.DataTable.isDataTable("#cuestionarioTable")) {
         $("#cuestionarioTable").DataTable();
@@ -43,8 +42,8 @@ export default function Cuestionario() {
       setCuestionarios(data);
       setTimeout(() => {
         $("#cuestionarioTable").DataTable();
-      }, 500); // Espera un poco para que los datos se rendericen antes de iniciar DataTables
-    } catch (error) {
+      }, 500);
+    } catch {
       toast.error("❌ Error al cargar los cuestionarios.", { position: "top-right" });
     }
   };
@@ -65,7 +64,7 @@ export default function Cuestionario() {
       setShowModal(false);
       setFormData({ titulo: "", descripcion: "", psicologo_id: formData.psicologo_id });
       fetchCuestionarios(formData.psicologo_id);
-    } catch (err) {
+    } catch {
       toast.error("❌ Error al procesar el cuestionario.", { position: "top-right" });
     }
   };

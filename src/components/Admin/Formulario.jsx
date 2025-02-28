@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
+import { crearPregunta } from "../Api/api_pregunta";
 
 const Formulario = () => {
   const { id } = useParams();
   const [preguntas, setPreguntas] = useState([]);
+  const [mensaje, setMensaje] = useState("");
 
   const agregarPregunta = () => {
     setPreguntas([
@@ -24,6 +26,35 @@ const Formulario = () => {
     setPreguntas(nuevasPreguntas);
   };
 
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
+  const psicologo_id = usuario?.psicologo_id;
+
+  const enviarPreguntas = async () => {
+    setMensaje("");
+  
+    for (const pregunta of preguntas) {
+      if (!pregunta.txt_pregunta || !pregunta.tipo_pregunta) {
+        setMensaje("Todas las preguntas deben tener texto y tipo.");
+        return;
+      }
+  
+      try {
+        await crearPregunta({
+          txt_pregunta: pregunta.txt_pregunta,
+          tipo_pregunta: pregunta.tipo_pregunta,
+          cuestionario_id: id,
+          psicologo_id: psicologo_id,
+        });
+      } catch {
+        setMensaje("Error al enviar una o más preguntas.");
+        return;
+      }
+    }
+  
+    setMensaje("Todas las preguntas se han guardado exitosamente.");
+    setPreguntas([]) //quitar en el caso que se quiera guasrdar temporalmente en la pantalla
+  };  
+
   return (
     <div className="container mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
@@ -39,6 +70,8 @@ const Formulario = () => {
           <a className="nav-link active" href="#">Preguntas y Opciones</a>
         </li>
       </ul>
+
+      {mensaje && <div className="alert alert-info">{mensaje}</div>}
 
       {preguntas.map((pregunta, index) => (
         <div key={pregunta.id} className="question-card p-3 mb-4 border rounded bg-light">
@@ -69,10 +102,6 @@ const Formulario = () => {
             <option value="escala_likert">Escala Likert</option>
             <option value="escala_numerica">Escala numérica</option>
           </select>
-          <div className="form-check mb-2">
-            <input type="checkbox" className="form-check-input" />
-            <label className="form-check-label">Pregunta obligatoria</label>
-          </div>
 
           <div className="opciones">
             <h6>Opciones</h6>
@@ -113,6 +142,7 @@ const Formulario = () => {
       ))}
 
       <button className="btn btn-primary" onClick={agregarPregunta}>+ Añadir Nueva Pregunta</button>
+      <button className="btn btn-success ms-2" onClick={enviarPreguntas}>Guardar Preguntas</button>
     </div>
   );
 };
