@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUsers, FaCog, FaChartBar } from 'react-icons/fa';
 import { Card, Row, Col, Container } from 'react-bootstrap';
@@ -10,7 +10,7 @@ export default function Dashboard() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      navigate("/"); // Redirigir a Login si no está autenticado
+      navigate("/");
     }
 
     // Obtener los datos del usuario desde localStorage

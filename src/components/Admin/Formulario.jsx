@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { crearPregunta } from "../Api/api_pregunta";
+import { crearOpcion } from "../Api/api_opcion";
 
 const Formulario = () => {
   const navigate = useNavigate();
@@ -12,7 +12,7 @@ const Formulario = () => {
   const agregarPregunta = () => {
     setPreguntas([
       ...preguntas,
-      { id: preguntas.length + 1, txt_pregunta: "", tipo_pregunta: "", opciones: [] },
+      { id: preguntas.length + 1, txt_pregunta: "", tipo_pregunta: "", opciones: [], pregunta_id: null },
     ]);
   };
 
@@ -24,44 +24,80 @@ const Formulario = () => {
 
   const eliminarOpcion = (preguntaIndex, opcionIndex) => {
     const nuevasPreguntas = [...preguntas];
-    nuevasPreguntas[preguntaIndex].opciones = nuevasPreguntas[preguntaIndex].opciones.filter((_, i) => i !== opcionIndex);
+    nuevasPreguntas[preguntaIndex].opciones.splice(opcionIndex, 1);
     setPreguntas(nuevasPreguntas);
   };
 
   const usuario = JSON.parse(localStorage.getItem("usuario"));
   const psicologo_id = usuario?.psicologo_id;
 
-  const enviarPreguntas = async () => {
+  const guardarPregunta = async (index) => {
     setMensaje("");
+    const pregunta = preguntas[index];
   
-    for (const pregunta of preguntas) {
-      if (!pregunta.txt_pregunta || !pregunta.tipo_pregunta) {
-        setMensaje("Todas las preguntas deben tener texto y tipo.");
-        return;
-      }
-  
-      try {
-        await crearPregunta({
-          txt_pregunta: pregunta.txt_pregunta,
-          tipo_pregunta: pregunta.tipo_pregunta,
-          cuestionario_id: id,
-          psicologo_id: psicologo_id,
-        });
-      } catch {
-        setMensaje("Error al enviar una o más preguntas.");
-        return;
-      }
+    if (!pregunta.txt_pregunta || !pregunta.tipo_pregunta) {
+      setMensaje("Cada pregunta debe tener texto y tipo.");
+      return;
     }
   
-    setMensaje("Todas las preguntas se han guardado exitosamente.");
-    setPreguntas([]) //quitar en el caso que se quiera guasrdar temporalmente en la pantalla
-  };  
+    try {
+      const response = await crearPregunta({
+        txt_pregunta: pregunta.txt_pregunta,
+        tipo_pregunta: pregunta.tipo_pregunta,
+        cuestionario_id: id,
+        psicologo_id: psicologo_id,
+      });
+  
+      console.log("Respuesta completa de la API:", response);
+      
+      if (response.pregunta && response.pregunta.id) {
+        const nuevasPreguntas = [...preguntas];
+        nuevasPreguntas[index].pregunta_id = response.pregunta.id; 
+        setPreguntas(nuevasPreguntas);
+        setMensaje("Pregunta guardada correctamente.");
+      } else {
+        setMensaje("Error: No se recibió un ID de la pregunta.");
+      }
+  
+    } catch (error) {
+      console.error("Error al guardar la pregunta:", error);
+      setMensaje("Error al guardar la pregunta.");
+    }
+  };
+
+  const guardarOpcion = async (preguntaIndex, opcionIndex) => {
+    setMensaje("");
+    const pregunta = preguntas[preguntaIndex];
+    const opcion = pregunta.opciones[opcionIndex];
+    console.log("Intentando guardar opción en pregunta ID:", pregunta.pregunta_id);
+    if (!pregunta.pregunta_id) {
+      setMensaje("Debe guardar la pregunta antes de añadir opciones.");
+      return;
+    }
+
+    if (!opcion.txt_opcion || opcion.puntaje === null) {
+      setMensaje("Cada opción debe tener texto y puntaje.");
+      return;
+    }
+
+    try {
+      await crearOpcion({
+        txt_opcion: opcion.txt_opcion,
+        puntaje: opcion.puntaje,
+        pregunta_id: pregunta.pregunta_id,
+        psicologo_id: psicologo_id,
+      });
+
+      setMensaje("Opción guardada correctamente.");
+    } catch {
+      setMensaje("Error al guardar la opción.");
+    }
+  };
 
   return (
     <div className="container mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1>Agregar preguntas y opciones al Cuestionario</h1>
-        <p>ID del Cuestionario: {id}</p>
         <div>
           <button className="btn btn-outline-success me-2" onClick={() => navigate(`/admin/cuestionarios`)}>Volver al Cuestionario</button>
         </div>
@@ -99,11 +135,15 @@ const Formulario = () => {
             }}
           >
             <option value="">Seleccione un tipo de pregunta</option>
-            <option value="opcion_unica">Opción múltiple (una respuesta)</option>
-            <option value="opcion_multiple">Opción múltiple (varias respuestas)</option>
+            <option value="opcion_unica">Opción única</option>
+            <option value="opcion_multiple">Opción múltiple</option>
             <option value="escala_likert">Escala Likert</option>
             <option value="escala_numerica">Escala numérica</option>
           </select>
+
+          <button className="btn btn-outline-success mb-2" onClick={() => guardarPregunta(index)}>
+            Guardar Pregunta
+          </button>
 
           <div className="opciones">
             <h6>Opciones</h6>
@@ -131,10 +171,11 @@ const Formulario = () => {
                     setPreguntas(nuevasPreguntas);
                   }}
                 />
-                <button className="btn btn-sm btn-outline-danger" onClick={() => eliminarOpcion(index, opcionIndex)}>X</button>
+                <button className="btn btn-sm btn-outline-danger me-2" onClick={() => eliminarOpcion(index, opcionIndex)}>X</button>
+                <button className="btn btn-sm btn-outline-primary" onClick={() => guardarOpcion(index, opcionIndex)}>Guardar Opción</button>
               </div>
             ))}
-            <button className="btn btn-sm btn-outline-primary" onClick={() => agregarOpcion(index)}>+ Añadir Opción</button>
+            <button className="btn btn-sm btn-outline-primary mt-2" onClick={() => agregarOpcion(index)}>+ Añadir Opción</button>
           </div>
 
           <button className="btn btn-sm btn-outline-danger mt-2" onClick={() => {
@@ -144,7 +185,6 @@ const Formulario = () => {
       ))}
 
       <button className="btn btn-primary" onClick={agregarPregunta}>+ Añadir Nueva Pregunta</button>
-      <button className="btn btn-success ms-2" onClick={enviarPreguntas}>Guardar Preguntas</button>
     </div>
   );
 };

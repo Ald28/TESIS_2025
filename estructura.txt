@@ -3,6 +3,8 @@ src/
 |   ├── Api/
 │   │   ├── api_psicologo.js
 |   |   ├── api_cuestionario.js
+|   |   ├── api_pregunta.js
+|   |   ├── api_opcion.js
 │   ├── Auth/
 │   │   ├── Login.jsx
 │   │   ├── Register.jsx
