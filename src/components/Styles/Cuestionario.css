@@ -1,0 +1,6 @@
+.toast-success {
+    background: linear-gradient(to right, #66ff66, #99cc99);
+    color: rgb(0, 0, 0);
+    border-radius: 5px;
+  }
+  

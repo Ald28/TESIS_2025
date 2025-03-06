@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api/cuestionario/';
+const API_URL = 'http://localhost:8080/api/cuestionario';
 
 // Crear cuestionario
 export const crearCuestaionario = async (datos) => {

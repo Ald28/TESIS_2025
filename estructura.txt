@@ -21,6 +21,8 @@ src/
 │   │   ├── Layout.jsx          # Layout que combina Sidebar y Navbar
 │   │   ├── Sidebar.jsx         # Menú lateral del administrador
 │   │   ├── Navbar.jsx          # Barra superior del administrador
+|   ├── Styles/
+│   │   ├── Cuestionario.css
 ├── assets/
 │   ├── images/
 │   │   ├── doctor-login.jpg

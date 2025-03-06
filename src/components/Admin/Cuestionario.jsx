@@ -10,6 +10,7 @@ import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
 import $ from "jquery";
 import "datatables.net";
 import "datatables.net-bs5";
+import "../Styles/Cuestionario.css"
 
 export default function Cuestionario() {
   const navigate = useNavigate();
@@ -21,8 +22,8 @@ export default function Cuestionario() {
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("usuario"));
     if (user) {
-      setFormData((prev) => ({ ...prev, psicologo_id: user.id }));
-      fetchCuestionarios(user.id);
+      setFormData((prev) => ({ ...prev, psicologo_id: user.psicologo_id }));
+      fetchCuestionarios(user.psicologo_id);
     } else {
       navigate("/");
     }
@@ -55,17 +56,27 @@ export default function Cuestionario() {
     try {
       if (editing) {
         // Aquí deberías llamar a la función de actualización si la tienes
-        toast.success("✅ Cuestionario actualizado exitosamente!", { position: "top-right" });
+        toast.success("Cuestionario actualizado exitosamente!", { 
+          position: "top-right", 
+          autoClose: 1500 // El mensaje se cierra después de 1.5 segundos
+        });
       } else {
         await crearCuestaionario(formData);
-        toast.success("✅ Cuestionario creado exitosamente!", { position: "top-right" });
+        toast.success("Cuestionario creado exitosamente!", { 
+          position: "top-right", 
+          autoClose: 1500, // El mensaje se cierra después de 1.5 segundos
+          className: "toast-success"
+        });
       }
       setShowModal(false);
       setFormData({ titulo: "", descripcion: "", psicologo_id: formData.psicologo_id });
-      setEditing(null); // Limpiar el estado de edición
-      fetchCuestionarios(formData.psicologo_id);
+      setEditing(null);
+      
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     } catch {
-      toast.error("❌ Error al procesar el cuestionario.", { position: "top-right" });
+      toast.error("Error al procesar el cuestionario.", { position: "top-right" });
     }
   };
 
