@@ -11,3 +11,13 @@ export const crearOpcion = async (opcionData) => {
     throw error;
   }
 };
+
+export const obtenerOpcionesPorPregunta = async (preguntaId) => {
+  try {
+    const response = await axios.get(`${API_URL}/opciones/${preguntaId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error al obtener opciones:", error);
+    throw error;
+  }
+};
