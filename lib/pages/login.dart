@@ -23,11 +23,11 @@ class _LoginState extends State<Login> {
   void login() async {
   String email = emailController.text.trim();
   String password = passwordController.text.trim();
-  String dni = dniController.text.trim(); // Obtener DNI
+  String dni = dniController.text.trim(); // solo si es nuevo
 
-  if (email.isEmpty || password.isEmpty || dni.isEmpty) {
+  if (email.isEmpty || password.isEmpty) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Correo, contraseña y DNI son obligatorios'), backgroundColor: Colors.red),
+      const SnackBar(content: Text('Correo y contraseña son obligatorios'), backgroundColor: Colors.red),
     );
     return;
   }
@@ -43,43 +43,35 @@ class _LoginState extends State<Login> {
     isLoading = true;
   });
 
-  var response = await ApiService.login(email, password, dni);
-  print("Respuesta procesada: $response");
+  // Intentar login primero
+  var loginResponse = await ApiService.soloLogin(email, password);
 
-  if (response.containsKey("error")) {
-    print("Error recibido: ${response["detalle"]}");
-    if (mounted) {
+  if (loginResponse.containsKey("error")) {
+    // Si no está registrado, pedir DNI y registrar
+    if (dni.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error en el servidor: ${response["detalle"]}'), backgroundColor: Colors.red),
+        const SnackBar(content: Text('Usuario no encontrado. Ingresa tu DNI para registrarte.'), backgroundColor: Colors.orange),
       );
-    }
-  } else if (response.containsKey("message")) {
-    String message = response["message"];
-    
-    print("Mensaje recibido: $message");
-
-    if (message.contains("autenticar el token")) {
-      print("Redirigiendo a verificación...");
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, '/verification', arguments: email);
-      }
     } else {
-      print("Inicio de sesión exitoso: $message");
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, '/home');
+      var registroResponse = await ApiService.loginOrRegister(email, password, dni);
+
+      if (registroResponse.containsKey("error")) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error en registro: ${registroResponse["detalle"]}'), backgroundColor: Colors.red),
+        );
+      } else {
+        Navigator.pushReplacementNamed(context, '/verification', arguments: email);
       }
     }
   } else {
-    print("Respuesta inesperada del servidor.");
+    // Login exitoso
+    Navigator.pushReplacementNamed(context, '/home');
   }
 
   setState(() {
     isLoading = false;
   });
 }
-
-
-
 
   @override
   Widget build(BuildContext context) {

@@ -33,8 +33,9 @@ class ResultsPage extends StatelessWidget {
                 children: [
                   Text('Preguntas: ${quiz.questions.length}',
                       style: Theme.of(context).textTheme.bodyLarge),
-                  Text('Puntaje: ${quiz.right} / ${quiz.totalPoints}',
+                  Text('Puntaje: ${quiz.right}',
                       style: Theme.of(context).textTheme.bodyLarge),
+
                 ],
               ),
             ),

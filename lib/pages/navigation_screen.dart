@@ -6,7 +6,6 @@ import 'pagina_favorito.dart';
 import 'pagina_chat.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-
 class NavigationScreen extends StatefulWidget {
   const NavigationScreen({Key? key}) : super(key: key);
 

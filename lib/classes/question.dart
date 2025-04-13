@@ -1,57 +1,60 @@
 class Answer {
   final String texto;
   final int puntaje;
+  final int preguntaId; 
 
-  Answer({required this.texto, required this.puntaje});
+  Answer({required this.texto, required this.puntaje, required this.preguntaId});
 
   factory Answer.fromJson(Map<String, dynamic> json) {
     return Answer(
-      texto: json['texto'],
-      puntaje: json['puntaje'],
+      texto: json['txt_opcion'] ?? "", 
+      puntaje: int.tryParse(json['puntaje'].toString()) ?? 0, 
+      preguntaId: int.tryParse(json['pregunta_id'].toString()) ?? 0,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'texto': texto,
+      'txt_opcion': texto,
       'puntaje': puntaje,
+      'pregunta_id': preguntaId,
     };
   }
 }
 
-
 class Question {
-  final int id;
+  final int id; 
   final String pregunta;
-  List<Answer> respuestas;
-  String? selected; // Agregamos esta propiedad para la respuesta seleccionada
-  bool correct = false; // Agregamos esta propiedad para verificar si la respuesta es correcta
+  final String tipo;
+  final int cuestionarioId;
+  List<Answer> respuestas = [];
+  String? selected;
+  bool correct = false;
 
   Question({
     required this.id,
     required this.pregunta,
-    required this.respuestas,
+    required this.tipo,
+    required this.cuestionarioId,
+    this.respuestas = const [],
   });
 
-  // Método para convertir JSON en un objeto Question
   factory Question.fromJson(Map<String, dynamic> json) {
-    var list = json['respuestas'] as List;
-    List<Answer> respuestaList = list.map((i) => Answer.fromJson(i)).toList();
-
     return Question(
-      id: json['id'],
-      pregunta: json['pregunta'],
-      respuestas: respuestaList,
+      id: int.tryParse(json['id'].toString()) ?? 0,
+      pregunta: json['txt_pregunta'] ?? "",
+      tipo: json['tipo_pregunta'] ?? "",
+      cuestionarioId: int.tryParse(json['cuestionario_id'].toString()) ?? 0,
     );
   }
 
-  // Método opcional para convertir un objeto Question a JSON
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'pregunta': pregunta,
+      'txt_pregunta': pregunta,
+      'tipo_pregunta': tipo,
+      'cuestionario_id': cuestionarioId,
       'respuestas': respuestas.map((e) => e.toJson()).toList(),
     };
   }
 }
-
