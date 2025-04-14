@@ -2,13 +2,34 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:frondend/classes/question.dart';
 import 'package:frondend/classes/quiz.dart';
+import 'package:frondend/classes/psicologo.dart';
 import 'package:frondend/classes/metodo_relajacion.dart';
 
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.100.11:8080/api';
+  static const String baseUrl = 'http://192.168.177.181:8080/api';
+
+  //psicologo parte superior  , esto se podri usar mas adelante si ahy una api listar
+
+  static Future<List<Psicologo>> fetchPsicologos() async {
+  try {
+    final response = await http.get(Uri.parse('$baseUrl/psicologo/listar_psicologos'));
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = jsonDecode(response.body);
+      return data.map((json) => Psicologo.fromJson(json)).toList();
+    } else {
+      print("Error al obtener psicólogos: ${response.statusCode}");
+      return [];
+    }
+  } catch (e) {
+    print("Excepción al obtener psicólogos: $e");
+    return [];
+  }
+}
 
 
+ ///metodo relajacion
   static Future<List<MetodoRelajacion>> fetchMetodosRelajacion() async {
   try {
     final response = await http.get(Uri.parse('$baseUrl/metodos_relajacion/listar'));
@@ -212,4 +233,5 @@ static Future<Map<String, dynamic>> soloLogin(String email, String password) asy
       return {"error": "Error de conexión con el servidor", "detalle": error.toString()};
     }
   }
+  
 }

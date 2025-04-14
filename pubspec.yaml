@@ -70,6 +70,7 @@ flutter:
     - assets/logologin2.png
     - assets/google_icon.png
     - assets/icon/logoi.png 
+    - assets/images/default_user.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 
