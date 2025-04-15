@@ -68,6 +68,7 @@ flutter:
     - assets/logo.png
     - assets/logologin.png
     - assets/logologin2.png
+    - assets/images/superior.png
     - assets/google_icon.png
     - assets/icon/logoi.png 
     - assets/images/default_user.png

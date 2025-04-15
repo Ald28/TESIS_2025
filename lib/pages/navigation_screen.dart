@@ -16,7 +16,15 @@ class NavigationScreen extends StatefulWidget {
 class _NavigationScreenState extends State<NavigationScreen> {
   int _paginaActual = 0;
 
-  List<Widget> _paginas = [
+  final List<String> _titulos = [
+    'Inicio',
+    'Chat',
+    'Favoritos',
+    'Editar',
+    'Usuario',
+  ];
+
+  final List<Widget> _paginas = [
     PaginaHome(),
     PaginaChat(),
     PaginaFavorito(),
@@ -26,27 +34,54 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Mi Aplicación Flutter'),
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.indigo,
+        title: Row(
+          children: [
+
+            Image.asset(
+              'assets/images/superior.png',
+              height: 28,
+            ),
+            const SizedBox(width: 8),
+
+
+            Expanded(
+              child: Align(
+                alignment: Alignment.center,
+                child: Text(
+                  _titulos[_paginaActual], 
+                  style: const TextStyle(fontSize: 20),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-      body: _paginas[_paginaActual], // Muestra la página actual seleccionada
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _paginaActual,
-        onTap: (index) {
-          setState(() {
-            _paginaActual = index;
-          });
-        },
-        type: BottomNavigationBarType.fixed,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home, size: 20), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline, size: 20), label: "Chat"),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite, size: 20), label: "Favorites"),
-          BottomNavigationBarItem(icon: Icon(Icons.edit, size: 20), label: "Edit"),
-          BottomNavigationBarItem(icon: Icon(Icons.supervised_user_circle, size: 20), label: "User"),
-        ],
+
+
+
+        body: _paginas[_paginaActual],
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _paginaActual,
+          onTap: (index) {
+            setState(() {
+              _paginaActual = index;
+            });
+          },
+          type: BottomNavigationBarType.fixed,
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home, size: 20), label: "Inicio"),
+            BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline, size: 20), label: "Chat"),
+            BottomNavigationBarItem(icon: Icon(Icons.favorite, size: 20), label: "Favoritos"),
+            BottomNavigationBarItem(icon: Icon(Icons.edit, size: 20), label: "Editar"),
+            BottomNavigationBarItem(icon: Icon(Icons.supervised_user_circle, size: 20), label: "Usuario"),
+          ],
+        ),
       ),
     );
   }

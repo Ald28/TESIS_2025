@@ -176,7 +176,15 @@ class _PaginaHomeState extends State<PaginaHome> {
                           const SizedBox(height: 10),
                           AspectRatio(
                             aspectRatio: 16 / 9,
-                            child: VideoPlayerWidget(url: metodo.archivo),
+                            child: metodo.archivo.endsWith('.mp4')
+                                ? VideoPlayerWidget(url: metodo.archivo)
+                                : Image.network(
+                                    metodo.archivo,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return const Center(child: Text('Error cargando imagen'));
+                                    },
+                                  ),
                           ),
                         ],
                       ),
@@ -202,6 +210,7 @@ class VideoPlayerWidget extends StatefulWidget {
 
 class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   late VideoPlayerController _controller;
+  bool _showControls = true;
 
   @override
   void initState() {
@@ -209,8 +218,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     _controller = VideoPlayerController.networkUrl(Uri.parse(widget.url))
       ..initialize().then((_) {
         setState(() {});
-        _controller.play();
-        _controller.setLooping(true);
+        _controller.setLooping(true);///esto genera un bucle 
       });
   }
 
@@ -223,7 +231,42 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   @override
   Widget build(BuildContext context) {
     return _controller.value.isInitialized
-        ? VideoPlayer(_controller)
+        ? GestureDetector(
+            onTap: () {
+              setState(() {
+                _showControls = !_showControls;
+              });
+            },
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                AspectRatio(
+                  aspectRatio: _controller.value.aspectRatio,
+                  child: VideoPlayer(_controller),
+                ),
+                if (_showControls)
+                  IconButton(
+                    icon: Icon(
+                      _controller.value.isPlaying
+                          ? Icons.pause_circle_filled
+                          : Icons.play_circle_fill,
+                      size: 60,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        if (_controller.value.isPlaying) {
+                          _controller.pause();
+                        } else {
+                          _controller.play();
+                          _showControls = false; // Ocultar controles cuando empieza
+                        }
+                      });
+                    },
+                  ),
+              ],
+            ),
+          )
         : const Center(child: CircularProgressIndicator());
   }
 }
