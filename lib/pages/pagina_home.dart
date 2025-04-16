@@ -3,9 +3,12 @@ import 'package:frondend/services/api_service.dart';
 import 'package:frondend/classes/metodo_relajacion.dart';
 import 'package:frondend/classes/psicologo.dart';
 import 'package:video_player/video_player.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PaginaHome extends StatefulWidget {
-  const PaginaHome({Key? key}) : super(key: key);
+  final Function(Psicologo)? onSeleccionarPsicologo;
+  
+  const PaginaHome({Key? key, this.onSeleccionarPsicologo}) : super(key: key);
 
   @override
   State<PaginaHome> createState() => _PaginaHomeState();
@@ -19,27 +22,46 @@ class _PaginaHomeState extends State<PaginaHome> {
   List<String> _categorias = [];
 
   String? _categoriaSeleccionada;
+  Set<int> _favoritos = {};
 
   @override
-  void initState() {
-    super.initState();
+void initState() {
+  super.initState();
+  _cargarDatos();
+}
 
-    _metodosFuture = ApiService.fetchMetodosRelajacion().then((metodos) {
-      _todosLosMetodos = metodos;
+void _cargarDatos() async {
+      /*
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int? usuarioId = prefs.getInt('usuario_id'); 
+    */
 
-      if (metodos.isNotEmpty) {
-        _categorias = metodos
-            .map((m) => m.categoria.trim().toLowerCase())
-            .toSet()
-            .toList();
-      }
+  _metodosFuture = ApiService.fetchMetodosRelajacion().then((metodos) {
+    _todosLosMetodos = metodos;
 
-      return metodos;
+    if (metodos.isNotEmpty) {
+      _categorias = metodos
+          .map((m) => m.categoria.trim().toLowerCase())
+          .toSet()
+          .toList();
+    }
+
+    return metodos;
+  });
+
+  _psicologosFuture = ApiService.fetchPsicologos();
+
+  /*if (usuarioId != null) {
+    ApiService.fetchFavoritos(usuarioId).then((ids) {
+      setState(() {
+        _favoritos = ids.toSet();
+      });
     });
-
-    _psicologosFuture = ApiService.fetchPsicologos();
   }
+  */
+  _favoritos = {}; 
 
+}
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -76,16 +98,23 @@ class _PaginaHomeState extends State<PaginaHome> {
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Column(
                       children: [
-                        Container(
-                          width: 55,
-                          height: 55,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            image: DecorationImage(
-                              image: (p.fotoUrl != null && p.fotoUrl!.isNotEmpty)
-                                  ? NetworkImage(p.fotoUrl!)
-                                  : const AssetImage('assets/images/default_user.png') as ImageProvider,
-                              fit: BoxFit.cover,
+                        GestureDetector(
+                          onTap: () {
+                            if (widget.onSeleccionarPsicologo != null) {
+                              widget.onSeleccionarPsicologo!(p);
+                            }
+                          },
+                          child: Container(
+                            width: 55,
+                            height: 55,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                image: (p.fotoUrl != null && p.fotoUrl!.isNotEmpty)
+                                    ? NetworkImage(p.fotoUrl!)
+                                    : const AssetImage('assets/images/default_user.png') as ImageProvider,
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
                         ),
@@ -173,6 +202,39 @@ class _PaginaHomeState extends State<PaginaHome> {
                           const SizedBox(height: 6),
                           Text("Psicólogo: ${metodo.psicologo}"),
                           Text("Categoría: ${metodo.categoria}"),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: IconButton(
+                              icon: Icon(
+                                _favoritos.contains(metodo.id)
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                color: Colors.red,
+                              ),
+                              onPressed: () async {
+                                /*final prefs = await SharedPreferences.getInstance();
+                                final usuarioId = prefs.getInt('usuario_id');
+                                if (usuarioId == null) return;*/
+
+                                final usuarioId = 4; // ID temporal para pruebas
+
+
+                                setState(() {
+                                  if (_favoritos.contains(metodo.id)) {
+                                    _favoritos.remove(metodo.id);
+                                  } else {
+                                    _favoritos.add(metodo.id);
+                                  }
+                                });
+
+                                if (_favoritos.contains(metodo.id)) {
+                                  await ApiService.agregarFavorito(usuarioId, metodo.id);
+                                } else {
+                                  await ApiService.eliminarFavorito(usuarioId, metodo.id);
+                                }
+                              },
+                            ),
+                          ),
                           const SizedBox(height: 10),
                           AspectRatio(
                             aspectRatio: 16 / 9,
@@ -259,7 +321,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                           _controller.pause();
                         } else {
                           _controller.play();
-                          _showControls = false; // Ocultar controles cuando empieza
+                          _showControls = false; 
                         }
                       });
                     },

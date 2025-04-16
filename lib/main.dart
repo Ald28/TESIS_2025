@@ -5,6 +5,7 @@ import 'package:frondend/pages/login.dart';
 import 'package:frondend/pages/verification_page.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 

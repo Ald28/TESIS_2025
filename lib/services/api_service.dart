@@ -3,13 +3,70 @@ import 'package:http/http.dart' as http;
 import 'package:frondend/classes/question.dart';
 import 'package:frondend/classes/quiz.dart';
 import 'package:frondend/classes/psicologo.dart';
+import 'package:frondend/classes/estudiante.dart';
 import 'package:frondend/classes/metodo_relajacion.dart';
 
 
 class ApiService {
   static const String baseUrl = 'http://192.168.177.181:8080/api';
 
-  //psicologo parte superior  , esto se podri usar mas adelante si ahy una api listar
+  /// Listar favoritos
+static Future<List<int>> fetchFavoritos(int estudianteId) async {
+  try {
+    final response = await http.get(Uri.parse('$baseUrl/favorito/listar/$estudianteId'));
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return List<int>.from(data.map((f) => f['metodo_id']));
+    } else {
+      return [];
+    }
+  } catch (e) {
+    return [];
+  }
+}
+
+/// Agregar favorito
+static Future<void> agregarFavorito(int estudianteId, int metodoId) async {
+  await http.post(
+    Uri.parse('$baseUrl/favorito/agregar'),
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({"estudiante_id": estudianteId, "metodo_id": metodoId}),
+  );
+}
+
+/// Eliminar favorito
+static Future<void> eliminarFavorito(int estudianteId, int metodoId) async {
+  await http.delete(
+    Uri.parse('$baseUrl/favorito/eliminar'),
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({"estudiante_id": estudianteId, "metodo_id": metodoId}),
+  );
+}
+
+
+
+  ///perfil usuario:
+  static Future<Estudiante?> fetchPerfilEstudiante(int usuarioId) async {
+  try {
+    final response = await http.get(Uri.parse('$baseUrl/estudiante/perfil/$usuarioId'));
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final estudiante = Estudiante.fromJson(data['datos'][0]);
+      return estudiante;
+    } else {
+      print("Error al obtener perfil: ${response.statusCode}");
+      return null;
+    }
+  } catch (e) {
+    print("Excepción al obtener perfil: $e");
+    return null;
+  }
+}
+
+
+  //psicologo parte superior
 
   static Future<List<Psicologo>> fetchPsicologos() async {
   try {
@@ -140,9 +197,9 @@ class ApiService {
         );
 
         return {
-          "pregunta_id": q.id, //  Asegúrate de que el ID es correcto
-          "estudiante_id": 1, //  Cambia esto con el ID real del estudiante
-          "opciones_id": selectedAnswer.preguntaId, //  Si esto es null, hay un error en los datos
+          "pregunta_id": q.id, 
+          "estudiante_id": 1, 
+          "opciones_id": selectedAnswer.preguntaId, 
         };
       }).toList();
 
@@ -217,9 +274,6 @@ static Future<Map<String, dynamic>> soloLogin(String email, String password) asy
         body: jsonEncode({"email": email, "codigo": codigo}),
       );
 
-      print("Código de estado: ${response.statusCode}");
-      print("Respuesta del servidor: ${response.body}");
-
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
         return jsonResponse;
@@ -233,5 +287,29 @@ static Future<Map<String, dynamic>> soloLogin(String email, String password) asy
       return {"error": "Error de conexión con el servidor", "detalle": error.toString()};
     }
   }
+//// reenviar codigo
+  static Future<Map<String, dynamic>> reenviarCodigo(String email) async {
+  final url = Uri.parse('$baseUrl/estudiante/reenviar-codigo');
+
+  try {
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"email": email}),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      return {
+        "error": "No se pudo reenviar el código",
+        "detalle": response.body.isNotEmpty ? response.body : "Respuesta vacía"
+      };
+    }
+  } catch (error) {
+    return {"error": "Error de conexión con el servidor", "detalle": error.toString()};
+  }
+}
+
   
 }

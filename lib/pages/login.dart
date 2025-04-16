@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -65,6 +67,10 @@ class _LoginState extends State<Login> {
     }
   } else {
     // Login exitoso
+    /////int usuarioIdDelEstudiante = loginResponse['usuario']['id'];
+
+    //////SharedPreferences prefs = await SharedPreferences.getInstance();
+    /////await prefs.setInt('usuario_id', usuarioIdDelEstudiante);
     Navigator.pushReplacementNamed(context, '/home');
   }
 

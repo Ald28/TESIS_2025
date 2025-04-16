@@ -92,7 +92,7 @@ class _VerificationPageState extends State<VerificationPage> {
                   labelText: "Correo electrónico",
                   border: OutlineInputBorder(),
                 ),
-                readOnly: true, // Para que el usuario no pueda modificarlo
+                readOnly: true, 
               ),
             ),
             const SizedBox(height: 20),
@@ -119,6 +119,35 @@ class _VerificationPageState extends State<VerificationPage> {
               child: isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
                   : const Text("Verificar", style: TextStyle(color: Colors.white, fontSize: 18)),
+            ),
+            TextButton(
+              onPressed: isLoading
+                  ? null
+                  : () async {
+                      setState(() {
+                        isLoading = true;
+                      });
+
+                      var response = await ApiService.reenviarCodigo(emailController.text.trim());
+
+                      setState(() {
+                        isLoading = false;
+                      });
+
+                      if (response.containsKey("error")) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error: ${response["detalle"]}'), backgroundColor: Colors.red),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Código reenviado exitosamente'), backgroundColor: Colors.green),
+                        );
+                      }
+                    },
+              child: const Text(
+                "¿No recibiste el código? Reenviar",
+                style: TextStyle(color: Colors.blueAccent),
+              ),
             ),
           ],
         ),
