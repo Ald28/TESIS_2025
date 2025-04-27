@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-//import { registroPsicologo } from "../Api/api_psicologo";
 import VerificarCodigo from "./VerificarCodigo";
 import Swal from "sweetalert2";
 import "bootstrap/dist/css/bootstrap.min.css";
