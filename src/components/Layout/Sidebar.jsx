@@ -4,54 +4,51 @@ import {
   FaArrowLeft,
   FaArrowRight,
   FaTachometerAlt,
-  FaTasks ,
+  FaTasks,
   FaUsers,
   FaWpforms,
   FaCog,
+  FaClipboardList,
   FaSignOutAlt,
-} from "react-icons/fa"; // Importa los íconos
+} from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const Sidebar = ({ collapsed, setCollapsed }) => {
-  // Función para alternar el estado del sidebar
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
   };
 
   return (
     <div
-      className={`d-flex flex-column vh-100 bg-primary text-white p-3 ${collapsed ? "collapsed" : ""}`}
+      className="d-flex flex-column bg-primary text-white"
       style={{
+        height: "100vh",
+        width: collapsed ? "80px" : "250px",
         position: "fixed",
         top: 0,
         left: 0,
-        height: "100vh",
-        width: collapsed ? "80px" : "250px", // Ajusta el ancho dependiendo del estado
-        transition: "width 0.3s", // Transición suave en el cambio de tamaño
-        display: "flex",
-        alignItems: "center", // Centra el contenido en el eje horizontal
+        transition: "width 0.3s ease",
+        overflowX: "hidden", // 🔥 evita barras de desplazamiento
       }}
     >
-      {/* Contenedor del icono y título */}
-      <div className="text-center w-100">
-        {/* Icono centrado arriba del título */}
+      {/* Icono y Título */}
+      <div className="text-center py-4">
         <img
-          src="/src/assets/images/icon.png" // Ruta correcta de la imagen /src\assets\images\icon.png
+          src="/src/assets/images/icon.png"
           alt="Icono"
           style={{
-            width: collapsed ? "40px" : "60px", // Ajusta el tamaño según el estado
+            width: collapsed ? "40px" : "60px",
             height: collapsed ? "40px" : "60px",
             borderRadius: "50%",
             objectFit: "cover",
-            marginBottom: "10px", // Espacio entre el icono y el título
+            marginBottom: "10px",
           }}
         />
-        {/* Título que cambia al colapsar */}
-        {!collapsed && <h3 className="mb-4">Administrador</h3>}
+        {!collapsed && <h5 className="mb-0">Administrador</h5>}
       </div>
 
-      {/* Opciones del sidebar */}
-      <ul className="nav flex-column w-100">
+      {/* Menú de navegación */}
+      <ul className="nav flex-column mt-3">
         <li className="nav-item mb-3">
           <Link to="/admin/dashboard" className="nav-link text-white d-flex align-items-center">
             <FaTachometerAlt />
@@ -66,8 +63,20 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
         </li>
         <li className="nav-item mb-3">
           <Link to="/admin/cuestionarios" className="nav-link text-white d-flex align-items-center">
-            <FaTasks  />
+            <FaTasks />
             {!collapsed && <span className="ms-2">Cuestionarios</span>}
+          </Link>
+        </li>
+        <li className="nav-item mb-3">
+          <Link to="/admin/metodos" className="nav-link text-white d-flex align-items-center">
+            <FaClipboardList />
+            {!collapsed && <span className="ms-2">Métodos</span>}
+          </Link>
+        </li>
+        <li className="nav-item mb-3">
+          <Link to="/admin/citas" className="nav-link text-white d-flex align-items-center">
+            <FaClipboardList />
+            {!collapsed && <span className="ms-2">Citas</span>}
           </Link>
         </li>
         <li className="nav-item mb-3">
@@ -76,7 +85,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
             {!collapsed && <span className="ms-2">Ajustes</span>}
           </Link>
         </li>
-        <li className="nav-item">
+        <li className="nav-item mb-3">
           <Link to="/" className="nav-link text-white d-flex align-items-center">
             <FaSignOutAlt />
             {!collapsed && <span className="ms-2">Cerrar Sesión</span>}
@@ -84,14 +93,10 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
         </li>
       </ul>
 
-      {/* Botón para colapsar/expandir el sidebar */}
+      {/* Botón de colapso - SIEMPRE al fondo */}
       <div
-        className="d-flex justify-content-center align-items-center mt-auto w-100"
-        style={{
-          cursor: "pointer",
-          padding: "10px",
-          backgroundColor: "#2d3e50",
-        }}
+        className="mt-auto d-flex justify-content-center align-items-center p-3"
+        style={{ cursor: "pointer", backgroundColor: "#004bb5" }}
         onClick={toggleSidebar}
       >
         {collapsed ? <FaArrowRight /> : <FaArrowLeft />}

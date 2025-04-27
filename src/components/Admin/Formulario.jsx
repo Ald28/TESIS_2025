@@ -1,16 +1,19 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams, Link, useLocation } from "react-router-dom";
-import { crearPregunta } from "../Api/api_pregunta";
-import { crearOpcion } from "../Api/api_opcion";
+import { useNavigate, useParams } from "react-router-dom";
+import { crearPregunta, preguntaPorCuestionario } from "../Api/api_pregunta";
+import { crearOpcion, obtenerOpcionesPorPregunta } from "../Api/api_opcion";
 
 const Formulario = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { id } = useParams();
+  const { id: paramId } = useParams();
   const [preguntas, setPreguntas] = useState([]);
   const [mensaje, setMensaje] = useState("");
+  const [preguntasConOpciones, setPreguntasConOpciones] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalOpcionVisible, setModalOpcionVisible] = useState(null);
+  const [nuevaOpcion, setNuevaOpcion] = useState({ txt_opcion: "", puntaje: 0 });
+  const [modalOpciones, setModalOpciones] = useState(null);
 
-  const { id: paramId } = useParams();
   const [cuestionarioId, setCuestionarioId] = useState(() => {
     return paramId || localStorage.getItem("cuestionario_id") || "";
   });
@@ -22,7 +25,8 @@ const Formulario = () => {
     }
   }, [paramId]);
 
-  console.log("ID del cuestionario en Formulario:", cuestionarioId);
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
+  const psicologo_id = usuario?.psicologo_id;
 
   const agregarPregunta = () => {
     setPreguntas([
@@ -33,25 +37,11 @@ const Formulario = () => {
         tipo_pregunta: "",
         opciones: [],
         pregunta_id: null,
-        guardado: false
+        guardado: false,
       },
     ]);
+    setModalVisible(true);
   };
-
-  const agregarOpcion = (index) => {
-    const nuevasPreguntas = [...preguntas];
-    nuevasPreguntas[index].opciones.push({ txt_opcion: "", puntaje: 0 });
-    setPreguntas(nuevasPreguntas);
-  };
-
-  const eliminarOpcion = (preguntaIndex, opcionIndex) => {
-    const nuevasPreguntas = [...preguntas];
-    nuevasPreguntas[preguntaIndex].opciones.splice(opcionIndex, 1);
-    setPreguntas(nuevasPreguntas);
-  };
-
-  const usuario = JSON.parse(localStorage.getItem("usuario"));
-  const psicologo_id = usuario?.psicologo_id;
 
   const guardarPregunta = async (index) => {
     setMensaje("");
@@ -66,16 +56,18 @@ const Formulario = () => {
       const response = await crearPregunta({
         txt_pregunta: pregunta.txt_pregunta,
         tipo_pregunta: pregunta.tipo_pregunta,
-        cuestionario_id: id,
+        cuestionario_id: cuestionarioId,
         psicologo_id: psicologo_id,
       });
 
-      if (response.pregunta && response.pregunta.id) {
+      if (response.pregunta?.id) {
         const nuevasPreguntas = [...preguntas];
         nuevasPreguntas[index].pregunta_id = response.pregunta.id;
-        nuevasPreguntas[index].guardado = true; // Se marca como guardado
+        nuevasPreguntas[index].guardado = true;
         setPreguntas(nuevasPreguntas);
         setMensaje("Pregunta guardada correctamente.");
+        setModalVisible(false);
+        obtenerPreguntasConOpciones();
       } else {
         setMensaje("Error: No se recibió un ID de la pregunta.");
       }
@@ -85,44 +77,60 @@ const Formulario = () => {
     }
   };
 
-  const guardarOpcion = async (preguntaIndex, opcionIndex) => {
+  const guardarOpcion = async () => {
     setMensaje("");
-    const pregunta = preguntas[preguntaIndex];
-    const opcion = pregunta.opciones[opcionIndex];
-
-    if (!pregunta.pregunta_id) {
-      setMensaje("Debe guardar la pregunta antes de añadir opciones.");
-      return;
-    }
-
-    if (!opcion.txt_opcion || opcion.puntaje === null) {
+    if (!nuevaOpcion.txt_opcion || nuevaOpcion.puntaje === null) {
       setMensaje("Cada opción debe tener texto y puntaje.");
       return;
     }
 
     try {
       await crearOpcion({
-        txt_opcion: opcion.txt_opcion,
-        puntaje: opcion.puntaje,
-        pregunta_id: pregunta.pregunta_id,
+        txt_opcion: nuevaOpcion.txt_opcion,
+        puntaje: nuevaOpcion.puntaje,
+        pregunta_id: modalOpcionVisible,
         psicologo_id: psicologo_id,
       });
 
       setMensaje("Opción guardada correctamente.");
-
-      // Actualizar el estado eliminando la opción guardada
-      const nuevasPreguntas = [...preguntas];
-      nuevasPreguntas[preguntaIndex].opciones.splice(opcionIndex, 1);
-
-      // Agregar automáticamente una nueva opción vacía
-      nuevasPreguntas[preguntaIndex].opciones.push({ txt_opcion: "", puntaje: 0 });
-
-      setPreguntas(nuevasPreguntas);
+      setNuevaOpcion({ txt_opcion: "", puntaje: 0 });
+      setModalOpcionVisible(null);
+      obtenerPreguntasConOpciones();
     } catch {
       setMensaje("Error al guardar la opción.");
     }
   };
 
+  const obtenerPreguntasConOpciones = async () => {
+    try {
+      setMensaje("");
+      const preguntas = await preguntaPorCuestionario(cuestionarioId);
+
+      const preguntasOpciones = await Promise.all(
+        preguntas.map(async (pregunta) => {
+          const opciones = await obtenerOpcionesPorPregunta(pregunta.id);
+          return { ...pregunta, opciones };
+        })
+      );
+
+      setPreguntasConOpciones(preguntasOpciones);
+    } catch (error) {
+      console.error("Error al obtener preguntas y opciones:", error);
+      setMensaje("No se pudieron cargar las preguntas y opciones.");
+    }
+  };
+
+  useEffect(() => {
+    if (cuestionarioId) {
+      obtenerPreguntasConOpciones();
+    }
+  }, [cuestionarioId]);
+
+  const verOpcionesModal = (id) => {
+    const pregunta = preguntasConOpciones.find((preg) => preg.id === id);
+    setModalOpciones(pregunta ? pregunta.opciones : []);
+    setModalOpcionVisible(id);
+  };
 
   return (
     <div className="container mt-4">
@@ -133,106 +141,158 @@ const Formulario = () => {
         </button>
       </div>
 
-      <ul className="nav nav-tabs mb-4">
-        <li className="nav-item">
-          <Link
-            to={`/admin/cuestionario/${id}`}
-            className={`nav-link ${location.pathname === `/admin/cuestionario/${id}` ? "active" : ""}`}
-          >
-            Preguntas y Opciones
-          </Link>
-        </li>
-        <li className="nav-item">
-          <Link
-            to="/admin/preguntas"
-            className={`nav-link ${location.pathname === "/admin/preguntas" ? "active" : ""}`}
-          >
-            Preguntas
-          </Link>
-        </li>
-      </ul>
-
       {mensaje && <div className="alert alert-info">{mensaje}</div>}
 
-      {preguntas.map((pregunta, index) => (
-        <div key={pregunta.id} className="question-card p-3 mb-4 border rounded bg-light">
-          <h5>Pregunta {index + 1}</h5>
+      <button className="btn btn-primary mb-4" onClick={agregarPregunta}>
+        + Añadir Nueva Pregunta
+      </button>
 
-          {!pregunta.guardado ? (
-            <>
-              <input
-                type="text"
-                className="form-control mb-2"
-                placeholder="Ingrese la pregunta"
-                value={pregunta.txt_pregunta}
-                onChange={(e) => {
-                  const nuevasPreguntas = [...preguntas];
-                  nuevasPreguntas[index].txt_pregunta = e.target.value;
-                  setPreguntas(nuevasPreguntas);
-                }}
-              />
-              <select
-                className="form-select mb-2"
-                value={pregunta.tipo_pregunta}
-                onChange={(e) => {
-                  const nuevasPreguntas = [...preguntas];
-                  nuevasPreguntas[index].tipo_pregunta = e.target.value;
-                  setPreguntas(nuevasPreguntas);
-                }}
-              >
-                <option value="">Seleccione un tipo de pregunta</option>
-                <option value="opcion_unica">Opción única</option>
-                <option value="opcion_multiple">Opción múltiple</option>
-                <option value="escala_likert">Escala Likert</option>
-                <option value="escala_numerica">Escala numérica</option>
-              </select>
+      {/* MODAL: Pregunta */}
+      {modalVisible && (
+        <div className="modal d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Añadir Pregunta</h5>
+                <button type="button" className="btn-close" onClick={() => setModalVisible(false)}></button>
+              </div>
+              <div className="modal-body">
+                {preguntas.slice(-1).map((pregunta, index) => {
+                  const realIndex = preguntas.length - 1;
 
-              <button className="btn btn-outline-success mb-2" onClick={() => guardarPregunta(index)}>
-                Guardar Pregunta
-              </button>
-            </>
-          ) : (
-            <p className="text-success">✅ Pregunta guardada.</p>
-          )}
+                  return (
+                    <div key={pregunta.id}>
+                      <input
+                        type="text"
+                        className="form-control mb-2"
+                        placeholder="Ingrese la pregunta"
+                        value={pregunta.txt_pregunta}
+                        onChange={(e) => {
+                          const nuevasPreguntas = [...preguntas];
+                          nuevasPreguntas[realIndex].txt_pregunta = e.target.value;
+                          setPreguntas(nuevasPreguntas);
+                        }}
+                      />
+                      <select
+                        className="form-select mb-2"
+                        value={pregunta.tipo_pregunta}
+                        onChange={(e) => {
+                          const nuevasPreguntas = [...preguntas];
+                          nuevasPreguntas[realIndex].tipo_pregunta = e.target.value;
+                          setPreguntas(nuevasPreguntas);
+                        }}
+                      >
+                        <option value="">Seleccione un tipo de pregunta</option>
+                        <option value="opcion_unica">Opción única</option>
+                        <option value="opcion_multiple">Opción múltiple</option>
+                        <option value="escala_likert">Escala Likert</option>
+                        <option value="escala_numerica">Escala numérica</option>
+                      </select>
 
-          {pregunta.guardado && (
-            <div className="opciones">
-              <h6>Opciones</h6>
-              {pregunta.opciones.map((opcion, opcionIndex) => (
-                <div key={opcionIndex} className="d-flex mb-2 align-items-center">
+                      <button className="btn btn-outline-success mb-2" onClick={() => guardarPregunta(realIndex)}>
+                        Guardar Pregunta
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setModalVisible(false)}>
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: Opciones */}
+      {modalOpcionVisible && (
+        <div className="modal d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Opciones</h5>
+                <button type="button" className="btn-close" onClick={() => setModalOpcionVisible(null)}></button>
+              </div>
+              <div className="modal-body">
+                {/* Mostrar las opciones existentes */}
+                <ul>
+                  {modalOpciones && modalOpciones.length > 0 ? (
+                    modalOpciones.map((opcion, idx) => (
+                      <li key={idx}>
+                        {opcion.txt_opcion} - <strong>{opcion.puntaje}</strong>
+                      </li>
+                    ))
+                  ) : (
+                    <p>No hay opciones disponibles para esta pregunta.</p>
+                  )}
+                </ul>
+
+                {/* Formulario para añadir una nueva opción */}
+                <div className="mt-3">
                   <input
                     type="text"
-                    className="form-control me-2"
-                    placeholder="Ingrese la opción"
-                    value={opcion.txt_opcion}
-                    onChange={(e) => {
-                      const nuevasPreguntas = [...preguntas];
-                      nuevasPreguntas[index].opciones[opcionIndex].txt_opcion = e.target.value;
-                      setPreguntas(nuevasPreguntas);
-                    }}
+                    className="form-control mb-2"
+                    placeholder="Texto de la opción"
+                    value={nuevaOpcion.txt_opcion}
+                    onChange={(e) => setNuevaOpcion({ ...nuevaOpcion, txt_opcion: e.target.value })}
                   />
                   <input
                     type="number"
-                    className="form-control me-2"
+                    className="form-control mb-2"
                     placeholder="Puntaje"
-                    value={opcion.puntaje}
-                    onChange={(e) => {
-                      const nuevasPreguntas = [...preguntas];
-                      nuevasPreguntas[index].opciones[opcionIndex].puntaje = Number(e.target.value);
-                      setPreguntas(nuevasPreguntas);
-                    }}
+                    value={nuevaOpcion.puntaje}
+                    onChange={(e) => setNuevaOpcion({ ...nuevaOpcion, puntaje: parseInt(e.target.value) || 0 })}
                   />
-                  <button className="btn btn-sm btn-outline-danger me-2" onClick={() => eliminarOpcion(index, opcionIndex)}>X</button>
-                  <button className="btn btn-sm btn-outline-primary" onClick={() => guardarOpcion(index, opcionIndex)}>Guardar Opción</button>
+                  <button className="btn btn-success mt-2" onClick={guardarOpcion}>
+                    Agregar Opción
+                  </button>
                 </div>
-              ))}
-              <button className="btn btn-sm btn-outline-primary mt-2" onClick={() => agregarOpcion(index)}>+ Añadir Opción</button>
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-secondary" onClick={() => setModalOpcionVisible(null)}>
+                  Cerrar
+                </button>
+              </div>
             </div>
-          )}
+          </div>
         </div>
-      ))}
+      )}
 
-      <button className="btn btn-primary" onClick={agregarPregunta}>+ Añadir Nueva Pregunta</button>
+      <hr />
+      <h4 className="mt-5 mb-3">📑 Preguntas Registradas</h4>
+
+      {preguntasConOpciones.length > 0 ? (
+        <div className="table-responsive">
+          <table className="table table-striped table-bordered shadow-sm">
+            <thead className="table-dark">
+              <tr>
+                <th className="text-center">Pregunta</th>
+                <th className="text-center">Tipo</th>
+                <th className="text-center">Opciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {preguntasConOpciones.map((pregunta) => (
+                <tr key={pregunta.id}>
+                  <td className="text-start">{pregunta.txt_pregunta}</td>
+                  <td className="text-center">
+                    <span className="badge bg-secondary">{pregunta.tipo_pregunta}</span>
+                  </td>
+                  <td className="text-center">
+                    <button className="btn btn-sm btn-outline-info me-2" onClick={() => verOpcionesModal(pregunta.id)}>
+                      Ver Opciones
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p className="text-muted">No hay preguntas registradas aún.</p>
+      )}
     </div>
   );
 };

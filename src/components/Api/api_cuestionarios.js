@@ -1,23 +1,27 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api/cuestionario';
+const API_URL = 'http://localhost:8080/api';
 
-// Crear cuestionario
-export const crearCuestaionario = async (datos) => {
-    try {
-        const response = await axios.post(`${API_URL}/cuestionario`, datos);
-        return response.data;
-    } catch (error) {
-        throw error.response ? error.response.data : error;
-    }
+// 🔹 Crear nueva pregunta
+export const crearPregunta = async (preguntaData) => {
+  const response = await axios.post(`${API_URL}/crear-pregunta`, preguntaData);
+  return response.data;
 };
 
-// Obtener cuestionarios por psicologo:
-export const cuestionarioPorPiscologo = async (psicologo_id) => {
-    try {
-        const response = await axios.get(`${API_URL}/cuestionario/${psicologo_id}`);
-        return response.data;
-    } catch (error) {
-        throw error.response ? error.response.data : error;
-    }
+// 🔹 Crear nueva opción para una pregunta
+export const crearOpcion = async (opcionData) => {
+  const response = await axios.post(`${API_URL}/crear-opcion`, opcionData);
+  return response.data;
+};
+
+// 🔹 Listar respuestas por estudiante
+export const listarTodasLasRespuestas = async () => {
+  const response = await axios.get(`${API_URL}/respuestas`);
+  return response.data;
+};
+
+// 🔹 Listar todas las preguntas con sus opciones
+export const listarPreguntasConOpciones = async () => {
+  const response = await axios.get(`${API_URL}/listar-preguntas-opciones`);
+  return response.data;
 };

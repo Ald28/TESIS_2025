@@ -1,150 +1,266 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Table, Button, Container, Modal, Form } from "react-bootstrap";
-import { FaPlusCircle, FaEdit, FaTrash, FaEye } from "react-icons/fa";
-import { crearCuestaionario, cuestionarioPorPiscologo } from "../Api/api_cuestionarios";
-import { ToastContainer, toast } from "react-toastify";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "datatables.net-dt/css/dataTables.dataTables.min.css";
-import "datatables.net-bs5/css/dataTables.bootstrap5.min.css";
-import $ from "jquery";
-import "datatables.net";
-import "datatables.net-bs5";
-import "../Styles/Cuestionario.css"
+import React, { useState, useEffect } from "react";
+import { Plus, Save, Eye, X, Trash, Edit } from "lucide-react";
+import { Modal, Button } from "react-bootstrap";
+import {
+  crearPregunta,
+  crearOpcion,
+  listarTodasLasRespuestas,
+  listarPreguntasConOpciones
+} from "../api/api_cuestionarios";
+import { buscarPsicologoPorUsuarioId } from "../api/api_psicologo";
 
 export default function Cuestionario() {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({ titulo: "", descripcion: "", psicologo_id: "" });
-  const [cuestionarios, setCuestionarios] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [editing, setEditing] = useState(null);
+  const [nuevaPregunta, setNuevaPregunta] = useState("");
+  const [tipoPregunta, setTipoPregunta] = useState("cerrada");
+  const [psicologoId, setPsicologoId] = useState(null);
+  const [preguntasConOpciones, setPreguntasConOpciones] = useState([]);
+  const [respuestas, setRespuestas] = useState([]);
+  const [mostrarModal, setMostrarModal] = useState(false);
+  const [mostrarRespuestas, setMostrarRespuestas] = useState(false); // 👉 nuevo
+  const [estudianteSeleccionado, setEstudianteSeleccionado] = useState(null);
+  const [respuestasEstudiante, setRespuestasEstudiante] = useState([]);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("usuario"));
-    if (user) {
-      setFormData((prev) => ({ ...prev, psicologo_id: user.psicologo_id }));
-      fetchCuestionarios(user.psicologo_id);
-    } else {
-      navigate("/");
-    }
-  }, [navigate]);
-
-  useEffect(() => {
-    if (cuestionarios.length > 0) {
-      $("#cuestionarioTable").DataTable().destroy();
-      setTimeout(() => {
-        $("#cuestionarioTable").DataTable();
-      }, 500);
-    }
-  }, [cuestionarios]);
-
-  const fetchCuestionarios = async (psicologo_id) => {
-    try {
-      const data = await cuestionarioPorPiscologo(psicologo_id);
-      setCuestionarios(data);
-    } catch {
-      toast.error("❌ Error al cargar los cuestionarios.", { position: "top-right" });
-    }
-  };
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      if (editing) {
-        // Aquí deberías llamar a la función de actualización si la tienes
-        toast.success("Cuestionario actualizado exitosamente!", { 
-          position: "top-right", 
-          autoClose: 1500 // El mensaje se cierra después de 1.5 segundos
-        });
-      } else {
-        await crearCuestaionario(formData);
-        toast.success("Cuestionario creado exitosamente!", { 
-          position: "top-right", 
-          autoClose: 1500, // El mensaje se cierra después de 1.5 segundos
-          className: "toast-success"
-        });
+    const fetchPsicologoId = async () => {
+      try {
+        const storedUser = JSON.parse(localStorage.getItem("usuario"));
+        if (storedUser) {
+          const data = await buscarPsicologoPorUsuarioId(storedUser.id);
+          setPsicologoId(data.psicologo_id);
+          await cargarPreguntas();
+        }
+      } catch (error) {
+        console.error("Error al obtener psicólogo ID:", error.message);
       }
-      setShowModal(false);
-      setFormData({ titulo: "", descripcion: "", psicologo_id: formData.psicologo_id });
-      setEditing(null);
-      
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
-    } catch {
-      toast.error("Error al procesar el cuestionario.", { position: "top-right" });
+    };
+    fetchPsicologoId();
+  }, []);
+
+  const cargarPreguntas = async () => {
+    try {
+      const data = await listarPreguntasConOpciones();
+      setPreguntasConOpciones(data.preguntas);
+    } catch (error) {
+      console.error("Error al cargar preguntas:", error.message);
     }
+  };
+
+  const handleCrearPregunta = async () => {
+    if (!psicologoId) return;
+
+    try {
+      const data = {
+        txt_pregunta: nuevaPregunta,
+        tipo: tipoPregunta,
+        psicologo_id: psicologoId,
+      };
+      const response = await crearPregunta(data);
+      const preguntaId = response.preguntaId;
+      alert(`Pregunta creada con ID: ${preguntaId}`);
+      setNuevaPregunta("");
+      if (tipoPregunta === "cerrada") {
+        await crearOpcion({ txt_opcion: "Sí", pregunta_id: preguntaId, psicologo_id: psicologoId });
+        await crearOpcion({ txt_opcion: "No", pregunta_id: preguntaId, psicologo_id: psicologoId });
+      }
+      await cargarPreguntas();
+      setShowForm(false);
+    } catch (error) {
+      console.error("Error al crear pregunta:", error.message);
+    }
+  };
+
+  const handleListarRespuestas = async () => {
+    if (!mostrarRespuestas) { // 👉 solo carga si aún no se ha cargado
+      try {
+        const data = await listarTodasLasRespuestas();
+        setRespuestas(data.respuestas);
+      } catch (error) {
+        console.error("Error al listar respuestas:", error.message);
+      }
+    }
+    setMostrarRespuestas(!mostrarRespuestas); // 👉 toggle (mostrar/ocultar)
+  };
+
+  const respuestasAgrupadas = respuestas.reduce((acc, respuesta) => {
+    const key = respuesta.correo_estudiante;
+    if (!acc[key]) {
+      acc[key] = {
+        nombre_estudiante: respuesta.nombre_estudiante,
+        apellido_estudiante: respuesta.apellido_estudiante,
+        correo_estudiante: respuesta.correo_estudiante,
+        respuestas: [],
+      };
+    }
+    acc[key].respuestas.push(respuesta);
+    return acc;
+  }, {});
+
+  const abrirModal = (estudiante) => {
+    setEstudianteSeleccionado(estudiante);
+    setRespuestasEstudiante(estudiante.respuestas);
+    setMostrarModal(true);
+  };
+
+  const cerrarModal = () => {
+    setMostrarModal(false);
+    setRespuestasEstudiante([]);
+    setEstudianteSeleccionado(null);
   };
 
   return (
-    <Container className="mt-4">
-      <ToastContainer />
-      <h2 className="mb-3 text-primary">Gestión de Cuestionarios</h2>
-      <Button variant="success" onClick={() => setShowModal(true)}>
-        <FaPlusCircle /> Agregar Cuestionario
-      </Button>
-      <Table id="cuestionarioTable" className="table table-striped table-bordered mt-3">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Título</th>
-            <th>Descripción</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {cuestionarios.length > 0 ? (
-            cuestionarios.map((cuestionario, index) => (
-              <tr key={cuestionario.id}>
-                <td>{index + 1}</td>
-                <td>{cuestionario.titulo}</td>
-                <td>{cuestionario.descripcion}</td>
-                <td>
-                  <div className="d-flex gap-2">
-                    <Button variant="info" size="sm" onClick={() => navigate(`/admin/cuestionario/${cuestionario.id}`)}>
-                      <FaEye />
+    <div className="container py-5">
+      <h1 className="mb-4 fw-bold text-primary">
+        📋 Panel de Administración de Encuestas
+      </h1>
+
+      {/* Sección de Preguntas */}
+      <div className="card shadow mb-5">
+        <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h5 className="mb-0">Preguntas</h5>
+          <Button variant="light" onClick={() => setShowForm(!showForm)}>
+            {showForm ? <X size={18} /> : <Plus size={18} />} {showForm ? "Cancelar" : "Agregar Pregunta"}
+          </Button>
+        </div>
+
+        <div className="card-body">
+          {showForm && (
+            <div className="mb-4">
+              <input
+                type="text"
+                className="form-control mb-3"
+                placeholder="Escribe la nueva pregunta"
+                value={nuevaPregunta}
+                onChange={(e) => setNuevaPregunta(e.target.value)}
+              />
+              <select
+                className="form-select mb-3"
+                value={tipoPregunta}
+                onChange={(e) => setTipoPregunta(e.target.value)}
+              >
+                <option value="cerrada">Cerrada (Sí/No)</option>
+                <option value="abierto">Abierta (Texto libre)</option>
+              </select>
+              <Button variant="success" onClick={handleCrearPregunta}>
+                <Save size={18} className="me-2" /> Guardar
+              </Button>
+            </div>
+          )}
+
+          {preguntasConOpciones.length > 0 ? (
+            <ul className="list-group list-group-flush">
+              {preguntasConOpciones.map((pregunta) => (
+                <li key={pregunta.id} className="list-group-item d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 className="fw-bold mb-1">{pregunta.txt_pregunta}</h6>
+                    <span className={`badge rounded-pill me-2 ${
+                      pregunta.tipo === 'cerrada' ? 'bg-primary' :
+                      pregunta.tipo === 'abierto' ? 'bg-success' : 'bg-warning'
+                    }`}>
+                      {pregunta.tipo.charAt(0).toUpperCase() + pregunta.tipo.slice(1)}
+                    </span>
+                    {pregunta.opciones.length > 0 && (
+                      <small className="text-muted">
+                        {pregunta.opciones.map(o => o.txt_opcion).join(", ")}
+                      </small>
+                    )}
+                  </div>
+                  <div>
+                    <Button variant="outline-primary" size="sm" className="me-2">
+                      <Edit size={16} />
                     </Button>
-                    <Button variant="warning" size="sm" onClick={() => { setEditing(cuestionario); setShowModal(true); }}>
-                      <FaEdit />
-                    </Button>
-                    <Button variant="danger" size="sm">
-                      <FaTrash />
+                    <Button variant="outline-danger" size="sm">
+                      <Trash size={16} />
                     </Button>
                   </div>
-                </td>
-              </tr>
-            ))
+                </li>
+              ))}
+            </ul>
           ) : (
-            <tr>
-              <td colSpan="4" className="text-center">No hay cuestionarios disponibles.</td>
-            </tr>
+            <p className="text-muted">No hay preguntas registradas.</p>
           )}
-        </tbody>
-      </Table>
-      <Modal show={showModal} onHide={() => { setShowModal(false); setEditing(null); }} centered>
+        </div>
+      </div>
+
+      {/* Sección de Estudiantes */}
+      <div className="card shadow mb-5">
+        <div className="card-header bg-success text-white d-flex justify-content-between align-items-center">
+          <h5 className="mb-0">Estudiantes</h5>
+          <Button variant="light" onClick={handleListarRespuestas}>
+            <Eye size={18} /> {mostrarRespuestas ? "Ocultar" : "Ver Respuestas"}
+          </Button>
+        </div>
+
+        {mostrarRespuestas && (
+          <div className="card-body">
+            {Object.keys(respuestasAgrupadas).length > 0 ? (
+              <div className="table-responsive">
+                <table className="table table-hover">
+                  <thead className="table-light">
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Apellido</th>
+                      <th>Correo</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.values(respuestasAgrupadas).map((estudiante, idx) => (
+                      <tr key={idx}>
+                        <td>{estudiante.nombre_estudiante}</td>
+                        <td>{estudiante.apellido_estudiante}</td>
+                        <td>{estudiante.correo_estudiante}</td>
+                        <td>
+                          <Button
+                            variant="outline-primary"
+                            size="sm"
+                            onClick={() => abrirModal(estudiante)}
+                          >
+                            <Eye size={16} className="me-1" />
+                            Ver Detalles
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-muted">No hay estudiantes con respuestas aún.</p>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Modal Respuestas */}
+      <Modal show={mostrarModal} onHide={cerrarModal} size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>{editing ? "Editar Cuestionario" : "Crear Cuestionario"}</Modal.Title>
+          <Modal.Title>Respuestas de {estudianteSeleccionado?.nombre_estudiante}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form onSubmit={handleSubmit}>
-            <Form.Group className="mb-3">
-              <Form.Label>Título</Form.Label>
-              <Form.Control type="text" name="titulo" value={formData.titulo} onChange={handleChange} required />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Descripción</Form.Label>
-              <Form.Control as="textarea" rows={3} name="descripcion" value={formData.descripcion} onChange={handleChange} required />
-            </Form.Group>
-            <Button variant="primary" type="submit">
-              {editing ? "Actualizar" : "Guardar"} Cuestionario
-            </Button>
-          </Form>
+          {respuestasEstudiante.length > 0 ? (
+            <ul className="list-group">
+              {respuestasEstudiante.map((respuesta, idx) => (
+                <li key={idx} className="list-group-item">
+                  <strong>Pregunta:</strong> {respuesta.txt_pregunta}<br />
+                  <strong>Respuesta:</strong> {respuesta.tipo === "cerrada"
+                    ? (respuesta.txt_opcion || "No respondida")
+                    : (respuesta.respuesta_texto || "No respondida")}
+                  <br />
+                  <small className="text-muted">Fecha: {new Date(respuesta.fecha).toLocaleString()}</small>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No hay respuestas registradas.</p>
+          )}
         </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={cerrarModal}>
+            Cerrar
+          </Button>
+        </Modal.Footer>
       </Modal>
-    </Container>
+    </div>
   );
 }

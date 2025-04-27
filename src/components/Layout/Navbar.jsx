@@ -1,5 +1,6 @@
 import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { FaBell } from 'react-icons/fa';
 
 const Navbar = ({ collapsed }) => {
   return (
@@ -9,7 +10,7 @@ const Navbar = ({ collapsed }) => {
         position: "fixed",
         top: 0,
         left: collapsed ? "80px" : "250px",
-        width: collapsed ? "calc(100% - 80px)" : "calc(100% - 250px)", 
+        width: collapsed ? "calc(100% - 80px)" : "calc(100% - 250px)",
         zIndex: 10
       }}
     >
@@ -31,18 +32,13 @@ const Navbar = ({ collapsed }) => {
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
             <li className="nav-item">
+              <a className="nav-link" href="/admin/notifications">
+                <FaBell />
+              </a>
+            </li>
+            <li className="nav-item">
               <a className="nav-link" href="/admin/perfil">
                 Perfil
-              </a>
-            </li>
-            <li className="nav-item">
-              <a className="nav-link" href="/admin/notifications">
-                Notificaciones
-              </a>
-            </li>
-            <li className="nav-item">
-              <a className="nav-link text-danger" href="/">
-                Cerrar Sesión
               </a>
             </li>
           </ul>

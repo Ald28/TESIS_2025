@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { verificarCodigo } from "../Api/api_psicologo";
+//import { verificarCodigo } from "../Api/api_psicologo";
 import Swal from "sweetalert2";
 import "bootstrap/dist/css/bootstrap.min.css";
 
