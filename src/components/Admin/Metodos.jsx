@@ -1,113 +1,231 @@
 import React, { useState, useEffect } from 'react';
-import { subirMetodoRelajacion } from '../Api/api_metodos';
-import axios from 'axios';
+import { 
+  subirMetodo, 
+  listarEstudiantes, 
+  listarMetodosRecomendados, 
+  listarTodosMetodosPrivados
+} from '../api/api_metodos';
 
-const Metodos = () => {
-    const [titulo, setTitulo] = useState('');
-    const [descripcion, setDescripcion] = useState('');
-    const [categoria_id, setCategoriaId] = useState('');
-    const [archivo, setArchivo] = useState(null);
-    const [mensaje, setMensaje] = useState('');
-    const [categorias, setCategorias] = useState([]);
+export default function Metodos() {
+  const [titulo, setTitulo] = useState('');
+  const [descripcion, setDescripcion] = useState('');
+  const [tipo, setTipo] = useState('recomendado');
+  const [estudianteId, setEstudianteId] = useState('');
+  const [archivo, setArchivo] = useState(null);
+  const [estudiantes, setEstudiantes] = useState([]);
 
-    const usuario = JSON.parse(localStorage.getItem('usuario'));
-    const psicologo_id = usuario?.psicologo_id;
+  const [metodosRecomendados, setMetodosRecomendados] = useState([]);
+  const [todosMetodosPrivados, setTodosMetodosPrivados] = useState([]);
 
+  useEffect(() => {
+    const cargarDatos = async () => {
+      try {
+        const estudiantesData = await listarEstudiantes();
+        setEstudiantes(estudiantesData);
 
-    useEffect(() => {
-        const obtenerCategorias = async () => {
-            try {
-                const response = await axios.get('http://localhost:8080/api/categorias/listar');
-                setCategorias(response.data);
-            } catch (error) {
-                console.error('Error al cargar las categorías:', error);
-                setMensaje('Error al cargar las categorías');
-            }
-        };
+        const recomendadosData = await listarMetodosRecomendados();
+        setMetodosRecomendados(recomendadosData);
 
-        obtenerCategorias();
-    }, []);
-
-    const manejarSubmit = async (e) => {
-        e.preventDefault();
-
-        if (!titulo || !descripcion || !psicologo_id || !categoria_id || !archivo) {
-            setMensaje('Por favor, complete todos los campos.');
-            return;
-        }
-
-        try {
-            await subirMetodoRelajacion(titulo, descripcion, psicologo_id, categoria_id, archivo);
-            setMensaje('Método de relajación subido con éxito.');
-
-            setTitulo('');
-            setDescripcion('');
-            setCategoriaId('');
-            setArchivo(null);
-        } catch (error) {
-            setMensaje('Error al subir el método de relajación.');
-        }
+        const privadosData = await listarTodosMetodosPrivados();
+        setTodosMetodosPrivados(privadosData);
+      } catch (error) {
+        console.error('Error inicial:', error);
+      }
     };
+    cargarDatos();
+  }, []);
 
-    return (
-        <div className="container mt-4">
-            <h2 className="mb-4">Subir Método de Relajación</h2>
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-            {mensaje && <div className="alert alert-info">{mensaje}</div>}
+    if (!archivo) {
+      alert('Selecciona un archivo');
+      return;
+    }
 
-            <form onSubmit={manejarSubmit}>
-                <div className="mb-3">
-                    <label htmlFor="titulo" className="form-label">Título</label>
-                    <input
-                        type="text"
-                        className="form-control"
-                        id="titulo"
-                        value={titulo}
-                        onChange={(e) => setTitulo(e.target.value)}
-                    />
-                </div>
+    const formData = new FormData();
+    formData.append('titulo', titulo);
+    formData.append('descripcion', descripcion);
+    formData.append('tipo', tipo);
+    if (tipo === 'privado') {
+      formData.append('estudiante_id', estudianteId);
+    }
+    formData.append('archivo', archivo);
 
-                <div className="mb-3">
-                    <label htmlFor="descripcion" className="form-label">Descripción</label>
-                    <textarea
-                        className="form-control"
-                        id="descripcion"
-                        value={descripcion}
-                        onChange={(e) => setDescripcion(e.target.value)}
-                    ></textarea>
-                </div>
+    try {
+      const response = await subirMetodo(formData);
+      alert(response.message);
+      setTitulo('');
+      setDescripcion('');
+      setTipo('recomendado');
+      setArchivo(null);
+      setEstudianteId('');
 
-                <div className="mb-3">
-                    <label htmlFor="categoria_id" className="form-label">Categoría</label>
-                    <select
-                        className="form-control"
-                        id="categoria_id"
-                        value={categoria_id}
-                        onChange={(e) => setCategoriaId(e.target.value)}
-                    >
-                        <option value="">Selecciona una categoría</option>
-                        {categorias.map((cat) => (
-                            <option key={cat.id} value={cat.id}>
-                                {cat.nombre}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+      const recomendadosData = await listarMetodosRecomendados();
+      setMetodosRecomendados(recomendadosData);
 
-                <div className="mb-3">
-                    <label htmlFor="archivo" className="form-label">Archivo</label>
-                    <input
-                        type="file"
-                        className="form-control"
-                        id="archivo"
-                        onChange={(e) => setArchivo(e.target.files[0])}
-                    />
-                </div>
+      const privadosData = await listarTodosMetodosPrivados();
+      setTodosMetodosPrivados(privadosData);
+    } catch (error) {
+      alert('Error al subir el método');
+    }
+  };
 
-                <button type="submit" className="btn btn-primary">Subir Método</button>
-            </form>
+  return (
+    <div className="container mt-5">
+
+      {/* Formulario */}
+      <div className="card shadow-sm p-4">
+        <h2 className="mb-4 text-center text-primary">Subir Método de Relajación</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+            <label className="form-label">Título</label>
+            <input
+              type="text"
+              className="form-control"
+              value={titulo}
+              onChange={(e) => setTitulo(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label">Descripción</label>
+            <input
+              type="text"
+              className="form-control"
+              value={descripcion}
+              onChange={(e) => setDescripcion(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label">Tipo de método</label>
+            <select
+              className="form-select"
+              value={tipo}
+              onChange={(e) => setTipo(e.target.value)}
+              required
+            >
+              <option value="recomendado">Recomendado</option>
+              <option value="privado">Privado</option>
+            </select>
+          </div>
+
+          {tipo === 'privado' && (
+            <div className="mb-3">
+              <label className="form-label">Seleccionar Estudiante</label>
+              <select
+                className="form-select"
+                value={estudianteId}
+                onChange={(e) => setEstudianteId(e.target.value)}
+                required
+              >
+                <option value="">Selecciona un estudiante</option>
+                {estudiantes.map((estudiante) => (
+                  <option key={estudiante.estudiante_id} value={estudiante.estudiante_id}>
+                    {estudiante.nombre} {estudiante.apellido}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div className="mb-3">
+            <label className="form-label">Archivo Multimedia</label>
+            <input
+              type="file"
+              className="form-control"
+              onChange={(e) => setArchivo(e.target.files[0])}
+              required
+            />
+          </div>
+
+          <div className="text-center">
+            <button type="submit" className="btn btn-primary w-50">
+              Subir Método
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* 🌟 Métodos Recomendados en Tabla */}
+      <div className="card shadow-sm p-4 mt-5">
+        <h3 className="text-center text-success">🌟 Métodos Recomendados</h3>
+        <div className="table-responsive">
+          <table className="table table-bordered table-hover">
+            <thead className="table-light">
+              <tr>
+                <th>Título</th>
+                <th>Descripción</th>
+                <th>Archivo Multimedia</th>
+              </tr>
+            </thead>
+            <tbody>
+              {metodosRecomendados.length > 0 ? (
+                metodosRecomendados.map((metodo) => (
+                  <tr key={metodo.id}>
+                    <td>{metodo.titulo}</td>
+                    <td>{metodo.descripcion}</td>
+                    <td>
+                      {metodo.multimedia_url && (
+                        <a href={metodo.multimedia_url} target="_blank" rel="noopener noreferrer" className="btn btn-outline-success btn-sm">
+                          Ver Archivo
+                        </a>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="3" className="text-center">No hay métodos recomendados disponibles.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
-    );
-};
+      </div>
 
-export default Metodos;
+      {/* 🔒 Métodos Privados en Tabla */}
+      <div className="card shadow-sm p-4 mt-5">
+        <h3 className="text-center text-danger">🔒 Métodos Privados Asignados</h3>
+        <div className="table-responsive">
+          <table className="table table-bordered table-hover">
+            <thead className="table-light">
+              <tr>
+                <th>Estudiante</th>
+                <th>Título</th>
+                <th>Descripción</th>
+                <th>Archivo Multimedia</th>
+              </tr>
+            </thead>
+            <tbody>
+              {todosMetodosPrivados.length > 0 ? (
+                todosMetodosPrivados.map((metodo) => (
+                  <tr key={metodo.id}>
+                    <td>{metodo.nombre} {metodo.apellido}</td>
+                    <td>{metodo.titulo}</td>
+                    <td>{metodo.descripcion}</td>
+                    <td>
+                      {metodo.multimedia_url && (
+                        <a href={metodo.multimedia_url} target="_blank" rel="noopener noreferrer" className="btn btn-outline-danger btn-sm">
+                          Ver Archivo
+                        </a>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4" className="text-center">No hay métodos privados asignados.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  );
+}

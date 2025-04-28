@@ -1,28 +1,59 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api/metodos_relajacion';
+const API_URL = 'http://localhost:8080/api';
+const API_ESTUDIANTE = 'http://localhost:8080/auth';
 
-export const subirMetodoRelajacion = async (titulo, descripcion, psicologo_id, categoria_id, archivo) => {
-  const formData = new FormData();
-
-  formData.append('titulo', titulo);
-  formData.append('descripcion', descripcion);
-  formData.append('psicologo_id', psicologo_id);
-  formData.append('categoria_id', categoria_id);
-  formData.append('archivo', archivo);
-
-  const token = localStorage.getItem('token'); // <-- Aquí lo obtienes
-
+export const subirMetodo = async (formData) => {
   try {
-    const response = await axios.post(`${API_URL}/subir`, formData, {
+    const token = localStorage.getItem('token');
+
+    const response = await axios.post(`${API_URL}/subir-metodo`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
-        'Authorization': `Bearer ${token}` // <-- Aquí lo envías al backend
+        'Authorization': token,
       },
     });
+
     return response.data;
   } catch (error) {
-    console.error("Error al subir el método de relajación", error);
-    throw new Error("No se pudo subir el método de relajación");
+    console.error('Error al subir método:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const listarEstudiantes = async () => {
+  try {
+    const token = localStorage.getItem('token');
+
+    const response = await axios.get(`${API_ESTUDIANTE}/estudiantes`, {
+      headers: {
+        'Authorization': token,
+      },
+    });
+
+    return response.data.estudiantes;
+  } catch (error) {
+    console.error('Error al listar estudiantes:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const listarMetodosRecomendados = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/recomendados`);
+    return response.data.metodos;
+  } catch (error) {
+    console.error('Error al listar métodos recomendados:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const listarTodosMetodosPrivados = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/privados-todos`);
+    return response.data.metodos;
+  } catch (error) {
+    console.error('Error al listar todos los métodos privados:', error.response?.data || error.message);
+    throw error;
   }
 };
