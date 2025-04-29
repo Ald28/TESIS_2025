@@ -1,33 +1,35 @@
 import { Outlet } from "react-router-dom";
-import Sidebar from './Sidebar';
-import Navbar from './Navbar';
-import React, { useState } from 'react';
+import Sidebar from "./Sidebar";
+import Navbar from "./Navbar";
+import React, { useState } from "react";
 
 export default function Layout() {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
-      {/* Sidebar fijo a la izquierda */}
+    <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#f8f9fa" }}>
       <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
-      {/* Contenido principal */}
       <div
         style={{
-          marginLeft: collapsed ? "80px" : "250px",
-          width: "100%",
+          flex: 1, 
           display: "flex",
           flexDirection: "column",
-          backgroundColor: "white", // ⬅️ Esto hace fondo blanco
-          minHeight: "100vh",        // ⬅️ Siempre ocupa toda la altura
+          minHeight: "100vh",
+          paddingLeft: collapsed ? "100px" : "260px",
+          transition: "padding 0.3s ease", 
+          backgroundColor: "#f8f9fa",
         }}
       >
-        {/* Navbar */}
         <Navbar collapsed={collapsed} />
 
-        {/* Área de páginas */}
-        <div style={{ marginTop: "60px", padding: "20px", flexGrow: 1 }}>
-          <Outlet /> {/* Aquí se inyecta Dashboard, Usuarios, etc */}
+        {/* Contenido */}
+        <div style={{
+          marginTop: "70px",
+          padding: "20px",
+          flexGrow: 1,
+        }}>
+          <Outlet />
         </div>
       </div>
     </div>

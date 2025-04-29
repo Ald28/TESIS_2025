@@ -10,6 +10,7 @@ import {
   FaCog,
   FaClipboardList,
   FaSignOutAlt,
+  FaCalendarAlt,
 } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -28,11 +29,21 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
         top: 0,
         left: 0,
         transition: "width 0.3s ease",
-        overflowX: "hidden", // 🔥 evita barras de desplazamiento
+        overflowX: "hidden",
+        alignItems: "center", 
+        paddingTop: "1rem",
       }}
     >
-      {/* Icono y Título */}
-      <div className="text-center py-4">
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
+          paddingBottom: "1rem",
+        }}
+      >
         <img
           src="/src/assets/images/icon.png"
           alt="Icono"
@@ -44,58 +55,40 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
             marginBottom: "10px",
           }}
         />
-        {!collapsed && <h5 className="mb-0">Administrador</h5>}
+        {!collapsed && (
+          <h5 className="mb-0 text-center">Administrador</h5>
+        )}
       </div>
 
-      {/* Menú de navegación */}
-      <ul className="nav flex-column mt-3">
-        <li className="nav-item mb-3">
-          <Link to="/admin/dashboard" className="nav-link text-white d-flex align-items-center">
-            <FaTachometerAlt />
-            {!collapsed && <span className="ms-2">Dashboard</span>}
-          </Link>
-        </li>
-        <li className="nav-item mb-3">
-          <Link to="/admin/usuarios" className="nav-link text-white d-flex align-items-center">
-            <FaUsers />
-            {!collapsed && <span className="ms-2">Usuarios</span>}
-          </Link>
-        </li>
-        <li className="nav-item mb-3">
-          <Link to="/admin/cuestionarios" className="nav-link text-white d-flex align-items-center">
-            <FaTasks />
-            {!collapsed && <span className="ms-2">Cuestionarios</span>}
-          </Link>
-        </li>
-        <li className="nav-item mb-3">
-          <Link to="/admin/metodos" className="nav-link text-white d-flex align-items-center">
-            <FaClipboardList />
-            {!collapsed && <span className="ms-2">Métodos</span>}
-          </Link>
-        </li>
-        <li className="nav-item mb-3">
-          <Link to="/admin/citas" className="nav-link text-white d-flex align-items-center">
-            <FaClipboardList />
-            {!collapsed && <span className="ms-2">Citas</span>}
-          </Link>
-        </li>
-        <li className="nav-item mb-3">
-          <Link to="/admin/ajustes" className="nav-link text-white d-flex align-items-center">
-            <FaCog />
-            {!collapsed && <span className="ms-2">Ajustes</span>}
-          </Link>
-        </li>
-        <li className="nav-item mb-3">
-          <Link to="/" className="nav-link text-white d-flex align-items-center">
-            <FaSignOutAlt />
-            {!collapsed && <span className="ms-2">Cerrar Sesión</span>}
-          </Link>
-        </li>
+      <ul className="nav flex-column mt-2 w-100">
+        {[ 
+          { to: "/admin/dashboard", icon: <FaTachometerAlt />, label: "Dashboard" },
+          { to: "/admin/usuarios", icon: <FaUsers />, label: "Usuarios" },
+          { to: "/admin/cuestionarios", icon: <FaTasks />, label: "Cuestionarios" },
+          { to: "/admin/metodos", icon: <FaClipboardList />, label: "Métodos" },
+          { to: "/admin/citas", icon: <FaCalendarAlt />, label: "Citas" },
+          { to: "/admin/ajustes", icon: <FaCog />, label: "Ajustes" },
+          { to: "/", icon: <FaSignOutAlt />, label: "Cerrar Sesión" },
+        ].map((item, idx) => (
+          <li key={idx} className="nav-item mb-3">
+            <Link
+              to={item.to}
+              className="nav-link text-white d-flex align-items-center"
+              style={{
+                justifyContent: collapsed ? "center" : "flex-start",
+                gap: "8px",
+                paddingLeft: collapsed ? "0" : "1rem",
+              }}
+            >
+              {item.icon}
+              {!collapsed && <span>{item.label}</span>}
+            </Link>
+          </li>
+        ))}
       </ul>
 
-      {/* Botón de colapso - SIEMPRE al fondo */}
       <div
-        className="mt-auto d-flex justify-content-center align-items-center p-3"
+        className="mt-auto d-flex justify-content-center align-items-center p-3 w-100"
         style={{ cursor: "pointer", backgroundColor: "#004bb5" }}
         onClick={toggleSidebar}
       >

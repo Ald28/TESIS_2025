@@ -90,7 +90,7 @@ const Register = () => {
         <div className="auth-container d-flex justify-content-center align-items-center" style={{ minHeight: "90vh", backgroundColor: "#ffffff" }}>
             <div className="card p-4" style={{ maxWidth: "900px", width: "100%", borderRadius: "20px", boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)" }}>
                 <div className="row g-0">
-                    {/* Imagen lado izquierdo */}
+
                     <div className="col-md-5 d-none d-md-flex align-items-center justify-content-center p-3">
                         <img
                             src="/src/assets/images/doctor-register.jpg"
@@ -99,7 +99,6 @@ const Register = () => {
                         />
                     </div>
 
-                    {/* Formulario lado derecho */}
                     <div className="col-md-7 d-flex flex-column justify-content-center p-4">
                         <h2 className="text-center mb-4" style={{ color: "#6c63ff", fontWeight: "700" }}>Registro</h2>
 

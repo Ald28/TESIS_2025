@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { FiRefreshCw } from "react-icons/fi";
 import { Container, Row, Col, Card, Button, Table, Modal, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { FaUsers, FaCalendarCheck, FaTasks, FaClock, FaGoogle } from "react-icons/fa";
@@ -37,15 +38,6 @@ export default function Dashboard() {
       setUsuario(JSON.parse(storedUser));
     }
 
-    const fetchCitas = async () => {
-      try {
-        const citasData = await obtenerCitasDelPsicologo(token);
-        setCitas(citasData.citas || []);
-      } catch (error) {
-        console.error("Error al obtener citas:", error.message);
-      }
-    };
-
     fetchCitas();
   }, [navigate]);
 
@@ -62,6 +54,7 @@ export default function Dashboard() {
       await crearDisponibilidad(disponibilidad);
       alert("Disponibilidad creada exitosamente!");
       setDisponibilidad({ dia: "", hora_inicio: "", hora_fin: "" });
+      fetchCitas();
     } catch (error) {
       console.error(error.message);
       alert("Error al crear disponibilidad");
@@ -72,7 +65,7 @@ export default function Dashboard() {
     try {
       const token = localStorage.getItem("token");
       await cambiarEstadoCita({ cita_id, estado: "aceptada", evento_google_id: null }, token);
-      window.location.reload();
+      fetchCitas();
     } catch (error) {
       console.error(error.message);
       alert("Error al aceptar la cita");
@@ -83,7 +76,7 @@ export default function Dashboard() {
     try {
       const token = localStorage.getItem("token");
       await cambiarEstadoCita({ cita_id, estado: "rechazada", evento_google_id: null }, token);
-      window.location.reload();
+      fetchCitas();
     } catch (error) {
       console.error(error.message);
       alert("Error al rechazar la cita");
@@ -91,126 +84,135 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="p-4" style={{ backgroundColor: "#fafafa", minHeight: "100vh" }}>
+    <div style={{ backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
       <Container fluid>
 
-        <h2 className="text-primary mb-4 fw-semibold">
-          Bienvenido, {usuario.nombre} {usuario.apellido_paterno}
-        </h2>
+        <div className="mb-4">
+          <h2 className="fw-bold text-dark">
+            Bienvenida, {usuario.nombre} {usuario.apellido_paterno}
+          </h2>
+          <p className="text-muted">Gestiona tus citas y disponibilidad.</p>
+        </div>
 
-        {/* KPIs */}
-        <Row className="mb-4">
+        <Row className="g-4 mb-4">
           <Col md={3}>
-            <Card className="text-center border-0 shadow-sm">
-              <Card.Body>
-                <FaUsers size={24} className="text-primary mb-2" />
-                <h6>Pacientes Activos</h6>
-                <p className="fw-bold mb-0">{citas.filter(c => c.estado === 'aceptada').length}</p>
+            <Card className="border-0 shadow-sm">
+              <Card.Body className="text-center">
+                <FaUsers size={30} className="text-primary mb-2" />
+                <h6 className="fw-semibold">Pacientes Activos</h6>
+                <p className="fw-bold fs-4 mb-0">{citas.filter(c => c.estado === 'aceptada').length}</p>
               </Card.Body>
             </Card>
           </Col>
           <Col md={3}>
-            <Card className="text-center border-0 shadow-sm">
-              <Card.Body>
-                <FaCalendarCheck size={24} className="text-success mb-2" />
-                <h6>Sesiones</h6>
-                <p className="fw-bold mb-0">{citas.length}</p>
+            <Card className="border-0 shadow-sm">
+              <Card.Body className="text-center">
+                <FaCalendarCheck size={30} className="text-success mb-2" />
+                <h6 className="fw-semibold">Sesiones</h6>
+                <p className="fw-bold fs-4 mb-0">{citas.length}</p>
               </Card.Body>
             </Card>
           </Col>
           <Col md={3}>
-            <Card className="text-center border-0 shadow-sm">
-              <Card.Body>
-                <FaTasks size={24} className="text-warning mb-2" />
-                <h6>Actividades</h6>
-                <p className="fw-bold mb-0">23</p>
+            <Card className="border-0 shadow-sm">
+              <Card.Body className="text-center">
+                <FaTasks size={30} className="text-warning mb-2" />
+                <h6 className="fw-semibold">Actividades</h6>
+                <p className="fw-bold fs-4 mb-0">23</p>
               </Card.Body>
             </Card>
           </Col>
           <Col md={3}>
-            <Card className="text-center border-0 shadow-sm">
-              <Card.Body>
-                <FaClock size={24} className="text-danger mb-2" />
-                <h6>Horas Programadas</h6>
-                <p className="fw-bold mb-0">86</p>
+            <Card className="border-0 shadow-sm">
+              <Card.Body className="text-center">
+                <FaClock size={30} className="text-danger mb-2" />
+                <h6 className="fw-semibold">Horas Programadas</h6>
+                <p className="fw-bold fs-4 mb-0">86</p>
               </Card.Body>
             </Card>
           </Col>
         </Row>
 
-        {/* Disponibilidad + Calendar */}
-        <Row className="mb-4">
+        <Row className="g-4 mb-4">
           <Col md={6}>
             <Card className="border-0 shadow-sm">
               <Card.Body>
-                <h5 className="mb-3">Crear Disponibilidad</h5>
-                <Row className="g-2 align-items-center">
-                  <Col md={4}>
-                    <Form.Control
-                      type="text"
-                      placeholder="Día (Ej: Lunes, Martes)"
-                      value={disponibilidad.dia}
-                      onChange={(e) => setDisponibilidad({ ...disponibilidad, dia: e.target.value })}
-                    />
-                  </Col>
-                  <Col md={3}>
-                    <Form.Control
-                      type="time"
-                      value={disponibilidad.hora_inicio}
-                      onChange={(e) => setDisponibilidad({ ...disponibilidad, hora_inicio: e.target.value })}
-                    />
-                  </Col>
-                  <Col md={3}>
-                    <Form.Control
-                      type="time"
-                      value={disponibilidad.hora_fin}
-                      onChange={(e) => setDisponibilidad({ ...disponibilidad, hora_fin: e.target.value })}
-                    />
-                  </Col>
-                  <Col md={2}>
-                    <div className="d-grid">
-                      <Button variant="primary" onClick={handleCrearDisponibilidad}>
-                        Crear
+                <h5 className="fw-semibold mb-3">Crear Disponibilidad</h5>
+                <Form>
+                  <Row className="g-3 align-items-center">
+                    <Col md={4}>
+                      <Form.Select
+                        value={disponibilidad.dia}
+                        onChange={(e) => setDisponibilidad({ ...disponibilidad, dia: e.target.value })}
+                      >
+                        <option value="">Selecciona un día</option>
+                        <option>Lunes</option>
+                        <option>Martes</option>
+                        <option>Miércoles</option>
+                        <option>Jueves</option>
+                        <option>Viernes</option>
+                        <option>Sábado</option>
+                      </Form.Select>
+                    </Col>
+                    <Col md={4}>
+                      <Form.Control
+                        type="time"
+                        value={disponibilidad.hora_inicio}
+                        onChange={(e) => setDisponibilidad({ ...disponibilidad, hora_inicio: e.target.value })}
+                      />
+                    </Col>
+                    <Col md={4}>
+                      <Form.Control
+                        type="time"
+                        value={disponibilidad.hora_fin}
+                        onChange={(e) => setDisponibilidad({ ...disponibilidad, hora_fin: e.target.value })}
+                      />
+                    </Col>
+                    <Col md={12} className="mt-3">
+                      <Button
+                        className="w-100"
+                        style={{ backgroundColor: "#6c63ff", border: "none" }}
+                        onClick={handleCrearDisponibilidad}
+                      >
+                        Crear Disponibilidad
                       </Button>
-                    </div>
-                  </Col>
-                </Row>
+                    </Col>
+                  </Row>
 
+                </Form>
               </Card.Body>
             </Card>
           </Col>
 
           <Col md={6}>
-            <Card className="border-0 shadow-sm">
-              <Card.Body className="d-flex flex-column align-items-center justify-content-center">
-                <FaGoogle size={32} className="text-danger mb-3" />
-                <h5>Conectar Calendar</h5>
-                <Button variant="danger" size="sm" onClick={abrirModal} className="mt-2">
-                  Conectar
-                </Button>
-              </Card.Body>
+            <Card className="border-0 shadow-sm text-center p-4">
+              <FaGoogle size={40} className="text-danger mb-3" />
+              <h5 className="fw-semibold">Sincroniza tu calendario</h5>
+              <p className="text-muted small">Mantén tus citas organizadas y sincronizadas con tu calendario de Google.</p>
+              <Button variant="danger" onClick={abrirModal}>
+                Conectar Google Calendar
+              </Button>
             </Card>
           </Col>
         </Row>
 
-        {/* Tabla de citas */}
         <Card className="border-0 shadow-sm">
           <Card.Body>
-            {/* 🔵 Encabezado con botón Refrescar */}
             <div className="d-flex justify-content-between align-items-center mb-3">
-              <h5 className="mb-0">Citas Pendientes</h5>
-              <Button variant="outline-primary" size="sm" onClick={fetchCitas}>
-                Refrescar
+              <h5 className="fw-semibold mb-0">Citas Pendientes</h5>
+              <Button variant="outline-primary" size="sm" onClick={fetchCitas} className="d-flex align-items-center gap-2">
+                <FiRefreshCw size={18} />
+                <span className="d-none d-md-inline">Refrescar</span>
               </Button>
             </div>
 
-            {/* 🔵 Tabla de citas */}
-            <Table responsive borderless hover>
+            <Table hover responsive borderless>
               <thead className="table-light">
                 <tr>
                   <th>Paciente</th>
                   <th>Fecha</th>
                   <th>Hora</th>
+                  <th>Estado</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
@@ -218,9 +220,13 @@ export default function Dashboard() {
                 {citas.filter(c => c.estado === "pendiente").length > 0 ? (
                   citas.filter(c => c.estado === "pendiente").map((cita, index) => (
                     <tr key={index}>
-                      <td>{cita.estudiante_nombre}</td>
+                      <td>
+                        <strong>{cita.estudiante_nombre}</strong><br />
+                        <small className="text-muted">Estudiante</small>
+                      </td>
                       <td>{new Date(cita.fecha_inicio).toLocaleDateString()}</td>
                       <td>{new Date(cita.fecha_inicio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+                      <td><span className="badge bg-warning text-dark">Pendiente</span></td>
                       <td>
                         <Button size="sm" variant="success" onClick={() => handleAceptarCita(cita.id)}>Aceptar</Button>{" "}
                         <Button size="sm" variant="outline-danger" onClick={() => handleRechazarCita(cita.id)}>Rechazar</Button>
@@ -229,7 +235,7 @@ export default function Dashboard() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="4" className="text-center text-muted">No hay citas pendientes.</td>
+                    <td colSpan="5" className="text-center text-muted">No hay citas pendientes.</td>
                   </tr>
                 )}
               </tbody>
@@ -237,7 +243,6 @@ export default function Dashboard() {
           </Card.Body>
         </Card>
 
-        {/* Modal Google Calendar */}
         <Modal show={showModal} onHide={cerrarModal} centered>
           <Modal.Header closeButton>
             <Modal.Title>Conectar Google Calendar</Modal.Title>
