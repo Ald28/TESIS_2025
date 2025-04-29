@@ -34,7 +34,6 @@ const Login = () => {
   };
 
   useEffect(() => {
-    // Inicializar Google Login
     google.accounts.id.initialize({
       client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
       callback: handleCallbackResponse,
@@ -47,38 +46,50 @@ const Login = () => {
   }, []);
 
   return (
-    <div className="auth-container d-flex justify-content-center align-items-center vh-80">
-      <div className="card shadow-lg p-5" style={{ maxWidth: "1200px", width: "100%" }}>
-        <h2 className="text-center text-primary mb-5">Inicio de Sesión</h2>
-
-        <div className="row g-5">
-          {/* Imagen a la izquierda */}
-          <div className="col-md-6 d-flex justify-content-center align-items-center">
+    <div className="auth-container d-flex justify-content-center align-items-center" style={{ minHeight: "90vh" }}>
+      <div className="card p-4" style={{ maxWidth: "900px", width: "100%", borderRadius: "20px", boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)" }}>
+        <div className="row g-0">
+          <div className="col-md-5 d-none d-md-flex align-items-center justify-content-center p-3">
             <img
               src="/src/assets/images/doctor-login.jpg"
-              alt="Login"
-              className="img-fluid rounded"
-              style={{ height: "500px", width: "100%", objectFit: "cover" }}
+              alt="Login visual"
+              style={{ maxWidth: "100%", height: "auto", borderRadius: "15px" }}
             />
           </div>
+          <div className="col-md-7 d-flex flex-column justify-content-center p-4">
+            <h2 className="text-center mb-4" style={{ color: "#6c63ff", fontWeight: "700" }}>Bienvenido</h2>
 
-          {/* Botón de Google a la derecha */}
-          <div className="col-md-6 d-flex flex-column justify-content-center align-items-center">
-            <img
-              src="/src/assets/images/icon.png"
-              alt="Icono"
-              style={{
-                borderRadius: "50%",
-                width: "120px",
-                height: "120px",
-                objectFit: "cover",
-                marginBottom: "20px",
-              }}
-            />
             <div id="googleBtn" style={{ width: "100%", marginBottom: "20px" }}></div>
 
-            <div className="text-center mt-3">
-              <p>¿No tienes cuenta? <a href="/register">Regístrate aquí</a></p>
+            <div className="text-center mb-3">─ O ─</div>
+
+            <form style={{ width: "100%" }}>
+              <div className="form-group mb-3">
+                <label>Email</label>
+                <input type="email" className="form-control" placeholder="Correo electrónico" />
+              </div>
+
+              <div className="form-group mb-3">
+                <label>Contraseña</label>
+                <input type="password" className="form-control" placeholder="Contraseña" />
+              </div>
+
+              <div className="form-check mb-3">
+                <input type="checkbox" className="form-check-input" id="rememberMe" />
+                <label className="form-check-label" htmlFor="rememberMe">Recordarme</label>
+              </div>
+
+              <button type="submit" className="btn btn-primary w-100" style={{ backgroundColor: "#6c63ff", border: "none" }}>
+                Iniciar sesión
+              </button>
+
+              <div className="text-center mt-3">
+                <a href="/forgot-password" style={{ fontSize: "0.9rem" }}>¿Olvidaste tu contraseña?</a>
+              </div>
+            </form>
+
+            <div className="text-center mt-4">
+              ¿No tienes una cuenta? <a href="/register" style={{ color: "#6c63ff", fontWeight: "bold" }}>Regístrate</a>
             </div>
           </div>
         </div>

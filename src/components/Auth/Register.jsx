@@ -87,58 +87,50 @@ const Register = () => {
     };
 
     return (
-        <div className="auth-container d-flex justify-content-center align-items-center vh-10">
-            <div className="card shadow-lg p-4" style={{ maxWidth: "1000px", width: "100%" }}>
-                <h2 className="text-center text-primary mb-4">Registro de Doctor</h2>
-                <div className="row g-4">
-                    <div className="col-md-6 d-flex justify-content-center align-items-center">
+        <div className="auth-container d-flex justify-content-center align-items-center" style={{ minHeight: "90vh", backgroundColor: "#ffffff" }}>
+            <div className="card p-4" style={{ maxWidth: "900px", width: "100%", borderRadius: "20px", boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)" }}>
+                <div className="row g-0">
+                    {/* Imagen lado izquierdo */}
+                    <div className="col-md-5 d-none d-md-flex align-items-center justify-content-center p-3">
                         <img
                             src="/src/assets/images/doctor-register.jpg"
                             alt="Registro"
-                            className="img-fluid rounded"
-                            style={{ height: "500px", objectFit: "cover" }}
+                            style={{ maxWidth: "100%", height: "auto", borderRadius: "15px" }}
                         />
                     </div>
-                    <div className="col-md-6">
+
+                    {/* Formulario lado derecho */}
+                    <div className="col-md-7 d-flex flex-column justify-content-center p-4">
+                        <h2 className="text-center mb-4" style={{ color: "#6c63ff", fontWeight: "700" }}>Registro</h2>
+
                         <form onSubmit={handleSubmit}>
-                            <img
-                                src="/src/assets/images/icon.png"
-                                alt="Icono"
-                                style={{
-                                    borderRadius: "50%",
-                                    objectFit: "cover",
-                                    marginBottom: "10px",
-                                }}
-                            />
                             <div className="row g-3">
                                 <div className="col-md-6">
-                                    <label className="form-label">Nombre</label>
-                                    <input type="text" name="nombre" className="form-control" value={formData.nombre} onChange={handleChange} required />
+                                    <input type="text" name="nombre" className="form-control" placeholder="Nombre" value={formData.nombre} onChange={handleChange} required />
                                 </div>
                                 <div className="col-md-6">
-                                    <label className="form-label">Apellido Paterno</label>
-                                    <input type="text" name="apellido_paterno" className="form-control" value={formData.apellido_paterno} onChange={handleChange} required />
+                                    <input type="text" name="apellido_paterno" className="form-control" placeholder="Apellido Paterno" value={formData.apellido_paterno} onChange={handleChange} required />
                                 </div>
                                 <div className="col-md-6">
-                                    <label className="form-label">Apellido Materno</label>
-                                    <input type="text" name="apellido_materno" className="form-control" value={formData.apellido_materno} onChange={handleChange} required />
+                                    <input type="text" name="apellido_materno" className="form-control" placeholder="Apellido Materno" value={formData.apellido_materno} onChange={handleChange} required />
                                 </div>
                                 <div className="col-md-6">
-                                    <label className="form-label">Correo Electrónico</label>
-                                    <input type="email" name="email" className="form-control" value={formData.email} onChange={handleChange} required />
+                                    <input type="email" name="email" className="form-control" placeholder="Correo Electrónico" value={formData.email} onChange={handleChange} required />
                                 </div>
                                 <div className="col-md-6">
-                                    <label className="form-label">Teléfono</label>
-                                    <input type="text" name="telefono" className="form-control" value={formData.telefono} onChange={handleChange} required />
+                                    <input type="text" name="telefono" className="form-control" placeholder="Teléfono" value={formData.telefono} onChange={handleChange} required />
                                 </div>
                                 <div className="col-md-6">
-                                    <label className="form-label">Contraseña</label>
-                                    <input type="password" name="contraseña" className="form-control" value={formData.contraseña} onChange={handleChange} required />
+                                    <input type="password" name="contraseña" className="form-control" placeholder="Contraseña" value={formData.contraseña} onChange={handleChange} required />
                                 </div>
                             </div>
-                            <button type="submit" className="btn btn-primary w-100 mt-4">Registrarse</button>
+
+                            <button type="submit" className="btn btn-primary w-100 mt-4" style={{ backgroundColor: "#6c63ff", border: "none" }}>
+                                Registrarse
+                            </button>
+
                             <div className="text-center mt-3">
-                                <a href="/">Ingresar</a>
+                                ¿Ya tienes cuenta? <a href="/" style={{ color: "#6c63ff", fontWeight: "bold" }}>Inicia sesión</a>
                             </div>
                         </form>
                     </div>
@@ -148,7 +140,7 @@ const Register = () => {
             {showModal && (
                 <div className="modal fade show d-block" tabIndex={-1} role="dialog" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
                     <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content" style={{ maxHeight: "680px", width: "4000px" }}>
+                        <div className="modal-content" style={{ maxHeight: "680px", width: "100%" }}>
                             <div className="modal-header">
                                 <h5 className="modal-title">Verificación de Código</h5>
                                 <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
