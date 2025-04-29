@@ -76,3 +76,8 @@ export const buscarPsicologoPorUsuarioId = async (usuario_id) => {
   const response = await axios.get(`http://localhost:8080/auth/buscar-psicologo/${usuario_id}`);
   return response.data;
 };
+
+export const obtenerDisponibilidadPsicologo = async (id) => {
+  const response = await axios.get(`http://localhost:8080/auth/disponibilidad/${id}`);
+  return response.data;
+};

@@ -7,7 +7,9 @@ import {
   obtenerCitasDelPsicologo,
   conectarGoogleCalendar,
   crearDisponibilidad,
-  cambiarEstadoCita
+  cambiarEstadoCita,
+  obtenerDisponibilidadPsicologo,
+  buscarPsicologoPorUsuarioId
 } from "../Api/api_psicologo";
 
 export default function Dashboard() {
@@ -16,14 +18,26 @@ export default function Dashboard() {
   const [showModal, setShowModal] = useState(false);
   const [citas, setCitas] = useState([]);
   const [disponibilidad, setDisponibilidad] = useState({ dia: "", hora_inicio: "", hora_fin: "" });
+  const [disponibilidades, setDisponibilidades] = useState([]);
+  const [mostrarDisponibilidades, setMostrarDisponibilidades] = useState(false);
 
   const fetchCitas = async () => {
     try {
       const token = localStorage.getItem("token");
       const citasData = await obtenerCitasDelPsicologo(token);
       setCitas(citasData.citas || []);
+
+      const user = JSON.parse(localStorage.getItem("usuario"));
+      if (user) {
+        const psicologoData = await buscarPsicologoPorUsuarioId(user.id);
+        const psicologoId = psicologoData.psicologo_id;
+
+        const disponibilidadData = await obtenerDisponibilidadPsicologo(psicologoId);
+        setDisponibilidades(disponibilidadData.disponibilidad || []);
+      }
+
     } catch (error) {
-      console.error("Error al obtener citas:", error.message);
+      console.error("Error al obtener citas o disponibilidad:", error.message);
     }
   };
 
@@ -181,6 +195,42 @@ export default function Dashboard() {
 
                 </Form>
               </Card.Body>
+              <h5
+                className="fw-semibold mt-4"
+                onClick={() => setMostrarDisponibilidades(!mostrarDisponibilidades)}
+                style={{ cursor: "pointer", userSelect: "none" }}
+              >
+                Disponibilidad Actual {mostrarDisponibilidades ? "▲" : "▼"}
+              </h5>
+
+              {mostrarDisponibilidades && (
+                <Table hover responsive borderless className="mt-3">
+                  <thead className="table-light">
+                    <tr>
+                      <th>Día</th>
+                      <th>Hora Inicio</th>
+                      <th>Hora Fin</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {disponibilidades.length > 0 ? (
+                      disponibilidades.map((disp, index) => (
+                        <tr key={index}>
+                          <td>{disp.dia}</td>
+                          <td>{disp.hora_inicio}</td>
+                          <td>{disp.hora_fin}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="3" className="text-center text-muted">
+                          No tienes disponibilidad registrada.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </Table>
+              )}
             </Card>
           </Col>
 
