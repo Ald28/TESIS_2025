@@ -154,34 +154,6 @@ export default function Dashboard() {
                 <h5 className="fw-semibold mb-3">Crear Disponibilidad</h5>
                 <Form>
                   <Row className="g-3 align-items-center">
-                    <Col md={4}>
-                      <Form.Select
-                        value={disponibilidad.dia}
-                        onChange={(e) => setDisponibilidad({ ...disponibilidad, dia: e.target.value })}
-                      >
-                        <option value="">Selecciona un día</option>
-                        <option>Lunes</option>
-                        <option>Martes</option>
-                        <option>Miércoles</option>
-                        <option>Jueves</option>
-                        <option>Viernes</option>
-                        <option>Sábado</option>
-                      </Form.Select>
-                    </Col>
-                    <Col md={4}>
-                      <Form.Control
-                        type="time"
-                        value={disponibilidad.hora_inicio}
-                        onChange={(e) => setDisponibilidad({ ...disponibilidad, hora_inicio: e.target.value })}
-                      />
-                    </Col>
-                    <Col md={4}>
-                      <Form.Control
-                        type="time"
-                        value={disponibilidad.hora_fin}
-                        onChange={(e) => setDisponibilidad({ ...disponibilidad, hora_fin: e.target.value })}
-                      />
-                    </Col>
                     <Col md={12} className="mt-3">
                       <Button
                         className="w-100"
