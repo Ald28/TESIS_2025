@@ -7,13 +7,13 @@ class PaginaEdit extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Página de editar"),
+        title: const Text("Notificaciones"),
         centerTitle: true,
         automaticallyImplyLeading: false,
       ),
       body: const Center(
         child: Text(
-          "Página de editar",
+          "Notificaciones",
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),

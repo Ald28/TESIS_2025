@@ -26,7 +26,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
   final List<String> _titulos = [
     'Inicio',
-    'Chat',
+    'Mis citas',
     'Favoritos',
     'Editar',
     'Usuario',
@@ -112,9 +112,9 @@ class _NavigationScreenState extends State<NavigationScreen> {
           type: BottomNavigationBarType.fixed,
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home, size: 20), label: "Inicio"),
-            BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline, size: 20), label: "Chat"),
+            BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline, size: 20), label: "Mis citas"),
             BottomNavigationBarItem(icon: Icon(Icons.favorite, size: 20), label: "Favoritos"),
-            BottomNavigationBarItem(icon: Icon(Icons.edit, size: 20), label: "Editar"),
+            BottomNavigationBarItem(icon: Icon(Icons.edit, size: 20), label: "Notificaciones"),
             BottomNavigationBarItem(icon: Icon(Icons.supervised_user_circle, size: 20), label: "Usuario"),
           ],
         ),
