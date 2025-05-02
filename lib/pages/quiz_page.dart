@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frondend/classes/question.dart';
 import 'package:frondend/classes/quiz.dart';
-import 'package:frondend/pages/results_page.dart';
 import 'package:frondend/services/api_service.dart';
+import 'package:frondend/pages/navigation_screen.dart';
 
 class QuizPage extends StatefulWidget {
   const QuizPage({super.key});
@@ -16,31 +16,7 @@ class _QuizPageState extends State<QuizPage> {
   int questionIndex = 0;
   int progressIndex = 0;
   Quiz quiz = Quiz(name: "Preguntas", questions: []);
-
-  /// Obtener preguntas desde la API
-  Future<void> _loadQuestions() async {
-  try {
-    List<Question> allQuestions = [];
-
-    //  cargar preguntas del 1 al 50
-    for (int id = 1; id <= 50; id++) {
-      List<Question> loadedQuestions = await ApiService.fetchQuestions(id);
-      allQuestions.addAll(loadedQuestions);
-    }
-
-    // Filtrar preguntas que tengan al menos una respuesta
-    allQuestions = allQuestions.where((q) => q.respuestas.isNotEmpty).toList();
-    allQuestions.shuffle(); // Mezclar aleatoriamente
-
-    setState(() {
-      quiz.questions.clear();
-      quiz.questions.addAll(allQuestions.take(4)); // Solo 4 preguntas al azar
-      totalQuestions = quiz.questions.length;
-    });
-  } catch (e) {
-    print("❌ Error al cargar preguntas: $e");
-  }
-}
+  TextEditingController _controller = TextEditingController();
 
   @override
   void initState() {
@@ -48,7 +24,26 @@ class _QuizPageState extends State<QuizPage> {
     _loadQuestions();
   }
 
-  /// Método para manejar selección de respuesta
+  Future<void> _loadQuestions() async {
+    try {
+      List<Question> allQuestions = await ApiService.fetchAllQuestions();
+
+      allQuestions = allQuestions.where((q) {
+        return q.tipo == 'abierto' || q.respuestas.isNotEmpty;
+      }).toList();
+
+      allQuestions.shuffle();
+
+      setState(() {
+        quiz.questions.clear();
+        quiz.questions.addAll(allQuestions.take(4));
+        totalQuestions = quiz.questions.length;
+      });
+    } catch (e) {
+      print(" Error al cargar preguntas: $e");
+    }
+  }
+
   void _optionSelected(Answer selected) {
     quiz.questions[questionIndex].selected = selected.texto;
     bool isCorrect = selected.puntaje > 0;
@@ -63,13 +58,15 @@ class _QuizPageState extends State<QuizPage> {
     if (questionIndex < totalQuestions - 1) {
       setState(() {
         questionIndex += 1;
+        _controller.clear();
       });
     } else {
-      Navigator.pushReplacement(
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (context) => ResultsPage(quiz: quiz), // Pasamos el objeto Quiz a ResultsPage
+          builder: (context) => const NavigationScreen(paginaInicial: 0),
         ),
+        (route) => false,
       );
     }
   }
@@ -116,42 +113,69 @@ class _QuizPageState extends State<QuizPage> {
                             ),
                           ),
                           Flexible(
-                            child: ListView.builder(
-                              itemCount: quiz.questions[questionIndex].respuestas.length,
-                              itemBuilder: (_, index) {
-                                return Container(
-                                  margin: const EdgeInsets.all(5),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.green, width: 2),
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
-                                  child: ListTile(
-                                    shape: const RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.all(Radius.circular(15)),
+                            child: quiz.questions[questionIndex].tipo == 'abierto'
+                                ? Padding(
+                                    padding: const EdgeInsets.all(10),
+                                    child: TextField(
+                                      controller: _controller,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Tu respuesta',
+                                        border: OutlineInputBorder(),
+                                      ),
                                     ),
-                                    leading: Text('${index + 1}', style: Theme.of(context).textTheme.bodyLarge),
-                                    title: Text(
-                                      quiz.questions[questionIndex].respuestas[index].texto,
-                                      style: Theme.of(context).textTheme.bodyLarge,
-                                    ),
-                                    onTap: () {
-                                      _optionSelected(quiz.questions[questionIndex].respuestas[index]);
+                                  )
+                                : ListView.builder(
+                                    itemCount: quiz.questions[questionIndex].respuestas.length,
+                                    itemBuilder: (_, index) {
+                                      return Container(
+                                        margin: const EdgeInsets.all(5),
+                                        decoration: BoxDecoration(
+                                          border: Border.all(color: Colors.green, width: 2),
+                                          borderRadius: BorderRadius.circular(15),
+                                        ),
+                                        child: ListTile(
+                                          shape: const RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.all(Radius.circular(15)),
+                                          ),
+                                          leading: Text('${index + 1}'),
+                                          title: Text(quiz.questions[questionIndex].respuestas[index].texto),
+                                          onTap: () {
+                                            quiz.questions[questionIndex].selected =
+                                                quiz.questions[questionIndex].respuestas[index].texto;
+                                            _optionSelected(quiz.questions[questionIndex].respuestas[index]);
+                                          },
+                                        ),
+                                      );
                                     },
                                   ),
-                                );
-                              },
-                            ),
                           ),
                         ],
                       ),
                     )
-                  : const Center(child: CircularProgressIndicator()), // Indicador de carga
+                  : const Center(child: CircularProgressIndicator()),
             ),
           ),
-          // Botón de siguiente
           TextButton(
             onPressed: () {
-              _optionSelected(quiz.questions[questionIndex].respuestas[0]);
+              final tipo = quiz.questions[questionIndex].tipo;
+              if (tipo == 'abierto') {
+                if (_controller.text.trim().isEmpty) return;
+
+                final respuesta = Answer(
+                  texto: _controller.text.trim(),
+                  puntaje: 0,
+                  preguntaId: quiz.questions[questionIndex].id,
+                );
+                quiz.questions[questionIndex].selected = _controller.text.trim();
+                _controller.clear();
+                _optionSelected(respuesta);
+              } else {
+                if (quiz.questions[questionIndex].selected == null) {
+                  final respuesta = quiz.questions[questionIndex].respuestas[0];
+                  quiz.questions[questionIndex].selected = respuesta.texto;
+                  _optionSelected(respuesta);
+                }
+              }
             },
             child: Text('Siguiente', style: Theme.of(context).textTheme.bodyLarge),
           ),

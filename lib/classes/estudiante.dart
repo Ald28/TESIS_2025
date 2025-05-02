@@ -9,11 +9,10 @@ class Estudiante {
 
   factory Estudiante.fromJson(Map<String, dynamic> json) {
     final nombre = json['nombre'] ?? '';
-    final apellidoPaterno = json['apellido_paterno'] ?? '';
-    final apellidoMaterno = json['apellido_materno'] ?? '';
-    final email = json['email'] ?? '';
+    final apellido = json['apellido'] ?? '';
+    final email = json['correo'] ?? ''; 
     return Estudiante(
-      nombreCompleto: '$nombre $apellidoPaterno $apellidoMaterno',
+      nombreCompleto: '$nombre $apellido',
       email: email,
     );
   }

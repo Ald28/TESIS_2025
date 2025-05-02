@@ -4,6 +4,7 @@ import 'package:frondend/classes/question.dart';
 import 'package:frondend/classes/quiz.dart';
 import 'package:frondend/classes/psicologo.dart';
 import 'package:frondend/classes/estudiante.dart';
+import 'package:frondend/classes/disponibilidad.dart';
 import 'package:frondend/classes/metodo_relajacion.dart';
 
 
@@ -11,20 +12,24 @@ class ApiService {
   static const String baseUrl = 'http://192.168.177.181:8080/api';
 
   /// Listar favoritos
-static Future<List<int>> fetchFavoritos(int estudianteId) async {
+static Future<List<MetodoRelajacion>> fetchFavoritos(int estudianteId) async {
   try {
     final response = await http.get(Uri.parse('$baseUrl/favorito/listar/$estudianteId'));
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      return List<int>.from(data.map((f) => f['metodo_id']));
+      return List<MetodoRelajacion>.from(
+        data.map((json) => MetodoRelajacion.fromJson(json)),
+      );
     } else {
       return [];
     }
   } catch (e) {
+    print("Error al obtener favoritos: $e");
     return [];
   }
 }
+
 
 /// Agregar favorito
 static Future<void> agregarFavorito(int estudianteId, int metodoId) async {
@@ -65,125 +70,130 @@ static Future<void> eliminarFavorito(int estudianteId, int metodoId) async {
   }
 }
 
+////disponibilidad  para citas
+  static Future<List<Disponibilidad>> fetchDisponibilidad(int psicologoId) async {
+  final response = await http.get(
+    Uri.parse('http://192.168.177.181:8080/auth/disponibilidad/$psicologoId'),
+  );
 
-  //psicologo parte superior
+  if (response.statusCode == 200) {
+    final decoded = jsonDecode(response.body);
+    List<dynamic> data = decoded['disponibilidad']; // ✅ clave correcta
+    return data.map((d) => Disponibilidad.fromJson(d)).toList();
+  } else {
+    throw Exception('Error al obtener disponibilidad');
+  }
+}
+
+static Future<void> crearCita({
+  required DateTime fecha, 
+  required String horaInicio,
+  required String horaFin,
+  required int psicologoId,
+  required int estudianteId,
+  required String token,
+}) async {
+  final response = await http.post(
+    Uri.parse('http://192.168.177.181:8080/auth/cita'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+    body: json.encode({
+      'fecha': fecha.toIso8601String().substring(0, 10), 
+      'hora_inicio': horaInicio, 
+      'hora_fin': horaFin,
+      'psicologo_id': psicologoId,
+      'estudiante_id': estudianteId,
+    }),
+  );
+
+  if (response.statusCode != 201) {
+    throw Exception('❌ Error al crear la cita: ${response.body}');
+  }
+}
+
+  //Listar psicologo parte superior
 
   static Future<List<Psicologo>> fetchPsicologos() async {
-  try {
-    final response = await http.get(Uri.parse('$baseUrl/psicologo/listar_psicologos'));
+    try {
+      final response = await http.get(Uri.parse('http://192.168.177.181:8080/auth/listar-psicologo'));   ///esto tambien es una alternativa 
+                                                                                                        /// ya que tengo mi base url con 1..../api
+                                                                                                        /// pero este es con auth
+      if (response.statusCode == 200) {
+        List<dynamic> data = jsonDecode(response.body);
+        return data.map((json) => Psicologo.fromJson(json)).toList();
+      } else {
+        print("Error al obtener psicólogos: ${response.statusCode}");
+        return [];
+      }
+    } catch (e) {
+      print("Excepción al obtener psicólogos: $e");
+      return [];
+    }
+  }
 
+
+ ///metodo relajacion
+  static Future<List<MetodoRelajacion>> fetchMetodosRecomendados() async {
+  try {
+    final response = await http.get(Uri.parse('$baseUrl/recomendados'));
     if (response.statusCode == 200) {
-      List<dynamic> data = jsonDecode(response.body);
-      return data.map((json) => Psicologo.fromJson(json)).toList();
+      final body = jsonDecode(response.body);
+      final data = body['metodos']; 
+      return (data as List)
+          .map((json) => MetodoRelajacion.fromJson(json))
+          .toList();
     } else {
-      print("Error al obtener psicólogos: ${response.statusCode}");
       return [];
     }
   } catch (e) {
-    print("Excepción al obtener psicólogos: $e");
     return [];
   }
 }
 
-
- ///metodo relajacion
-  static Future<List<MetodoRelajacion>> fetchMetodosRelajacion() async {
+static Future<List<MetodoRelajacion>> fetchMetodosPrivados(int estudianteId) async {
   try {
-    final response = await http.get(Uri.parse('$baseUrl/metodos_relajacion/listar'));
-
+    final response = await http.get(Uri.parse('$baseUrl/privados/$estudianteId'));
     if (response.statusCode == 200) {
-      List<dynamic> data = jsonDecode(response.body);
-      return data.map((json) => MetodoRelajacion.fromJson(json)).toList();
+      final body = jsonDecode(response.body);
+      final data = body['metodos']; // ✅ accede al array interno
+      return (data as List)
+          .map((json) => MetodoRelajacion.fromJson(json))
+          .toList();
     } else {
-      print("Error al obtener métodos: ${response.statusCode}");
       return [];
     }
   } catch (e) {
-    print("Excepción al obtener métodos: $e");
     return [];
   }
 }
 
   /// Obtener preguntas por cuestionario 
-  static Future<List<Question>> fetchQuestions(int preguntaId) async {
-  try {
-    final response = await http.get(Uri.parse('$baseUrl/pregunta/pregunta/$preguntaId'));
+    static Future<List<Question>> fetchAllQuestions() async {
+    final response = await http.get(Uri.parse('$baseUrl/listar-preguntas-opciones'));
 
     if (response.statusCode == 200) {
-      List<dynamic> data = jsonDecode(response.body);
+      final data = jsonDecode(response.body);
 
-      print("🔹 API devolvió ${data.length} preguntas para el cuestionario $preguntaId");
+      // Asumiendo que el JSON tiene una clave 'preguntas'
+      List<dynamic> rawQuestions = data['preguntas'];
 
-      List<Question> questions = data.map((json) => Question.fromJson(json)).toList();
+      List<Question> questions = rawQuestions.map((json) {
+        final q = Question.fromJson(json);
 
-      for (var question in questions) {
-        question.respuestas = await fetchAnswers(question.id);
-        print("✅ Pregunta: ${question.pregunta} - Respuestas obtenidas: ${question.respuestas.length}");
-      }
+        if (json['opciones'] != null) {
+          q.respuestas = List<Answer>.from(
+            json['opciones'].map((opt) => Answer.fromJson(opt)),
+          );
+        }
+
+        return q;
+      }).toList();
 
       return questions;
     } else {
-      print("Error al cargar preguntas: Código ${response.statusCode}");
-      return [];
-    }
-  } catch (e) {
-    print(" Excepción al cargar preguntas: $e");
-    return [];
-  }
-}
-
-
-
-  /// Obtener opciones de respuesta por pregunta
-  static Future<List<Answer>> fetchAnswers(int preguntaId) async {
-  try {
-    final response = await http.get(Uri.parse('$baseUrl/opcion/opciones/$preguntaId'));
-
-    if (response.statusCode == 200) {
-      List<dynamic> data = jsonDecode(response.body);
-
-      print("🔹 API devolvió ${data.length} respuestas para pregunta $preguntaId");
-
-      List<Answer> answers = data.map((json) => Answer.fromJson(json)).toList();
-
-      if (answers.isEmpty) {
-        print("No se encontraron respuestas para la pregunta ID: $preguntaId");
-      }
-
-      return answers;
-    } else {
-      print("Error al cargar respuestas para pregunta $preguntaId: ${response.statusCode}");
-      return [];
-    }
-  } catch (e) {
-    print(" Excepción al cargar respuestas para pregunta $preguntaId: $e");
-    return [];
-  }
-}
-
-
-
-  /// Enviar respuestas del usuario
-  static Future<void> sendAnswers(List<Map<String, dynamic>> respuestas) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/respuesta/respuesta'),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"respuestas": respuestas}),
-    );
-
-    if (response.statusCode != 201) {
-      throw Exception('Error al enviar respuestas');
-    }
-  }
-
-  /// Obtener resultado del estudiante
-  static Future<Map<String, dynamic>> fetchResult(int estudianteId, int cuestionarioId) async {
-    final response = await http.get(Uri.parse('$baseUrl/resultado/resultado/$estudianteId/$cuestionarioId'));
-
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception('Error al obtener resultado');
+      throw Exception('Error al cargar preguntas: Código ${response.statusCode}');
     }
   }
 
@@ -191,19 +201,24 @@ static Future<void> eliminarFavorito(int estudianteId, int metodoId) async {
   static Future<void> sendResults(Quiz quiz) async {
     try {
       List<Map<String, dynamic>> respuestas = quiz.questions.map((q) {
-        final selectedAnswer = q.respuestas.firstWhere(
-          (r) => r.texto == q.selected, 
-          orElse: () => Answer(texto: "", puntaje: 0, preguntaId: 0),
-        );
+        final selectedAnswer = q.tipo == 'abierto'
+            ? Answer(
+                texto: q.selected ?? "",
+                puntaje: 0,
+                preguntaId: q.id,
+              )
+            : q.respuestas.firstWhere(
+                (r) => r.texto == q.selected,
+                orElse: () => Answer(texto: "", puntaje: 0, preguntaId: q.id),
+              );
 
         return {
-          "pregunta_id": q.id, 
-          "estudiante_id": 1, 
-          "opciones_id": selectedAnswer.preguntaId, 
+          "pregunta_id": q.id,
+          "estudiante_id": 1,
+          "opciones_id": q.tipo == 'abierto' ? null : selectedAnswer.preguntaId,
+          "respuesta_texto": q.tipo == 'abierto' ? selectedAnswer.texto : null,
         };
       }).toList();
-
-      print(" Enviando respuestas: ${jsonEncode({"respuestas": respuestas})}");
 
       final response = await http.post(
         Uri.parse('$baseUrl/resultado/resultado'),
@@ -211,105 +226,55 @@ static Future<void> eliminarFavorito(int estudianteId, int metodoId) async {
         body: jsonEncode({"respuestas": respuestas}),
       );
 
-      print(" Código de respuesta: ${response.statusCode}");
-      print(" Respuesta del servidor: ${response.body}");
-
       if (response.statusCode != 201) {
-        throw Exception('Error al enviar resultados: ${response.body}');
+        throw Exception('Error al enviar resultados');
       }
     } catch (e) {
-      print(" Error en sendResults: $e");
+      throw Exception("Error al enviar respuestas: $e");
     }
   }
-
-  ///  Iniciar sesión
-  static Future<Map<String, dynamic>> loginOrRegister(String email, String password, String dni) async {
-  final url = Uri.parse('$baseUrl/estudiante/registro_estudiante');
+  
+  /// Iniciar sesión con Google
+static Future<Map<String, dynamic>> loginConGoogle(String credential) async {
+  final url = Uri.parse('http://192.168.177.181:8080/auth/google/estudiante');
 
   try {
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"email": email, "contraseña": password, "dni": dni}),
+      body: jsonEncode({"credential": credential}),
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       return jsonDecode(response.body);
     } else {
-      return {"error": "Error en el registro", "detalle": response.body};
+      return {"error": "Error en el login", "detalle": response.body};
     }
   } catch (error) {
     return {"error": "Error de conexión con el servidor", "detalle": error.toString()};
   }
 }
-///login
-static Future<Map<String, dynamic>> soloLogin(String email, String password) async {
-  final url = Uri.parse('$baseUrl/estudiante/login');
+/// Obtener perfil con token (si lo separas)
+static Future<Map<String, dynamic>> obtenerPerfilConToken(String token) async {
+  final url = Uri.parse('http://192.168.177.181:8080/auth/perfil');
 
   try {
-    final response = await http.post(
+    final response = await http.get(
       url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"email": email, "contraseña": password}),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
     );
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      return {"error": "Credenciales incorrectas", "detalle": response.body};
+      return {"error": "Error al obtener perfil", "detalle": response.body};
     }
   } catch (error) {
     return {"error": "Error de conexión", "detalle": error.toString()};
   }
 }
-
-  /// Verificar código de autenticación
-  static Future<Map<String, dynamic>> verificarCodigo(String email, String codigo) async {
-    final url = Uri.parse('$baseUrl/estudiante/verificar_codigo');
-
-    try {
-      final response = await http.post(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"email": email, "codigo": codigo}),
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-        return jsonResponse;
-      } else {
-        return {
-          "error": "Error en la verificación",
-          "detalle": response.body.isNotEmpty ? response.body : "Respuesta vacía"
-        };
-      }
-    } catch (error) {
-      return {"error": "Error de conexión con el servidor", "detalle": error.toString()};
-    }
-  }
-//// reenviar codigo
-  static Future<Map<String, dynamic>> reenviarCodigo(String email) async {
-  final url = Uri.parse('$baseUrl/estudiante/reenviar-codigo');
-
-  try {
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"email": email}),
-    );
-
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      return {
-        "error": "No se pudo reenviar el código",
-        "detalle": response.body.isNotEmpty ? response.body : "Respuesta vacía"
-      };
-    }
-  } catch (error) {
-    return {"error": "Error de conexión con el servidor", "detalle": error.toString()};
-  }
-}
-
   
 }

@@ -1,10 +1,12 @@
 class Psicologo {
+  final int id;
   final String nombre;
   final String? fotoUrl;
   final String? email;
   final String? telefono;
 
   Psicologo({
+    required this.id, 
     required this.nombre,
     this.fotoUrl,
     this.email,
@@ -13,9 +15,10 @@ class Psicologo {
 
   factory Psicologo.fromJson(Map<String, dynamic> json) {
     return Psicologo(
-      nombre: json['nombre_completo'],
+      id: json['psicologo_id'], 
+      nombre: "${json['nombre']} ${json['apellido']}",
       fotoUrl: json['imagen_url'],
-      email: json['email'],
+      email: json['correo'],
       telefono: json['telefono'],
     );
   }

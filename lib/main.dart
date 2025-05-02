@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frondend/pages/home_page.dart';
 import 'package:frondend/pages/quiz_page.dart';
 import 'package:frondend/pages/login.dart';
-import 'package:frondend/pages/verification_page.dart';
+
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,11 +60,8 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const Login(),
         '/home': (context) => const HomePage(),
-        '/verification': (context) {
-          final String email = ModalRoute.of(context)!.settings.arguments as String;
-          return VerificationPage(email: email);
-        },
         '/quiz-page': (context) => const QuizPage(),
+        '/home-page': (context) => const HomePage(),
       },
     );
   }

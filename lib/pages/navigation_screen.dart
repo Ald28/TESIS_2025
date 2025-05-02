@@ -5,19 +5,23 @@ import 'pagina_edit.dart';
 import 'pagina_favorito.dart';
 import 'pagina_chat.dart';
 import 'detalle_psicologo_page.dart';
+import 'detalle_metodo_page.dart';
 import '../classes/psicologo.dart';
+import '../classes/metodo_relajacion.dart';
 
 class NavigationScreen extends StatefulWidget {
-  const NavigationScreen({Key? key}) : super(key: key);
+  final int paginaInicial;
+
+  const NavigationScreen({Key? key, this.paginaInicial = 0}) : super(key: key);
 
   @override
   _NavigationScreenState createState() => _NavigationScreenState();
 }
 
 class _NavigationScreenState extends State<NavigationScreen> {
-  int _paginaActual = 0;
+  late int _paginaActual;
   Psicologo? _psicologoSeleccionado;
-
+  MetodoRelajacion? _metodoSeleccionado;
   late List<Widget> _paginas;
 
   final List<String> _titulos = [
@@ -27,11 +31,13 @@ class _NavigationScreenState extends State<NavigationScreen> {
     'Editar',
     'Usuario',
     'Detalle Psicólogo',
+    'Detalle Método',
   ];
 
   @override
   void initState() {
     super.initState();
+    _paginaActual = widget.paginaInicial;
 
     _paginas = [
       PaginaHome(
@@ -43,8 +49,21 @@ class _NavigationScreenState extends State<NavigationScreen> {
             } else {
               _paginas[5] = PaginaDetallePsicologo(psicologo: psicologo);
             }
-
             _paginaActual = 5;
+          });
+        },
+        onSeleccionarMetodo: (metodo) {
+          setState(() {
+            _metodoSeleccionado = metodo;
+            if (_paginas.length == 5) {
+              _paginas.add(const SizedBox());
+              _paginas.add(PaginaDetalleMetodo(metodo: metodo));
+            } else if (_paginas.length == 6) {
+              _paginas.add(PaginaDetalleMetodo(metodo: metodo));
+            } else if (_paginas.length == 7) {
+              _paginas[6] = PaginaDetalleMetodo(metodo: metodo);
+            }
+            _paginaActual = 6;
           });
         },
       ),

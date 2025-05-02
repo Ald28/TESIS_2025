@@ -1,0 +1,2 @@
+C:/copia_seguridad/TESIS_2025/android/app/.cxx/Debug/1l376943/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/copia_seguridad/TESIS_2025/android/app/.cxx/Debug/1l376943/armeabi-v7a/CMakeFiles/rebuild_cache.dir

@@ -1,17 +1,22 @@
 class Answer {
   final String texto;
   final int puntaje;
-  final int preguntaId; 
+  final int preguntaId;
 
-  Answer({required this.texto, required this.puntaje, required this.preguntaId});
+  Answer({
+    required this.texto,
+    required this.puntaje,
+    required this.preguntaId,
+  });
 
   factory Answer.fromJson(Map<String, dynamic> json) {
     return Answer(
-      texto: json['txt_opcion'] ?? "", 
-      puntaje: int.tryParse(json['puntaje'].toString()) ?? 0, 
-      preguntaId: int.tryParse(json['pregunta_id'].toString()) ?? 0,
+      texto: json['txt_opcion'] ?? "",
+      puntaje: int.tryParse(json['puntaje']?.toString() ?? "0") ?? 0,
+      preguntaId: int.tryParse(json['pregunta_id']?.toString() ?? "0") ?? 0,
     );
   }
+
 
   Map<String, dynamic> toJson() {
     return {
@@ -22,14 +27,16 @@ class Answer {
   }
 }
 
+
 class Question {
-  final int id; 
+  final int id;
   final String pregunta;
-  final String tipo;
+  final String tipo; 
   final int cuestionarioId;
   List<Answer> respuestas = [];
-  String? selected;
-  bool correct = false;
+
+  String? selected; 
+  bool correct = false; 
 
   Question({
     required this.id,
@@ -43,10 +50,11 @@ class Question {
     return Question(
       id: int.tryParse(json['id'].toString()) ?? 0,
       pregunta: json['txt_pregunta'] ?? "",
-      tipo: json['tipo_pregunta'] ?? "",
-      cuestionarioId: int.tryParse(json['cuestionario_id'].toString()) ?? 0,
+      tipo: json['tipo'] ?? "", // ✅ era 'tipo', no 'tipo_pregunta'
+      cuestionarioId: int.tryParse(json['cuestionario_id']?.toString() ?? "0") ?? 0,
     );
   }
+
 
   Map<String, dynamic> toJson() {
     return {

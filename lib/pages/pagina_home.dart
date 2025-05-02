@@ -3,12 +3,16 @@ import 'package:frondend/services/api_service.dart';
 import 'package:frondend/classes/metodo_relajacion.dart';
 import 'package:frondend/classes/psicologo.dart';
 import 'package:video_player/video_player.dart';
+import 'detalle_metodo_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PaginaHome extends StatefulWidget {
   final Function(Psicologo)? onSeleccionarPsicologo;
+  final Function(MetodoRelajacion)? onSeleccionarMetodo;
+
   
-  const PaginaHome({Key? key, this.onSeleccionarPsicologo}) : super(key: key);
+  const PaginaHome({Key? key, this.onSeleccionarPsicologo, this.onSeleccionarMetodo}) : super(key: key);
+
 
   @override
   State<PaginaHome> createState() => _PaginaHomeState();
@@ -23,45 +27,40 @@ class _PaginaHomeState extends State<PaginaHome> {
 
   String? _categoriaSeleccionada;
   Set<int> _favoritos = {};
+  bool mostrarPrivados = false;
 
   @override
 void initState() {
   super.initState();
   _cargarDatos();
+  
 }
 
 void _cargarDatos() async {
-      /*
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    int? usuarioId = prefs.getInt('usuario_id'); 
-    */
+  const estudianteId = 2;
 
-  _metodosFuture = ApiService.fetchMetodosRelajacion().then((metodos) {
+  Future<List<MetodoRelajacion>> futureMetodos;
+  if (mostrarPrivados) {
+    futureMetodos = ApiService.fetchMetodosPrivados(estudianteId);
+  } else {
+    futureMetodos = ApiService.fetchMetodosRecomendados();
+  }
+
+  _metodosFuture = futureMetodos.then((metodos) async {
     _todosLosMetodos = metodos;
+    _categorias = metodos.map((m) => m.categoria.trim().toLowerCase()).toSet().toList();
 
-    if (metodos.isNotEmpty) {
-      _categorias = metodos
-          .map((m) => m.categoria.trim().toLowerCase())
-          .toSet()
-          .toList();
-    }
+    final favoritos = await ApiService.fetchFavoritos(estudianteId);
+    setState(() {
+      _favoritos = favoritos.map((m) => m.id).toSet();
+    });
 
     return metodos;
   });
 
   _psicologosFuture = ApiService.fetchPsicologos();
-
-  /*if (usuarioId != null) {
-    ApiService.fetchFavoritos(usuarioId).then((ids) {
-      setState(() {
-        _favoritos = ids.toSet();
-      });
-    });
-  }
-  */
-  _favoritos = {}; 
-
 }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -133,39 +132,72 @@ void _cargarDatos() async {
         ),
         const SizedBox(height: 12),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Row(
-            children: [
-              const Text("Métodos de relajación:"),
-              const SizedBox(width: 10),
-              Expanded(
-                child: DropdownButton<String>(
-                  isExpanded: true,
-                  hint: const Text("Categorías de estrés"),
-                  value: _categoriaSeleccionada,
-                  items: _categorias.map((cat) {
-                    return DropdownMenuItem<String>(
-                      value: cat,
-                      child: Text(cat[0].toUpperCase() + cat.substring(1)),
-                    );
-                  }).toList()
-                    ..insert(
-                      0,
-                      const DropdownMenuItem<String>(
-                        value: null,
-                        child: Text("Todas las categorías"),
-                      ),
-                    ),
-                  onChanged: (value) {
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
                     setState(() {
-                      _categoriaSeleccionada = value;
+                      mostrarPrivados = false;
                     });
+                    _cargarDatos();
                   },
+                  child: const Text('Recomendados'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: mostrarPrivados ? Colors.grey : Colors.blue,
+                  ),
                 ),
-              ),
-            ],
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      mostrarPrivados = true;
+                    });
+                    _cargarDatos();
+                  },
+                  child: const Text('Mis Privados'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: mostrarPrivados ? Colors.blue : Colors.grey,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              children: [
+                const Text("Métodos de relajación:"),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: DropdownButton<String>(
+                    isExpanded: true,
+                    hint: const Text("Categorías de estrés"),
+                    value: _categoriaSeleccionada,
+                    items: _categorias.map((cat) {
+                      return DropdownMenuItem<String>(
+                        value: cat,
+                        child: Text(cat[0].toUpperCase() + cat.substring(1)),
+                      );
+                    }).toList()
+                      ..insert(
+                        0,
+                        const DropdownMenuItem<String>(
+                          value: null,
+                          child: Text("Todas las categorías"),
+                        ),
+                      ),
+                    onChanged: (value) {
+                      setState(() {
+                        _categoriaSeleccionada = value;
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
         const SizedBox(height: 10),
         Expanded(
           child: FutureBuilder<List<MetodoRelajacion>>(
@@ -189,64 +221,106 @@ void _cargarDatos() async {
                 itemCount: metodosFiltrados.length,
                 itemBuilder: (context, index) {
                   final metodo = metodosFiltrados[index];
-                  return Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  return GestureDetector(
+                    onTap: () {
+                      if (widget.onSeleccionarMetodo != null) {
+                        widget.onSeleccionarMetodo!(metodo);
+                      }
+                    },
+                    child: Card(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      child: Row(
                         children: [
-                          Text(metodo.titulo, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 6),
-                          Text(metodo.descripcion),
-                          const SizedBox(height: 6),
-                          Text("Psicólogo: ${metodo.psicologo}"),
-                          Text("Categoría: ${metodo.categoria}"),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: IconButton(
-                              icon: Icon(
-                                _favoritos.contains(metodo.id)
-                                    ? Icons.favorite
-                                    : Icons.favorite_border,
-                                color: Colors.red,
-                              ),
-                              onPressed: () async {
-                                /*final prefs = await SharedPreferences.getInstance();
-                                final usuarioId = prefs.getInt('usuario_id');
-                                if (usuarioId == null) return;*/
-
-                                final usuarioId = 4; // ID temporal para pruebas
-
-
-                                setState(() {
-                                  if (_favoritos.contains(metodo.id)) {
-                                    _favoritos.remove(metodo.id);
-                                  } else {
-                                    _favoritos.add(metodo.id);
-                                  }
-                                });
-
-                                if (_favoritos.contains(metodo.id)) {
-                                  await ApiService.agregarFavorito(usuarioId, metodo.id);
-                                } else {
-                                  await ApiService.eliminarFavorito(usuarioId, metodo.id);
-                                }
-                              },
+                          ClipRRect(
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(15),
+                              bottomLeft: Radius.circular(15),
+                            ),
+                            child: SizedBox(
+                              width: 130,
+                              height: 130,
+                              child: metodo.url.endsWith('.mp4')
+                                  ? VideoPlayerWidget(url: metodo.url)
+                                  : Image.network(
+                                      metodo.url,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return const Center(child: Text('Error cargando imagen'));
+                                      },
+                                    ),
                             ),
                           ),
-                          const SizedBox(height: 10),
-                          AspectRatio(
-                            aspectRatio: 16 / 9,
-                            child: metodo.archivo.endsWith('.mp4')
-                                ? VideoPlayerWidget(url: metodo.archivo)
-                                : Image.network(
-                                    metodo.archivo,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return const Center(child: Text('Error cargando imagen'));
+                          Expanded(
+                            child: Stack(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        metodo.titulo,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        metodo.descripcion,
+                                        maxLines: 3,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.person, size: 16),
+                                          const SizedBox(width: 4),
+                                          Expanded(
+                                            child: Text(
+                                              "Dr. ${metodo.psicologo}",
+                                              style: const TextStyle(fontSize: 13),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 4,
+                                  right: 4,
+                                  child: IconButton(
+                                    icon: Icon(
+                                      _favoritos.contains(metodo.id)
+                                          ? Icons.favorite
+                                          : Icons.favorite_border,
+                                      color: Colors.red,
+                                    ),
+                                    onPressed: () async {
+                                      const usuarioId = 2;
+                                      final yaEsFavorito = _favoritos.contains(metodo.id);
+
+                                      setState(() {
+                                        if (yaEsFavorito) {
+                                          _favoritos.remove(metodo.id);
+                                        } else {
+                                          _favoritos.add(metodo.id);
+                                        }
+                                      });
+
+                                      if (yaEsFavorito) {
+                                        await ApiService.eliminarFavorito(usuarioId, metodo.id);
+                                      } else {
+                                        await ApiService.agregarFavorito(usuarioId, metodo.id);
+                                      }
                                     },
                                   ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -273,6 +347,7 @@ class VideoPlayerWidget extends StatefulWidget {
 class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   late VideoPlayerController _controller;
   bool _showControls = true;
+  
 
   @override
   void initState() {

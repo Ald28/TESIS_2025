@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../services/api_service.dart';
+import 'package:http/http.dart' as http;
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'dart:convert';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -11,73 +12,72 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController dniController = TextEditingController(); // Nuevo campo DNI
   bool isLoading = false;
 
-  // Validación de correo electrónico
-  bool isValidEmail(String email) {
-    String emailRegex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
-    return RegExp(emailRegex).hasMatch(email);
-  }
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: ['email'],
+    serverClientId:
+        '381550545275-npvfm9sf70jomqsum8fm1dvde05j8qks.apps.googleusercontent.com',
+  );
 
-  void login() async {
-  String email = emailController.text.trim();
-  String password = passwordController.text.trim();
-  String dni = dniController.text.trim(); // solo si es nuevo
-
-  if (email.isEmpty || password.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Correo y contraseña son obligatorios'), backgroundColor: Colors.red),
-    );
-    return;
-  }
-
-  if (!isValidEmail(email)) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Ingrese un correo válido'), backgroundColor: Colors.red),
-    );
-    return;
-  }
-
-  setState(() {
-    isLoading = true;
-  });
-
-  // Intentar login primero
-  var loginResponse = await ApiService.soloLogin(email, password);
-
-  if (loginResponse.containsKey("error")) {
-    // Si no está registrado, pedir DNI y registrar
-    if (dni.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Usuario no encontrado. Ingresa tu DNI para registrarte.'), backgroundColor: Colors.orange),
-      );
-    } else {
-      var registroResponse = await ApiService.loginOrRegister(email, password, dni);
-
-      if (registroResponse.containsKey("error")) {
+  Future<void> loginWithGoogle() async {
+    setState(() => isLoading = true);
+    try {
+      final GoogleSignInAccount? user = await _googleSignIn.signIn();
+      if (user == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error en registro: ${registroResponse["detalle"]}'), backgroundColor: Colors.red),
+          const SnackBar(content: Text('Inicio de sesión cancelado')),
         );
-      } else {
-        Navigator.pushReplacementNamed(context, '/verification', arguments: email);
+        setState(() => isLoading = false);
+        return;
       }
+
+      final GoogleSignInAuthentication auth = await user.authentication;
+
+      final response = await http.post(
+        Uri.parse('http://192.168.177.181:8080/auth/google/estudiante'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'credential': auth.idToken}),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = json.decode(response.body);
+        final token = data['token'];
+
+        final perfilResponse = await http.get(
+          Uri.parse('http://192.168.177.181:8080/auth/perfil'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+        );
+
+        if (perfilResponse.statusCode == 200) {
+          final perfilData = json.decode(perfilResponse.body);
+          final estudianteId = perfilData['estudiante']['estudiante_id'];
+
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('token', token);
+          await prefs.setInt('estudiante_id', estudianteId);
+
+          Navigator.pushReplacementNamed(context, '/quiz-page');
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error al obtener perfil: ${perfilResponse.body}')),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error en login: ${response.body}')),
+        );
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $error')),
+      );
     }
-  } else {
-    // Login exitoso
-    /////int usuarioIdDelEstudiante = loginResponse['usuario']['id'];
-
-    //////SharedPreferences prefs = await SharedPreferences.getInstance();
-    /////await prefs.setInt('usuario_id', usuarioIdDelEstudiante);
-    Navigator.pushReplacementNamed(context, '/home');
+    setState(() => isLoading = false);
   }
-
-  setState(() {
-    isLoading = false;
-  });
-}
 
   @override
   Widget build(BuildContext context) {
@@ -94,89 +94,48 @@ class _LoginState extends State<Login> {
               'assets/logologin2.png',
               height: 200,
             ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                labelText: 'Correo electrónico',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Contraseña',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: dniController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'DNI',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 40),
             Stack(
               alignment: Alignment.center,
               children: [
-                ElevatedButton(
-                  onPressed: isLoading ? null : login,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
-                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                  ),
-                  child: const Text(
-                    'Iniciar Sesión',
-                    style: TextStyle(fontSize: 18, color: Colors.white),
+                GestureDetector(
+                  onTap: isLoading ? null : loginWithGoogle,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                          spreadRadius: 2,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          'assets/google_icon.png',
+                          height: 20,
+                        ),
+                        const SizedBox(width: 10),
+                        const Text(
+                          'Continuar con Google',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 if (isLoading)
                   const CircularProgressIndicator(color: Colors.white),
               ],
-            ),
-            const SizedBox(height: 20),
-            GestureDetector(
-              onTap: () {
-                print("Continuar con Google");
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 4,
-                      spreadRadius: 2,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      'assets/google_icon.png',
-                      height: 20,
-                    ),
-                    const SizedBox(width: 10),
-                    const Text(
-                      'Continuar con Google',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black54,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ),
           ],
         ),
