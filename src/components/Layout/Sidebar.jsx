@@ -63,9 +63,9 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       <ul className="nav flex-column mt-2 w-100">
         {[ 
           { to: "/admin/dashboard", icon: <FaTachometerAlt />, label: "Dashboard" },
-          { to: "/admin/usuarios", icon: <FaUsers />, label: "Usuarios" },
+          { to: "/admin/usuarios", icon: <FaUsers />, label: "Estudiantes" },
           { to: "/admin/cuestionarios", icon: <FaTasks />, label: "Cuestionarios" },
-          { to: "/admin/metodos", icon: <FaClipboardList />, label: "Métodos" },
+          { to: "/admin/metodos", icon: <FaClipboardList />, label: "Actividades" },
           { to: "/admin/citas", icon: <FaCalendarAlt />, label: "Citas" },
           { to: "/admin/ajustes", icon: <FaCog />, label: "Ajustes" },
           { to: "/", icon: <FaSignOutAlt />, label: "Cerrar Sesión" },

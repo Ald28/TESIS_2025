@@ -59,8 +59,6 @@ const Login = () => {
           <div className="col-md-7 d-flex flex-column justify-content-center p-4">
             <h2 className="text-center mb-4" style={{ color: "#6c63ff", fontWeight: "700" }}>Bienvenido</h2>
 
-            <div id="googleBtn" style={{ width: "100%", marginBottom: "20px" }}></div>
-
             <div className="text-center mb-3">─ O ─</div>
 
             <form style={{ width: "100%" }}>
@@ -90,7 +88,10 @@ const Login = () => {
 
             <div className="text-center mt-4">
               ¿No tienes una cuenta? <a href="/register" style={{ color: "#6c63ff", fontWeight: "bold" }}>Regístrate</a>
-            </div>
+            </div><br />
+
+            <div id="googleBtn" style={{ width: "100%", marginBottom: "20px" }}></div>
+
           </div>
         </div>
       </div>

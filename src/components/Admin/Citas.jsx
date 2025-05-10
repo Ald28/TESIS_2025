@@ -1,9 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button } from "react-bootstrap";
-import { obtenerCitasAceptadas, cancelarCitaAceptada } from "../Api/api_citas";
+import { Table, Button, Modal, Form } from "react-bootstrap";
+import {
+  obtenerCitasAceptadas,
+  cancelarCitaAceptada,
+  crearCitaSeguimiento,
+  listarEstudiantes
+} from "../Api/api_citas";
 
 export default function Citas() {
   const [citas, setCitas] = useState([]);
+  const [estudiantes, setEstudiantes] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [nuevoCita, setNuevoCita] = useState({
+    estudiante_id: "",
+    fecha: "",
+    hora_inicio: "",
+    hora_fin: ""
+  });
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -13,12 +26,35 @@ export default function Citas() {
         .catch((err) => {
           console.error("❌ Error al obtener citas aceptadas:", err);
         });
+
+      listarEstudiantes()
+        .then(setEstudiantes)
+        .catch((err) => {
+          console.error("❌ Error al listar estudiantes:", err);
+        });
     }
   }, []);
+
+  const handleCrearCita = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      await crearCitaSeguimiento(token, nuevoCita);
+      alert("✅ Cita de seguimiento creada correctamente.");
+      setShowModal(false);
+      setNuevoCita({ estudiante_id: "", fecha: "", hora_inicio: "", hora_fin: "" });
+    } catch (error) {
+      console.error("❌ Error al crear cita de seguimiento:", error);
+      alert("❌ Error al crear cita de seguimiento.");
+    }
+  };
 
   return (
     <div className="container mt-4">
       <h3>Citas Aceptadas</h3>
+
+      <Button variant="primary" className="mb-3" onClick={() => setShowModal(true)}>
+        Crear Cita de Seguimiento
+      </Button>
 
       <Table hover responsive borderless>
         <thead className="table-light">
@@ -52,7 +88,6 @@ export default function Citas() {
                       try {
                         const token = localStorage.getItem("token");
                         await cancelarCitaAceptada(token, cita.id);
-                        // Actualizar la lista local
                         setCitas((prev) => prev.filter((c) => c.id !== cita.id));
                       } catch (error) {
                         console.error("❌ Error al cancelar cita:", error);
@@ -74,6 +109,67 @@ export default function Citas() {
           )}
         </tbody>
       </Table>
+
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Cita de Seguimiento</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>Seleccionar Estudiante</Form.Label>
+              <Form.Select
+                value={nuevoCita.estudiante_id}
+                onChange={(e) =>
+                  setNuevoCita({ ...nuevoCita, estudiante_id: e.target.value })
+                }
+              >
+                <option value="">Seleccione un estudiante</option>
+                {estudiantes.map((est) => (
+                  <option key={est.estudiante_id} value={est.estudiante_id}>
+                    {est.nombre} {est.apellido}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Fecha</Form.Label>
+              <Form.Control
+                type="date"
+                value={nuevoCita.fecha}
+                onChange={(e) => setNuevoCita({ ...nuevoCita, fecha: e.target.value })}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Hora de Inicio</Form.Label>
+              <Form.Control
+                type="time"
+                value={nuevoCita.hora_inicio}
+                onChange={(e) => setNuevoCita({ ...nuevoCita, hora_inicio: e.target.value })}
+              />
+            </Form.Group>
+
+            <Form.Group>
+              <Form.Label>Hora de Fin</Form.Label>
+              <Form.Control
+                type="time"
+                value={nuevoCita.hora_fin}
+                onChange={(e) => setNuevoCita({ ...nuevoCita, hora_fin: e.target.value })}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Cancelar
+          </Button>
+          <Button variant="success" onClick={handleCrearCita}>
+            Crear Cita
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }

@@ -108,7 +108,7 @@ export default function Metodos() {
         </div>
 
         <Button variant="primary" onClick={() => setMostrarModal(true)}>
-          + Subir Método de Relajación
+          + Subir Actividad
         </Button>
       </div>
 
@@ -160,7 +160,7 @@ export default function Metodos() {
                 Cancelar
               </Button>
               <Button variant="success" type="submit">
-                Subir Método
+                Subir Actividad
               </Button>
             </div>
           </form>
