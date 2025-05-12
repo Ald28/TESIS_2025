@@ -1,0 +1,76 @@
+/* === Botones === */
+.add-button {
+    background-color: #7c3aed;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-more {
+    background-color: #e5e7eb;
+    color: black;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* === Panel Lateral Desplegable === */
+.side-panel {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 360px;
+    height: 100vh;
+    background-color: white;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+    z-index: 2000;
+    transition: right 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+}
+
+.side-panel.open {
+    right: 0;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f3e8ff;
+    padding: 1rem;
+    border-bottom: 1px solid #ddd;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #6b21a8;
+    cursor: pointer;
+}
+
+/* === Formulario dentro del panel === */
+.modal-form input,
+.modal-form textarea {
+    width: 100%;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+/* === Registro compacto (opcional si agregas otras zonas) === */
+.registro-section input,
+.registro-section textarea {
+    max-width: 300px;
+    width: 100%;
+}
