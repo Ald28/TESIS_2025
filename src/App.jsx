@@ -7,10 +7,8 @@ import Dashboard from "./components/Admin/Dashboard";
 import Usuarios from "./components/Admin/Usuarios";
 import Notificaciones from "./components/Admin/Notificaciones";
 import PerfilDoctor from "./components/Admin/PerfilDoctor";
-import Formulario from "./components/Admin/Formulario";
 import NotFound from "./components/Common/NotFound";
 import Cuestionario from "./components/Admin/Cuestionario";
-import Pregunta from "./components/Admin/Pregunta";
 import Metodos from "./components/Admin/Metodos";
 import Citas from "./components/Admin/Citas";
 import "./index.css";
@@ -29,8 +27,6 @@ const App = () => {
           <Route path="usuarios" element={<Usuarios />} />
           <Route path="notificaciones" element={<Notificaciones />} />
           <Route path="cuestionarios" element={<Cuestionario />} />
-          <Route path="cuestionario/:id" element={<Formulario />} />
-          <Route path="preguntas" element={<Pregunta />} />
           <Route path="metodos" element={<Metodos />} />
           <Route path="citas" element={<Citas />} />
           <Route path="perfil" element={<PerfilDoctor />} />

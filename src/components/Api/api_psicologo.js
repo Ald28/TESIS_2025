@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = "http://localhost:8080/auth";
+const API = "http://localhost:8080/auth/psicologo";
 const API_ADMIN = "http://localhost:8080/auth/admin";
 
 export const loginPsicologo = async (credential) => {

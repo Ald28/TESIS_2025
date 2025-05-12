@@ -1,0 +1,15 @@
+.dashboard-container {
+  padding: 1rem;
+}
+
+.dashboard-header h2 {
+  font-weight: 700;
+  color: #333;
+}
+
+.dashboard-card {
+  padding: 1.5rem;
+  border: none;
+  box-shadow: 0 0 10px rgba(0,0,0,0.08);
+  border-radius: 1rem;
+}
