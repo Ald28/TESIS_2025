@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import MainLayout from "../layouts/MainLayout";
-import { getPsicologos } from "../api/api_admin";
+import { getPsicologos, registrarPsicologo } from "../api/api_admin";
 import { FaUserMd, FaPlus, FaTimes } from "react-icons/fa";
-import "../styles/Psicologo.css"; // asegúrate de agregar los nuevos estilos al final de ese archivo
+import "../styles/Psicologo.css";
 
 export default function Psicologo() {
   const [psicologos, setPsicologos] = useState([]);
@@ -16,28 +16,37 @@ export default function Psicologo() {
   });
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await getPsicologos();
-        setPsicologos(data);
-      } catch (error) {
-        console.error("Error cargando psicólogos:", error);
-      }
-    };
     fetchData();
   }, []);
 
-  const handleSubmit = (e) => {
+  const fetchData = async () => {
+    try {
+      const data = await getPsicologos();
+      setPsicologos(data);
+    } catch (error) {
+      console.error("Error cargando psicólogos:", error);
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Guardar psicólogo:", nuevoPsicologo);
-    setNuevoPsicologo({
-      nombre: "",
-      apellido: "",
-      correo: "",
-      especialidad: "",
-      descripcion: "",
-    });
-    setMostrarPanel(false);
+    try {
+      await registrarPsicologo(nuevoPsicologo);
+      await fetchData(); // Refrescar lista
+
+      // Limpiar campos y cerrar panel
+      setNuevoPsicologo({
+        nombre: "",
+        apellido: "",
+        correo: "",
+        especialidad: "",
+        descripcion: "",
+      });
+      setMostrarPanel(false);
+    } catch (error) {
+      console.error("Error al registrar psicólogo:", error.message);
+      alert("Error al registrar psicólogo: " + error.message);
+    }
   };
 
   return (

@@ -41,3 +41,13 @@ export const crearDisponibilidad = async (disponibilidad) => {
         throw error;
     }
 };
+
+export const registrarPsicologo = async (psicologoData) => {
+    try {
+        const response = await axios.post(`${API}/psicologos/registrar`, psicologoData);
+        return response.data;
+    } catch (error) {
+        console.error("Error al registrar psicólogo:", error);
+        throw error;
+    }
+};
