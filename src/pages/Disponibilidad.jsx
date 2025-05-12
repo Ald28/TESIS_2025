@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import MainLayout from "../layouts/MainLayout";
 import "../styles/Disponibilidad.css";
-import { getPsicologos, crearDisponibilidad } from "../api/api_admin";
+import {
+  getPsicologos,
+  crearDisponibilidad,
+  getDisponibilidadPorPsicologo,
+} from "../api/api_admin";
 
 export default function Disponibilidad() {
   const [psicologos, setPsicologos] = useState([]);
@@ -27,6 +31,42 @@ export default function Disponibilidad() {
     cargarPsicologos();
   }, []);
 
+  useEffect(() => {
+    const cargarDisponibilidad = async () => {
+      if (selectedId === "-1") return;
+
+      try {
+        const data = await getDisponibilidadPorPsicologo(selectedId);
+
+        const nuevaDisponibilidad = {
+          lunes: { mañana: { inicio: "", fin: "" }, tarde: { inicio: "", fin: "" } },
+          martes: { mañana: { inicio: "", fin: "" }, tarde: { inicio: "", fin: "" } },
+          miercoles: { mañana: { inicio: "", fin: "" }, tarde: { inicio: "", fin: "" } },
+          jueves: { mañana: { inicio: "", fin: "" }, tarde: { inicio: "", fin: "" } },
+          viernes: { mañana: { inicio: "", fin: "" }, tarde: { inicio: "", fin: "" } },
+        };
+
+        data.forEach((turno) => {
+          const dia = turno.dia.toLowerCase();
+          if (nuevaDisponibilidad[dia]) {
+            const horaInicio = turno.hora_inicio?.substring(0, 5); // recorta HH:mm:ss
+            const horaFin = turno.hora_fin?.substring(0, 5);
+            const turnoHora = turno.hora_inicio < "13:00" ? "mañana" : "tarde";
+
+            nuevaDisponibilidad[dia][turnoHora].inicio = horaInicio || "";
+            nuevaDisponibilidad[dia][turnoHora].fin = horaFin || "";
+          }
+        });
+
+        setDisponibilidad(nuevaDisponibilidad);
+      } catch (error) {
+        console.error("Error cargando disponibilidad:", error);
+      }
+    };
+
+    cargarDisponibilidad();
+  }, [selectedId]);
+
   const handleChange = (dia, turno, campo, valor) => {
     setDisponibilidad((prev) => ({
       ...prev,
@@ -40,11 +80,10 @@ export default function Disponibilidad() {
     }));
   };
 
-  const idNumerico = parseInt(selectedId);
   const handleGuardar = async () => {
+    const idNumerico = parseInt(selectedId);
     if (selectedId === "-1" || isNaN(idNumerico)) {
       alert("Selecciona un psicólogo válido.");
-      console.error("ID de psicólogo no válido:", selectedId);
       return;
     }
 
@@ -56,9 +95,9 @@ export default function Disponibilidad() {
           mañana_fin: turnos.mañana.fin,
           tarde_inicio: turnos.tarde.inicio,
           tarde_fin: turnos.tarde.fin,
-          psicologo_id: parseInt(selectedId)
+          psicologo_id: idNumerico,
         };
-        
+
         if (
           !payload.mañana_inicio ||
           !payload.mañana_fin ||
@@ -100,7 +139,7 @@ export default function Disponibilidad() {
           </select>
         </div>
 
-        {selectedId && (
+        {selectedId !== "-1" && (
           <div className="table-responsive">
             <table className="table table-bordered disponibilidad-table">
               <thead>
@@ -112,7 +151,7 @@ export default function Disponibilidad() {
                 </tr>
               </thead>
               <tbody>
-                {Object.entries(disponibilidad).map(([dia, turnos]) => (
+                {Object.entries(disponibilidad).map(([dia, turnos]) =>
                   ["mañana", "tarde"].map((turno) => (
                     <tr key={`${dia}-${turno}`}>
                       <td className="text-capitalize">{dia}</td>
@@ -139,7 +178,7 @@ export default function Disponibilidad() {
                       </td>
                     </tr>
                   ))
-                ))}
+                )}
               </tbody>
             </table>
             <button className="btn btn-primary mt-3" onClick={handleGuardar}>

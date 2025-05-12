@@ -1,6 +1,7 @@
 import axios from "axios";
 
 const API = "http://localhost:8080/auth/admin";
+const API_PSICO = "http://localhost:8080/auth/psicologo";
 
 export const login = async (correo, contrasena) => {
     try {
@@ -50,4 +51,14 @@ export const registrarPsicologo = async (psicologoData) => {
         console.error("Error al registrar psicólogo:", error);
         throw error;
     }
+};
+
+export const getDisponibilidadPorPsicologo = async (id) => {
+  try {
+    const response = await axios.get(`${API_PSICO}/disponibilidad/${id}`);
+    return response.data.disponibilidad;
+  } catch (error) {
+    console.error("Error al obtener disponibilidad:", error);
+    throw error;
+  }
 };

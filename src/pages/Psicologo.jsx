@@ -78,7 +78,12 @@ export default function Psicologo() {
               {psicologos.map((psic) => (
                 <tr key={psic.usuario_id}>
                   <td className="user-info">
-                    <div className="avatar"><FaUserMd size={24} /></div>
+                    <img
+                      src={psic.foto || ""}
+                      alt="Foto del psicólogo"
+                      className="rounded-circle"
+                      style={{ width: "40px", height: "40px", objectFit: "cover" }}
+                    />
                     <div>
                       <div className="name">Dr. {psic.nombre} {psic.apellido}</div>
                       <div className="email">{psic.correo}</div>
