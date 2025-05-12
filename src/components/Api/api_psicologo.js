@@ -1,6 +1,7 @@
 import axios from "axios";
 
 const API = "http://localhost:8080/auth";
+const API_ADMIN = "http://localhost:8080/auth/admin";
 
 export const loginPsicologo = async (credential) => {
   try {
@@ -20,25 +21,6 @@ export const loginPsicologo = async (credential) => {
   } catch (error) {
     throw error;
   }
-};
-
-export const crearDisponibilidad = async (disponibilidad) => {
-  const token = localStorage.getItem("token");
-  const response = await fetch(`${API}/disponibilidad`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(disponibilidad),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Error al crear disponibilidad");
-  }
-
-  return await response.json();
 };
 
 export const obtenerCitasDelPsicologo = async (token) => {
@@ -73,11 +55,21 @@ export const conectarGoogleCalendar = () => {
 };
 
 export const buscarPsicologoPorUsuarioId = async (usuario_id) => {
-  const response = await axios.get(`http://localhost:8080/auth/buscar-psicologo/${usuario_id}`);
+  const response = await axios.get(`${API}/buscar-psicologo/${usuario_id}`);
   return response.data;
 };
 
 export const obtenerDisponibilidadPsicologo = async (id) => {
-  const response = await axios.get(`http://localhost:8080/auth/disponibilidad/${id}`);
+  const response = await axios.get(`${API}/disponibilidad/${id}`);
   return response.data;
+};
+
+export const obtenerDisponibilidadPorTurno = async (psicologo_id) => {
+  try {
+    const response = await axios.get(`${API_ADMIN}/disponibilidad/turnos/${psicologo_id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error al obtener disponibilidad por turnos:", error);
+    throw error;
+  }
 };

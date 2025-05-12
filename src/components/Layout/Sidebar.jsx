@@ -11,6 +11,7 @@ import {
   FaClipboardList,
   FaSignOutAlt,
   FaCalendarAlt,
+  FaBell,
 } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -56,7 +57,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
           }}
         />
         {!collapsed && (
-          <h5 className="mb-0 text-center">Administrador</h5>
+          <h5 className="mb-0 text-center">Psicologo</h5>
         )}
       </div>
 
@@ -67,7 +68,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
           { to: "/admin/cuestionarios", icon: <FaTasks />, label: "Cuestionarios" },
           { to: "/admin/metodos", icon: <FaClipboardList />, label: "Actividades" },
           { to: "/admin/citas", icon: <FaCalendarAlt />, label: "Citas" },
-          { to: "/admin/ajustes", icon: <FaCog />, label: "Ajustes" },
+          { to: "/admin/notificaciones", icon: <FaBell />, label: "Notificaciones" },
           { to: "/", icon: <FaSignOutAlt />, label: "Cerrar Sesión" },
         ].map((item, idx) => (
           <li key={idx} className="nav-item mb-3">

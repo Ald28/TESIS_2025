@@ -7,28 +7,23 @@ export default function Layout() {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#f8f9fa" }}>
+    <div style={{ display: "flex", backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
       <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
       <div
         style={{
-          flex: 1, 
+          flex: 1,
           display: "flex",
           flexDirection: "column",
-          minHeight: "100vh",
           paddingLeft: collapsed ? "100px" : "260px",
-          transition: "padding 0.3s ease", 
+          transition: "padding 0.3s ease",
           backgroundColor: "#f8f9fa",
         }}
       >
         <Navbar collapsed={collapsed} />
 
-        {/* Contenido */}
-        <div style={{
-          marginTop: "70px",
-          padding: "20px",
-          flexGrow: 1,
-        }}>
+        {/* 🔥 Reducido el espacio de margen superior aquí */}
+        <div style={{ marginTop: "60px", padding: "20px", flexGrow: 1 }}>
           <Outlet />
         </div>
       </div>

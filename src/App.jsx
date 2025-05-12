@@ -5,10 +5,9 @@ import Register from "./components/Auth/Register";
 import Layout from "./components/Layout/Layout";
 import Dashboard from "./components/Admin/Dashboard";
 import Usuarios from "./components/Admin/Usuarios";
-import Ajustes from "./components/Admin/Ajustes";
+import Notificaciones from "./components/Admin/Notificaciones";
 import PerfilDoctor from "./components/Admin/PerfilDoctor";
 import Formulario from "./components/Admin/Formulario";
-import VerificarCodigo from "./components/Auth/VerificarCodigo";
 import NotFound from "./components/Common/NotFound";
 import Cuestionario from "./components/Admin/Cuestionario";
 import Pregunta from "./components/Admin/Pregunta";
@@ -23,13 +22,12 @@ const App = () => {
         {/* Rutas públicas */}
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/verificar-codigo" element={<VerificarCodigo />} />
 
         {/* Rutas privadas bajo Layout */}
         <Route path="/admin" element={<Layout />}>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="usuarios" element={<Usuarios />} />
-          <Route path="ajustes" element={<Ajustes />} />
+          <Route path="notificaciones" element={<Notificaciones />} />
           <Route path="cuestionarios" element={<Cuestionario />} />
           <Route path="cuestionario/:id" element={<Formulario />} />
           <Route path="preguntas" element={<Pregunta />} />
