@@ -87,7 +87,7 @@ export default function Dashboard() {
     <Container fluid>
       <div className="mb-4">
         <h2 className="fw-bold text-dark">
-          Bienvenida, {usuario.nombre} {usuario.apellido_paterno}
+          Bienvenido, {usuario.nombre} {usuario.apellido_paterno}
         </h2>
         <p className="text-muted">Gestiona tus citas y disponibilidad.</p>
       </div>
@@ -173,16 +173,19 @@ export default function Dashboard() {
         </Table>
 
 
-        <Col md={6}>
+        <Col md={12}>
           <Card className="border-0 shadow-sm text-center p-4">
             <FaGoogle size={40} className="text-danger mb-3" />
             <h5 className="fw-semibold">Sincroniza tu calendario</h5>
-            <p className="text-muted small">Mantén tus citas organizadas y sincronizadas con tu calendario de Google.</p>
+            <p className="text-muted small">
+              Mantén tus citas organizadas y sincronizadas con tu calendario de Google.
+            </p>
             <Button variant="danger" onClick={abrirModal}>
               Conectar Google Calendar
             </Button>
           </Card>
         </Col>
+
       </Row>
 
       <Card className="border-0 shadow-sm">

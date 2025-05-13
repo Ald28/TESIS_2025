@@ -24,14 +24,15 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
     <div
       className="d-flex flex-column bg-primary text-white"
       style={{
-        height: "100vh",
+        minHeight: "100vh",
+        height: "100%",
         width: collapsed ? "80px" : "250px",
         position: "fixed",
         top: 0,
         left: 0,
         transition: "width 0.3s ease",
         overflowX: "hidden",
-        alignItems: "center", 
+        alignItems: "center",
         paddingTop: "1rem",
       }}
     >
@@ -62,7 +63,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       </div>
 
       <ul className="nav flex-column mt-2 w-100">
-        {[ 
+        {[
           { to: "/admin/dashboard", icon: <FaTachometerAlt />, label: "Dashboard" },
           { to: "/admin/usuarios", icon: <FaUsers />, label: "Estudiantes" },
           { to: "/admin/cuestionarios", icon: <FaTasks />, label: "Cuestionarios" },

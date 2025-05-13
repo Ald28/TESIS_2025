@@ -73,3 +73,13 @@ export const obtenerDisponibilidadPorTurno = async (psicologo_id) => {
     throw error;
   }
 };
+
+export const obtenerPerfilPsicologo = async (usuario_id) => {
+  try {
+    const response = await axios.get(`${API}/perfil/${usuario_id}`);
+    return response.data.perfil;
+  } catch (error) {
+    console.error("Error al obtener perfil del psicólogo:", error);
+    throw error;
+  }
+};
