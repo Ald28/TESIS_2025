@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { listarEstudiantesRelacionados } from "../Api/api_citas";
-import { buscarPsicologoPorUsuarioId } from "../Api/api_psicologo";
+import {
+  buscarPsicologoPorUsuarioId,
+  obtenerHistorial
+} from "../Api/api_psicologo";
 import {
   crearCalificacion,
   obtenerCalificacionesPorEstudiante
@@ -12,9 +15,12 @@ export default function Usuarios() {
   const [estudiantes, setEstudiantes] = useState([]);
   const [comentarios, setComentarios] = useState({});
   const [observaciones, setObservaciones] = useState({});
+  const [historiales, setHistoriales] = useState({});
   const [psicologoId, setPsicologoId] = useState(null);
   const [modalEstudianteId, setModalEstudianteId] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalHistorialVisible, setModalHistorialVisible] = useState(false);
+  const [modalHistorialEstudianteId, setModalHistorialEstudianteId] = useState(null);
 
   useEffect(() => {
     const cargarDatos = async () => {
@@ -31,6 +37,9 @@ export default function Usuarios() {
         for (const est of data) {
           const obs = await obtenerCalificacionesPorEstudiante(est.estudiante_id);
           setObservaciones(prev => ({ ...prev, [est.estudiante_id]: obs }));
+
+          const historial = await obtenerHistorial(est.estudiante_id);
+          setHistoriales(prev => ({ ...prev, [est.estudiante_id]: historial }));
         }
       } catch (error) {
         console.error("❌ Error al cargar datos:", error);
@@ -45,9 +54,19 @@ export default function Usuarios() {
     setModalVisible(true);
   };
 
+  const abrirModalHistorial = (estudianteId) => {
+    setModalHistorialEstudianteId(estudianteId);
+    setModalHistorialVisible(true);
+  };
+
   const cerrarModal = () => {
     setModalVisible(false);
     setModalEstudianteId(null);
+  };
+
+  const cerrarModalHistorial = () => {
+    setModalHistorialVisible(false);
+    setModalHistorialEstudianteId(null);
   };
 
   const handleComentarioChange = (id, texto) => {
@@ -134,6 +153,12 @@ export default function Usuarios() {
                       >
                         Ver observaciones
                       </button>
+                      <button
+                        className="btn btn-outline-secondary btn-sm mt-2"
+                        onClick={() => abrirModalHistorial(est.estudiante_id)}
+                      >
+                        Ver historial
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -148,8 +173,7 @@ export default function Usuarios() {
           </tbody>
         </table>
       </div>
-
-      {/* MODAL de observaciones */}
+      
       {modalVisible && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -167,6 +191,27 @@ export default function Usuarios() {
                   </span>
                 </li>
               ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {modalHistorialVisible && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h5 className="mb-3">Historial de citas canceladas</h5>
+            <button className="modal-close" onClick={cerrarModalHistorial}>✕</button>
+            <ul className="list-unstyled small mt-3">
+              {(historiales[modalHistorialEstudianteId] || []).map((h, idx) => (
+                <li key={idx} className="mb-3 border-bottom pb-2">
+                  <strong>{h.tipo_cita.toUpperCase()}</strong> — {new Date(h.fecha_inicio).toLocaleString()}
+                  <br />
+                  <span className="text-muted">Estado: {h.estado}</span>
+                </li>
+              ))}
+              {(!historiales[modalHistorialEstudianteId] || historiales[modalHistorialEstudianteId].length === 0) && (
+                <li className="text-muted">Sin historial de cancelaciones</li>
+              )}
             </ul>
           </div>
         </div>

@@ -83,3 +83,13 @@ export const obtenerPerfilPsicologo = async (usuario_id) => {
     throw error;
   }
 };
+
+export const obtenerHistorial = async (estudiante_id) => {
+  try {
+    const response = await axios.get(`${API}/historial-canceladas/${estudiante_id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error al obtener el historial del estudiante:", error);
+    throw error;
+  }
+};
