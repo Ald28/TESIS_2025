@@ -1,0 +1,104 @@
+Estructura :
+├── src/
+├   ├── config/
+├   |   ├── conexion.js
+├   ├── controllers/
+├   │   ├── admin_auth.controller.js
+├   │   ├── estudiante_auth.controller.js
+├   │   ├── metodo_relajacion.controller.js
+├   │   ├── observacion.controller.js
+├   │   ├── pregunta.controller.js
+├   │   ├── psicologo_auth.controller.js
+├   ├── database/
+├   │   ├── .sql
+├   ├── middlewares/
+├   │   ├── authMiddlewares.js
+├   │   ├── authPsicologo.js
+├   │   ├── multer.js
+├   │   ├── validarDatos.js
+├   |   ├── verificarAutenticacion.js
+├   ├── models/
+├   │   ├── admin.model.js
+├   │   ├── cita.model.js
+├   │   ├── estudiante.model.js
+├   │   ├── metodo.model.js
+├   │   ├── multimedia.model.js
+├   │   ├── observacion.model.js
+├   │   ├── pregunta.model.js
+├   │   ├── psicologo.model.js
+├   │   ├── respuesta.model.js
+├   |   ├── usuario.js
+├   ├── routes/
+├   │   ├── admin_auth.routes.js
+├   │   ├── estudiante_auth.routes.js
+├   │   ├── metodo_relajacion.routes.js
+├   │   ├── observacion.routes.js
+├   │   ├── pregunta.routes.js
+├   │   ├── psicologo_auth.routes.js
+├   ├── services/
+├   │   ├── cloudinary.service.js
+├   │   ├── email.service.js
+├   │   ├── gemini.service.js
+├   │   ├── google_calendar.service.js
+├   │   ├── googleAuth.service.js
+├   │   ├── metodo_relajacion.service.js
+├── app.js
+├── index.js
+├── .env
+
+RESULTADOS
++--------------+---------------+------------+
+| Campo        | Tipo         | Nulo       |
++--------------+---------------+------------+
+| id          | INT          | NO (PK)    |
+| fecha       | TIMESTAMP    | SÍ         |
+| puntaje     | VARCHAR(45)  | SÍ         |
+| estado_animo| VARCHAR(45)  | SÍ         |
+| estudiante_id  | INT       | SÍ (FK)    |
+| cuestionario_id | INT      | SÍ (FK)    |
+| psicologo_id  | INT        | SÍ (FK)    |
++--------------+---------------+------------+
+
+PREGUNTAS
++---------------+---------------+------------+
+| Campo         | Tipo          | Nulo       |
++---------------+---------------+------------+
+| id           | INT           | NO (PK)    |
+| txt_pregunta | VARCHAR(45)   | SÍ         |
+| tipo_pregunta| VARCHAR(45)   | SÍ         |
+| cuestionario_id | INT        | SÍ (FK)    |
+| psicologo_id  | INT          | SÍ (FK)    |
++---------------+---------------+------------+
+
+OPCIONES
++---------------+---------------+------------+
+| Campo         | Tipo          | Nulo       |
++---------------+---------------+------------+
+| id           | INT           | NO (PK)    |
+| txt_opcion   | VARCHAR(45)   | SÍ         |
+| puntaje      | VARCHAR(45)   | SÍ         |
+| pregunta_id  | INT           | SÍ (FK)    |
+| psicologo_id | INT           | SÍ (FK)    |
++---------------+---------------+------------+
+
+CUESTIONARIO
++---------------+---------------+------------+
+| Campo         | Tipo          | Nulo       |
++---------------+---------------+------------+
+| id           | INT           | NO (PK)    |
+| titulo       | VARCHAR(45)   | SÍ         |
+| descripcion  | VARCHAR(45)   | SÍ         |
+| fecha        | TIMESTAMP     | SÍ         |
+| psicologo_id | INT           | SÍ (FK)    |
++---------------+---------------+------------+
+
+RESPUESTAS
++--------------+---------------+------------+
+| Campo        | Tipo          | Nulo       |
++--------------+---------------+------------+
+| id           | INT           | NO (PK)    |
+| fecha        | TIMESTAMP     | SÍ         |
+| pregunta_id  | INT           | SÍ (FK)    |
+| estudiante_id| INT           | SÍ (FK)    |
+| opciones_id  | INT           | SÍ (FK)    |
++--------------+---------------+------------+

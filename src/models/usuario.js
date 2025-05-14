@@ -1,0 +1,32 @@
+const { query } = require('../config/conexion');
+
+const buscarUsuarioPorCorreo = async (correo) => {
+  const sql = 'SELECT * FROM usuario WHERE correo = ?';
+  const resultado = await query(sql, [correo]);
+  return resultado;
+};
+
+const insertarMultimedia = async (url) => {
+  const sql = 'INSERT INTO multimedia (url) VALUES (?)';
+  const resultado = await query(sql, [url]);
+  return resultado.insertId;
+};
+
+const crearUsuario = async (usuario) => {
+  const sql = 'INSERT INTO usuario (nombre, apellido, correo, rol_id, multimedia_id) VALUES (?, ?, ?, ?, ?)';
+  const { nombre, apellido, correo, rol_id, multimedia_id } = usuario;
+  const resultado = await query(sql, [nombre, apellido, correo, rol_id, multimedia_id]);
+  return resultado.insertId;
+};
+
+const actualizarMultimediaUsuario = async (usuario_id, multimedia_id) => {
+  const sql = `UPDATE usuario SET multimedia_id = ? WHERE id = ?`;
+  await query(sql, [multimedia_id, usuario_id]);
+};
+
+module.exports = {
+  buscarUsuarioPorCorreo,
+  insertarMultimedia,
+  crearUsuario,
+  actualizarMultimediaUsuario,
+};
