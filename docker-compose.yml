@@ -3,25 +3,9 @@ services:
     build: .
     container_name: calmatec_backend
     ports:
-      - "8080:8080"
-    environment:
-      - PORT=8080
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_USER=root
-      - DB_PASSWORD=1234
-      - DB_NAME=tesis_db
-      - EMAIL_SENDER=calmatec.salud@gmail.com
-      - SENDGRID_API_KEY=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
-      - GOOGLE_CLIENT_ID_MOBILE=381550545275-0b9h60bgi2gbp3taqm8bh5o0po02gd74.apps.googleusercontent.com
-      - GOOGLE_CLIENT_ID_WEB=381550545275-npvfm9sf70jomqsum8fm1dvde05j8qks.apps.googleusercontent.com
-      - GOOGLE_CLIENT_SECRET=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
-      - CLOUDINARY_CLOUD_NAME=dp6slcmoi
-      - CLOUDINARY_API_KEY=185715682916925
-      - CLOUDINARY_API_SECRET=vrn6ZvnUcWkZsNA9shRS5QQTzjc
-      - GEMINI_API_KEY=AIzaSyB3c5ITxWHN2u1JKdoVR_lGAb-9V-XJ2oM
-      - JWT_SECRET='$2y$10$.dguRUHrP1z.Zor48Ym1BOVm3hXfRNSsplo8benvey9nq5IPHzya.'
-      - JWT_TIMEOUT=2h
+      - "${PORT}:${PORT}"
+    env_file:
+      - .env
     depends_on:
       mysql:
         condition: service_healthy
@@ -31,8 +15,8 @@ services:
     container_name: mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: 1234
-      MYSQL_DATABASE: tesis_db
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
     ports:
       - "3307:3306"
     volumes:
