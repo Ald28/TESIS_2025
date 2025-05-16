@@ -63,12 +63,26 @@ const obtenerCitasAceptadasPorPsicologo = async (psicologo_id) => {
 
 // El Psicologo acepta o rechaza la cita del estudiante
 const actualizarEstadoCita = async ({ cita_id, estado, evento_google_id }) => {
-    const sql = `
-        UPDATE cita
-        SET estado = ?, evento_google_id = ?
-        WHERE id = ?
-    `;
-    await query(sql, [estado, evento_google_id, cita_id]);
+    let sql;
+    let params;
+
+    if (typeof evento_google_id !== 'undefined') {
+        sql = `
+            UPDATE cita
+            SET estado = ?, evento_google_id = ?
+            WHERE id = ?
+        `;
+        params = [estado, evento_google_id, cita_id];
+    } else {
+        sql = `
+            UPDATE cita
+            SET estado = ?
+            WHERE id = ?
+        `;
+        params = [estado, cita_id];
+    }
+
+    await query(sql, params);
 };
 
 // El estudiante al crear la cita se va a validar la disponibilidad del psicólogo

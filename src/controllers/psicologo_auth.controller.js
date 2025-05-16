@@ -1,4 +1,4 @@
-const { guardarTokensPsicologo, crearEventoPsicologo } = require('../services/google_calendar.service');
+const { guardarTokensPsicologo, crearEventoPsicologo, eliminarEventoGoogleCalendar } = require('../services/google_calendar.service');
 const { enviarCorreoCitaAceptada } = require('../services/email.service');
 const { verifyGoogleToken } = require('../services/googleAuth.service');
 const psicologoModel = require('../models/psicologo.model');
@@ -212,6 +212,34 @@ const cambiarEstadoCita = async (req, res) => {
             });
         }
 
+        if (estado === 'realizada') {
+            const cita = await psicologoModel.obtenerDetallesCita(cita_id);
+
+            if (!cita || !cita.evento_google_id) {
+                return res.status(404).json({ message: 'Cita no encontrada o sin evento asociado' });
+            }
+
+            const usuario = await usuarioModel.buscarUsuarioPorId(cita.usuario_psicologo);
+
+            if (!usuario?.correo) {
+                return res.status(400).json({ message: 'Correo del psicólogo no encontrado' });
+            }
+
+            const correoPsicologo = usuario.correo;
+
+            await eliminarEventoGoogleCalendar(correoPsicologo, cita.evento_google_id);
+
+            await citaModel.actualizarEstadoCita({
+                cita_id,
+                estado,
+                evento_google_id: cita.evento_google_id,
+            });
+
+            return res.status(200).json({
+                message: 'Cita marcada como realizada y evento eliminado, token conservado.',
+            });
+        }
+
         await citaModel.actualizarEstadoCita({ cita_id, estado, evento_google_id });
 
         res.status(200).json({
@@ -376,30 +404,30 @@ const estudiantePorPsicologo = async (req, res) => {
 };
 
 const obtenerPerfilPsicologo = async (req, res) => {
-  try {
-    const usuario_id = req.params.usuario_id;
-    const perfil = await psicologoModel.obtenerPerfilPsicologo(usuario_id);
+    try {
+        const usuario_id = req.params.usuario_id;
+        const perfil = await psicologoModel.obtenerPerfilPsicologo(usuario_id);
 
-    if (!perfil) {
-      return res.status(404).json({ message: 'Psicólogo no encontrado' });
+        if (!perfil) {
+            return res.status(404).json({ message: 'Psicólogo no encontrado' });
+        }
+
+        res.status(200).json({ perfil });
+    } catch (error) {
+        console.error('Error al obtener perfil del psicólogo:', error);
+        res.status(500).json({ message: 'Error interno del servidor' });
     }
-
-    res.status(200).json({ perfil });
-  } catch (error) {
-    console.error('Error al obtener perfil del psicólogo:', error);
-    res.status(500).json({ message: 'Error interno del servidor' });
-  }
 };
 
 const obtenerHistorial = async (req, res) => {
-  try {
-    const { estudiante_id } = req.params;
-    const historial = await psicologoModel.obtenerHistorial(estudiante_id);
-    res.json(historial);
-  } catch (error) {
-    console.error("Error al obtener historial de cancelaciones:", error);
-    res.status(500).json({ error: "Error al obtener historial de cancelaciones" });
-  }
+    try {
+        const { estudiante_id } = req.params;
+        const historial = await psicologoModel.obtenerHistorial(estudiante_id);
+        res.json(historial);
+    } catch (error) {
+        console.error("Error al obtener historial de cancelaciones:", error);
+        res.status(500).json({ error: "Error al obtener historial de cancelaciones" });
+    }
 };
 
 module.exports = {

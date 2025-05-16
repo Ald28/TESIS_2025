@@ -24,9 +24,16 @@ const actualizarMultimediaUsuario = async (usuario_id, multimedia_id) => {
   await query(sql, [multimedia_id, usuario_id]);
 };
 
+const buscarUsuarioPorId = async (id) => {
+  const sql = 'SELECT * FROM usuario WHERE id = ?';
+  const resultado = await query(sql, [id]);
+  return resultado[0]; 
+};
+
 module.exports = {
   buscarUsuarioPorCorreo,
   insertarMultimedia,
   crearUsuario,
   actualizarMultimediaUsuario,
+  buscarUsuarioPorId,
 };

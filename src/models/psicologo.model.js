@@ -120,7 +120,7 @@ const obtenerHistorial = async (estudiante_id) => {
     JOIN psicologo p ON c.psicologo_id = p.id
     JOIN usuario u ON p.usuario_id = u.id
     WHERE c.estudiante_id = ?
-      AND c.estado = 'cancelada'
+      AND c.estado = 'realizada'
       AND c.evento_google_id IS NOT NULL
       AND (
         (c.creado_por = 'estudiante' AND c.seguimiento_id IS NULL)
