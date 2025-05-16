@@ -93,3 +93,17 @@ export const obtenerHistorial = async (estudiante_id) => {
     throw error;
   }
 };
+
+export const crearDisponibilidadPsicologo = async (data, token) => {
+  try {
+    const response = await axios.post(`${API}/disponibilidad/crear`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("❌ Error al crear disponibilidad:", error.response?.data || error.message);
+    throw error;
+  }
+};

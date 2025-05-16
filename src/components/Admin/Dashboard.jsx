@@ -8,7 +8,8 @@ import {
   conectarGoogleCalendar,
   cambiarEstadoCita,
   buscarPsicologoPorUsuarioId,
-  obtenerDisponibilidadPorTurno
+  obtenerDisponibilidadPorTurno,
+  crearDisponibilidadPsicologo
 } from "../Api/api_psicologo";
 
 export default function Dashboard() {
@@ -18,6 +19,13 @@ export default function Dashboard() {
   const [citas, setCitas] = useState([]);
   const [disponibilidades, setDisponibilidades] = useState([]);
   const [mostrarDisponibilidades, setMostrarDisponibilidades] = useState(false);
+  const [formData, setFormData] = useState({
+    dia: "",
+    mañana_inicio: "",
+    mañana_fin: "",
+    tarde_inicio: "",
+    tarde_fin: ""
+  });
 
   const fetchCitas = async () => {
     try {
@@ -80,6 +88,31 @@ export default function Dashboard() {
     } catch (error) {
       console.error(error.message);
       alert("Error al rechazar la cita");
+    }
+  };
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleCrearDisponibilidad = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const user = JSON.parse(localStorage.getItem("usuario"));
+      const psicologoData = await buscarPsicologoPorUsuarioId(user.id);
+      const psicologo_id = psicologoData.psicologo_id;
+
+      const dataConPsicologo = {
+        ...formData,
+        psicologo_id,
+      };
+
+      await crearDisponibilidadPsicologo(dataConPsicologo, token);
+      alert("✅ Disponibilidad creada con éxito.");
+      fetchCitas();
+    } catch (error) {
+      alert("❌ Error al crear disponibilidad: " + (error.response?.data?.mensaje || error.message));
     }
   };
 
@@ -172,6 +205,39 @@ export default function Dashboard() {
           </tbody>
         </Table>
 
+        <Card className="border-0 shadow-sm mt-4">
+          <Card.Body>
+            <h5 className="fw-semibold mb-3">Registrar Disponibilidad</h5>
+            <Form>
+              <Row className="align-items-end g-3">
+                <Col md={2}>
+                  <Form.Label>Día</Form.Label>
+                  <Form.Control type="text" name="dia" placeholder="ej. lunes" onChange={handleFormChange} />
+                </Col>
+
+                <Col md={5}>
+                  <Form.Label>Turno Mañana</Form.Label>
+                  <Row>
+                    <Col><Form.Control type="time" name="mañana_inicio" onChange={handleFormChange} /></Col>
+                    <Col><Form.Control type="time" name="mañana_fin" onChange={handleFormChange} /></Col>
+                  </Row>
+                </Col>
+
+                <Col md={5}>
+                  <Form.Label>Turno Tarde</Form.Label>
+                  <Row>
+                    <Col><Form.Control type="time" name="tarde_inicio" onChange={handleFormChange} /></Col>
+                    <Col><Form.Control type="time" name="tarde_fin" onChange={handleFormChange} /></Col>
+                  </Row>
+                </Col>
+              </Row>
+
+              <div className="mt-3 text-end">
+                <Button onClick={handleCrearDisponibilidad}>Guardar</Button>
+              </div>
+            </Form>
+          </Card.Body>
+        </Card>
 
         <Col md={12}>
           <Card className="border-0 shadow-sm text-center p-4">
