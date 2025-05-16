@@ -3,7 +3,6 @@ import MainLayout from "../layouts/MainLayout";
 import "../styles/Disponibilidad.css";
 import {
   getPsicologos,
-  crearDisponibilidad,
   getDisponibilidadPorPsicologo,
 } from "../api/api_admin";
 
@@ -80,44 +79,6 @@ export default function Disponibilidad() {
     }));
   };
 
-  const handleGuardar = async () => {
-    const idNumerico = parseInt(selectedId);
-    if (selectedId === "-1" || isNaN(idNumerico)) {
-      alert("Selecciona un psicólogo válido.");
-      return;
-    }
-
-    try {
-      for (const [dia, turnos] of Object.entries(disponibilidad)) {
-        const payload = {
-          dia,
-          mañana_inicio: turnos.mañana.inicio,
-          mañana_fin: turnos.mañana.fin,
-          tarde_inicio: turnos.tarde.inicio,
-          tarde_fin: turnos.tarde.fin,
-          psicologo_id: idNumerico,
-        };
-
-        if (
-          !payload.mañana_inicio ||
-          !payload.mañana_fin ||
-          !payload.tarde_inicio ||
-          !payload.tarde_fin
-        ) {
-          alert(`Completa todos los campos para el día: ${dia}`);
-          return;
-        }
-
-        await crearDisponibilidad(payload);
-      }
-
-      alert("✅ Disponibilidad registrada correctamente.");
-    } catch (error) {
-      console.error("❌ Error al guardar disponibilidad:", error);
-      alert("❌ Error al guardar disponibilidad");
-    }
-  };
-
   return (
     <MainLayout>
       <div className="disponibilidad-container">
@@ -181,9 +142,6 @@ export default function Disponibilidad() {
                 )}
               </tbody>
             </table>
-            <button className="btn btn-primary mt-3" onClick={handleGuardar}>
-              Guardar Disponibilidad
-            </button>
           </div>
         )}
       </div>
