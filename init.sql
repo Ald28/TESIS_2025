@@ -340,7 +340,7 @@ CREATE TABLE IF NOT EXISTS `tesis_db`.`disponibilidad` (
   `dia` ENUM('lunes', 'martes', 'miercoles', 'jueves', 'viernes') NOT NULL,
   `hora_inicio` TIME NULL,
   `hora_fin` TIME NULL,
-  `turno` ENUM('mañana', 'tarde') NOT NULL,
+  `turno` ENUM('temprano', 'tarde') NOT NULL,
   `psicologo_id` INT NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_disponibilidad_psicologo1_idx` (`psicologo_id` ASC) VISIBLE,

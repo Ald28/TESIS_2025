@@ -9,7 +9,7 @@ const crearDisponibilidadPsicologo = async (req, res) => {
       return res.status(400).json({ mensaje: "Todos los campos son obligatorios." });
     }
 
-    await crearDisponibilidad(dia, mañana_inicio, mañana_fin, 'mañana', psicologo_id);
+    await crearDisponibilidad(dia, mañana_inicio, mañana_fin, 'temprano', psicologo_id);
     await crearDisponibilidad(dia, tarde_inicio, tarde_fin, 'tarde', psicologo_id);
 
     return res.status(201).json({ mensaje: "✅ Disponibilidad creada correctamente." });
