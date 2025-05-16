@@ -6,7 +6,6 @@ const adminController = require('../controllers/admin_auth.controller');
 router.post('/login', adminController.loginAdmin);
 router.get('/listar', adminController.obtenerEstudiantes);
 router.get('/psicologos', adminController.obtenerPsicologos);
-router.post('/disponibilidad/crear-turno', adminController.crearTurnoPsicologo);
 router.get('/disponibilidad/turnos/:psicologo_id', adminController.listarDisponibilidadPorTurno);
 router.post('/psicologos/registrar', adminController.registrarPsicologo);
 

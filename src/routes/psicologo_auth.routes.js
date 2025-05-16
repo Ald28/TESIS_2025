@@ -1,4 +1,5 @@
 const psicologoController = require('../controllers/psicologo_auth.controller');
+const disponibilidad = require('../controllers/disponibilidad.controller');
 const authPsicologo = require('../middlewares/authPsicologo.js');
 const express = require('express');
 const router = express.Router();
@@ -25,6 +26,8 @@ router.get('/perfil/:usuario_id', psicologoController.obtenerPerfilPsicologo);
 router.get('/disponibilidad/:id', psicologoController.obtenerDisponibilidadPorId);
 // Ruta para listar las horas ocupadas
 router.get('/horas-ocupadas/:psicologo_id/:fecha', psicologoController.obtenerHorasOcupadas);
+// Ruta para crear una nueva disponibilidad
+router.post('/disponibilidad/crear', disponibilidad.crearDisponibilidadPsicologo);
 
 
 // Ruta para listar citas de un psicólogo

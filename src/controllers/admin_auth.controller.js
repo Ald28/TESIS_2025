@@ -66,43 +66,6 @@ const obtenerPsicologos = async (req, res) => {
     }
 };
 
-const crearTurnoPsicologo = async (req, res) => {
-  try {
-    const { dia, mañana_inicio, mañana_fin, tarde_inicio, tarde_fin, psicologo_id } = req.body;
-    console.log("Datos recibidos:", req.body);
-
-    if (!dia || !mañana_inicio || !mañana_fin || !tarde_inicio || !tarde_fin || !psicologo_id) {
-      return res.status(400).json({ mensaje: "Todos los campos son obligatorios." });
-    }
-
-    try {
-      await adminModel.crearDisponibilidad(dia, mañana_inicio, mañana_fin, 'mañana', psicologo_id);
-    } catch (error) {
-      if (error.message.includes("horario")) {
-        console.error("Error en crearDisponibilidad:", error);
-        return res.status(400).json({ mensaje: error.message });
-      }
-      console.warn("Turno mañana duplicado:", error.message);
-    }
-
-    try {
-      await adminModel.crearDisponibilidad(dia, tarde_inicio, tarde_fin, 'tarde', psicologo_id);
-    } catch (error) {
-      if (error.message.includes("horario")) {
-        console.error("Error en crearDisponibilidad:", error);
-        return res.status(400).json({ mensaje: error.message });
-      }
-      console.warn("Turno tarde duplicado:", error.message);
-    }
-
-    return res.status(201).json({ mensaje: "Disponibilidad creada (evitando duplicados)." });
-
-  } catch (error) {
-    console.error("❌ Error al crear disponibilidad:", error);
-    res.status(500).json({ mensaje: "Error del servidor." });
-  }
-};
-
 const listarDisponibilidadPorTurno = async (req, res) => {
   try {
     const { psicologo_id } = req.params;
@@ -145,7 +108,6 @@ module.exports = {
     loginAdmin,
     obtenerEstudiantes,
     obtenerPsicologos,
-    crearTurnoPsicologo,
     listarDisponibilidadPorTurno,
     registrarPsicologo
 };
