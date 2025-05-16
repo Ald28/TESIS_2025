@@ -4,8 +4,9 @@ import {
   obtenerCitasAceptadas,
   cancelarCitaAceptada,
   crearCitaSeguimiento,
-  listarEstudiantes
+  listarEstudiantes,
 } from "../Api/api_citas";
+import { cambiarEstadoCita } from "../Api/api_psicologo";
 import "../styles/Citas.css";
 
 export default function Citas() {
@@ -44,6 +45,18 @@ export default function Citas() {
       setNuevoCita({ estudiante_id: "", fecha: "", hora_inicio: "", hora_fin: "" });
     } catch (error) {
       alert("❌ Error al crear cita.");
+    }
+  };
+
+  const handleRealizarCita = async (id) => {
+    if (!window.confirm("¿Cita realizada?")) return;
+    try {
+      const token = localStorage.getItem("token");
+      await cambiarEstadoCita({ cita_id: id, estado: "realizada", evento_google_id: null }, token);
+      setCitasNormales(prev => prev.filter(c => c.id !== id));
+      setCitasSeguimiento(prev => prev.filter(c => c.id !== id));
+    } catch (err) {
+      alert("❌ Error al marcar realizada.");
     }
   };
 
@@ -112,6 +125,7 @@ export default function Citas() {
                       <td><span className="badge bg-success">Aceptada</span></td>
                       <td>
                         <Button size="sm" variant="outline-danger" onClick={() => handleCancelar(cita.id)}>Cancelar</Button>
+                        <Button size="sm" variant="outline-danger" onClick={() => handleRealizarCita(cita.id)}>Realizada</Button>
                       </td>
                     </tr>
                   ))
@@ -157,6 +171,7 @@ export default function Citas() {
                       </td>
                       <td>
                         <Button size="sm" variant="outline-danger" onClick={() => handleCancelar(cita.id)}>Cancelar</Button>
+                        <Button size="sm" variant="outline-danger" onClick={() => handleRealizarCita(cita.id)}>Realizada</Button>
                       </td>
                     </tr>
                   ))
