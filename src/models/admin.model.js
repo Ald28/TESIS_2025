@@ -64,7 +64,7 @@ const crearDisponibilidad = async (dia, hora_inicio, hora_fin, turno, psicologo_
     const horaInicio = padHora(hora_inicio);
     const horaFin = padHora(hora_fin);
 
-    if (turno === 'mañana') {
+    if (turno === 'temrano') {
         if (horaInicio < '08:00:00' || horaFin > '11:59:59') {
             throw new Error("El horario de la mañana debe estar entre 08:00:00 y 11:59:59.");
         }
