@@ -18,7 +18,7 @@ const obtenerDatosEstudiantePorId = async (usuario_id) => {
           u.rol_id,
           m.url AS foto,
           e.ciclo,
-          e.edad,
+          e.fecha_nacimiento,
           e.carrera
         FROM usuario u
         INNER JOIN estudiante e ON u.id = e.usuario_id
@@ -70,7 +70,7 @@ const listarPorPsicologo = async (psicologo_id) => {
       u.apellido,
       u.correo,
       e.ciclo,
-      e.edad,
+      e.fecha_nacimiento,
       e.carrera
     FROM estudiante e
     INNER JOIN usuario u ON u.id = e.usuario_id

@@ -18,7 +18,7 @@ const listarEstudiantes = async () => {
         u.rol_id,
         e.id AS estudiante_id,
         e.ciclo,
-        e.edad,
+        e.fecha_nacimiento,
         e.carrera
       FROM usuario u
       INNER JOIN estudiante e ON u.id = e.usuario_id
