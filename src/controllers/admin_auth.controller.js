@@ -81,7 +81,7 @@ const registrarPsicologo = async (req, res) => {
   try {
     const { nombre, apellido, correo, especialidad, descripcion } = req.body;
 
-    if (!nombre || !apellido || !correo || especialidad) {
+    if (!nombre || !apellido || !correo) {
       return res.status(400).json({ mensaje: "Todos los campos obligatorios deben estar completos." });
     }
 
