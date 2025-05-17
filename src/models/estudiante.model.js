@@ -1,14 +1,14 @@
 const { query } = require('../config/conexion');
 
 const crearEstudiante = async (estudiante) => {
-    const sql = 'INSERT INTO estudiante (usuario_id, ciclo, edad, carrera) VALUES (?, ?, ?, ?)';
-    const { usuario_id, ciclo, edad, carrera } = estudiante;
-    const result = await query(sql, [usuario_id, ciclo, edad, carrera]); 
-    return result.insertId;
+  const sql = 'INSERT INTO estudiante (usuario_id, ciclo, fecha_nacimiento, carrera) VALUES (?, ?, ?, ?)';
+  const { usuario_id, ciclo, fecha_nacimiento, carrera } = estudiante;
+  const result = await query(sql, [usuario_id, ciclo, fecha_nacimiento, carrera]);
+  return result.insertId;
 };
 
 const obtenerDatosEstudiantePorId = async (usuario_id) => {
-    const sql = `
+  const sql = `
         SELECT 
           e.id AS estudiante_id,
           u.id AS usuario_id,
@@ -25,18 +25,18 @@ const obtenerDatosEstudiantePorId = async (usuario_id) => {
         LEFT JOIN multimedia m ON u.multimedia_id = m.id
         WHERE u.id = ?
     `;
-    const resultado = await query(sql, [usuario_id]);
-    return resultado[0];
+  const resultado = await query(sql, [usuario_id]);
+  return resultado[0];
 };
 
 const buscarPorUsuarioId = async (usuario_id) => {
-    const sql = `SELECT * FROM estudiante WHERE usuario_id = ? LIMIT 1`;
-    const result = await query(sql, [usuario_id]);
-    return result.length > 0 ? result[0] : null;
+  const sql = `SELECT * FROM estudiante WHERE usuario_id = ? LIMIT 1`;
+  const result = await query(sql, [usuario_id]);
+  return result.length > 0 ? result[0] : null;
 };
 
 const listarEstudiantes = async () => {
-    const sql = `
+  const sql = `
         SELECT 
           e.id AS estudiante_id,
           u.id AS usuario_id,
@@ -46,19 +46,19 @@ const listarEstudiantes = async () => {
         INNER JOIN usuario u ON e.usuario_id = u.id
         WHERE u.rol_id = 2
     `;
-    const resultado = await query(sql);
-    return resultado;
+  const resultado = await query(sql);
+  return resultado;
 };
 
 const obtenerUsuarioPorEstudianteId = async (estudiante_id) => {
-    const sql = `
+  const sql = `
         SELECT u.*
         FROM estudiante e
         INNER JOIN usuario u ON e.usuario_id = u.id
         WHERE e.id = ?
     `;
-    const result = await query(sql, [estudiante_id]);
-    return result[0];
+  const result = await query(sql, [estudiante_id]);
+  return result[0];
 };
 
 const listarPorPsicologo = async (psicologo_id) => {
@@ -85,10 +85,10 @@ const listarPorPsicologo = async (psicologo_id) => {
 };
 
 module.exports = {
-    crearEstudiante,
-    obtenerDatosEstudiantePorId,
-    buscarPorUsuarioId,
-    listarEstudiantes,
-    obtenerUsuarioPorEstudianteId,
-    listarPorPsicologo,
+  crearEstudiante,
+  obtenerDatosEstudiantePorId,
+  buscarPorUsuarioId,
+  listarEstudiantes,
+  obtenerUsuarioPorEstudianteId,
+  listarPorPsicologo,
 };

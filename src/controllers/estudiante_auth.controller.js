@@ -27,7 +27,7 @@ const loginGoogleEstudiante = async (req, res) => {
         await estudianteModel.crearEstudiante({
           usuario_id: usuario.id,
           ciclo: '',
-          edad: '',
+          fecha_nacimiento: null,
           carrera: ''
         });
 
@@ -65,7 +65,7 @@ const loginGoogleEstudiante = async (req, res) => {
     await estudianteModel.crearEstudiante({
       usuario_id,
       ciclo: '',
-      edad: '',
+      fecha_nacimiento: null,
       carrera: ''
     });
 
