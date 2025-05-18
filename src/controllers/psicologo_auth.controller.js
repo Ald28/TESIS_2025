@@ -33,14 +33,18 @@ const loginGooglePsicologo = async (req, res) => {
             });
         }
 
-        // Si no tiene foto aún, completamos
+        if (usuario.estado !== "activo") {
+            return res.status(403).json({
+                message: 'Tu cuenta está inactiva. Contacta al administrador para habilitar el acceso.',
+            });
+        }
+
         if (!usuario.multimedia_id) {
             const multimedia_id = await usuarioModel.insertarMultimedia(picture);
             await usuarioModel.actualizarMultimediaUsuario(usuario.id, multimedia_id);
             usuario.multimedia_id = multimedia_id;
         }
 
-        // Generar token
         const token = jwt.sign(
             { id: usuario.id, rol: usuario.rol_id },
             process.env.JWT_SECRET,
