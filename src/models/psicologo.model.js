@@ -1,19 +1,19 @@
 const { query } = require('../config/conexion');
 
 const crearPsicologo = async (psicologo) => {
-    const sql = 'INSERT INTO psicologo (usuario_id, especialidad, descripcion) VALUES (?, ?, ?)';
-    const { usuario_id, especialidad, descripcion } = psicologo;
-    await query(sql, [usuario_id, especialidad, descripcion]);
+  const sql = 'INSERT INTO psicologo (usuario_id, especialidad, descripcion) VALUES (?, ?, ?)';
+  const { usuario_id, especialidad, descripcion } = psicologo;
+  await query(sql, [usuario_id, especialidad, descripcion]);
 };
 
 const obtenerDisponibilidadPorPsicologo = async (psicologo_id) => {
-    const sql = `SELECT id, dia, hora_inicio, hora_fin FROM disponibilidad WHERE psicologo_id = ? ORDER BY FIELD(dia, 'lunes','martes','miércoles','jueves','viernes','sábado','domingo'), hora_inicio`;
-    const resultado = await query(sql, [psicologo_id]);
-    return resultado;
+  const sql = `SELECT id, dia, hora_inicio, hora_fin FROM disponibilidad WHERE psicologo_id = ? ORDER BY FIELD(dia, 'lunes','martes','miércoles','jueves','viernes','sábado','domingo'), hora_inicio`;
+  const resultado = await query(sql, [psicologo_id]);
+  return resultado;
 };
 
 const listarPsicologos = async () => {
-    const sql = `
+  const sql = `
         SELECT 
             p.id AS psicologo_id,
             u.id AS usuario_id,
@@ -26,19 +26,20 @@ const listarPsicologos = async () => {
             p.descripcion
         FROM psicologo p
         JOIN usuario u ON p.usuario_id = u.id
+        WHERE u.estado = 'activo'
     `;
-    const resultados = await query(sql);
-    return resultados;
+  const resultados = await query(sql);
+  return resultados;
 };
 
 const obtenerPsicologoPorUsuarioId = async (usuario_id) => {
-    const sql = 'SELECT id FROM psicologo WHERE usuario_id = ?';
-    const resultado = await query(sql, [usuario_id]);
-    return resultado[0];
+  const sql = 'SELECT id FROM psicologo WHERE usuario_id = ?';
+  const resultado = await query(sql, [usuario_id]);
+  return resultado[0];
 };
 
 const obtenerDetallesCita = async (cita_id) => {
-    const sql = `
+  const sql = `
         SELECT c.*, ue.correo AS correo_usuario, p.usuario_id AS usuario_psicologo
         FROM cita c
         JOIN estudiante e ON e.id = c.estudiante_id
@@ -46,39 +47,39 @@ const obtenerDetallesCita = async (cita_id) => {
         JOIN psicologo p ON p.id = c.psicologo_id
         WHERE c.id = ?
     `;
-    const resultado = await query(sql, [cita_id]);
-    return resultado[0];
+  const resultado = await query(sql, [cita_id]);
+  return resultado[0];
 };
 
 const obtenerNombreCompletoEstudiante = async (estudiante_id) => {
-    const sql = `
+  const sql = `
         SELECT CONCAT(nombre, ' ', apellido) AS nombre_completo
         FROM usuario
         WHERE id = (SELECT usuario_id FROM estudiante WHERE id = ?)
     `;
-    const resultado = await query(sql, [estudiante_id]);
-    return resultado[0];
+  const resultado = await query(sql, [estudiante_id]);
+  return resultado[0];
 };
 
 const obtenerNombreCompletoPsicologo = async (usuario_id) => {
-    const sql = `
+  const sql = `
         SELECT correo, CONCAT(nombre, ' ', apellido) AS nombre_completo
         FROM usuario
         WHERE id = ?
     `;
-    const resultado = await query(sql, [usuario_id]);
-    return resultado[0];
+  const resultado = await query(sql, [usuario_id]);
+  return resultado[0];
 };
 
 const obtenerPsicologoConUsuario = async (usuario_id) => {
-    const sql = `
+  const sql = `
         SELECT p.id AS psicologo_id, p.usuario_id, u.correo
         FROM psicologo p
         INNER JOIN usuario u ON p.usuario_id = u.id
         WHERE p.usuario_id = ?
     `;
-    const resultado = await query(sql, [usuario_id]);
-    return resultado[0];
+  const resultado = await query(sql, [usuario_id]);
+  return resultado[0];
 };
 
 const obtenerPerfilPsicologo = async (usuario_id) => {
@@ -133,14 +134,14 @@ const obtenerHistorial = async (estudiante_id) => {
 };
 
 module.exports = {
-    crearPsicologo,
-    listarPsicologos,
-    obtenerDisponibilidadPorPsicologo,
-    obtenerPsicologoPorUsuarioId,
-    obtenerDetallesCita,
-    obtenerNombreCompletoEstudiante,
-    obtenerNombreCompletoPsicologo,
-    obtenerPsicologoConUsuario,
-    obtenerPerfilPsicologo,
-    obtenerHistorial,
+  crearPsicologo,
+  listarPsicologos,
+  obtenerDisponibilidadPorPsicologo,
+  obtenerPsicologoPorUsuarioId,
+  obtenerDetallesCita,
+  obtenerNombreCompletoEstudiante,
+  obtenerNombreCompletoPsicologo,
+  obtenerPsicologoConUsuario,
+  obtenerPerfilPsicologo,
+  obtenerHistorial,
 };
