@@ -237,7 +237,7 @@ const editarPerfilEstudiante = async (req, res) => {
     const { ciclo, fecha_nacimiento, carrera, multimedia_id } = req.body;
     const usuario_id = req.usuario.id;
 
-    if (!ciclo || !fecha_nacimiento || !carrera || !multimedia_id) {
+    if (!ciclo || !fecha_nacimiento || !carrera || multimedia_id) {
       return res.status(400).json({ message: "Faltan campos obligatorios" });
     }
 
