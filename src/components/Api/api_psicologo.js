@@ -118,3 +118,17 @@ export const actualizarDisponibilidad = async (id, datos, token) => {
   const response = await axios.put(`${API}/disponibilidad/editar/${id}`, datos, config);
   return response.data;
 };
+
+export const eliminarDisponibilidadPorTurno = async (dia, turno, token) => {
+  try {
+    const response = await axios.delete(`${API}/disponibilidad/eliminar/${dia}/${turno}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("❌ Error al eliminar disponibilidad:", error.response?.data || error.message);
+    throw error;
+  }
+};

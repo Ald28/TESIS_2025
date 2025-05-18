@@ -12,7 +12,8 @@ import {
   buscarPsicologoPorUsuarioId,
   obtenerDisponibilidadPorTurno,
   crearDisponibilidadPsicologo,
-  actualizarDisponibilidad
+  actualizarDisponibilidad,
+  eliminarDisponibilidadPorTurno,
 } from "../Api/api_psicologo";
 
 export default function Dashboard() {
@@ -168,6 +169,18 @@ export default function Dashboard() {
     }
   };
 
+  const handleEliminarDisponibilidad = async (dia, turno) => {
+    try {
+      const token = localStorage.getItem("token");
+      await eliminarDisponibilidadPorTurno(dia, turno, token);
+      toast.success("Disponibilidad eliminada correctamente.");
+      fetchCitas();
+    } catch (error) {
+      console.error("Error al eliminar disponibilidad:", error);
+      toast.error("❌ No se pudo eliminar la disponibilidad.");
+    }
+  };
+
   return (
     <Container fluid>
       <div className="mb-4">
@@ -274,6 +287,7 @@ export default function Dashboard() {
                         variant="danger"
                         size="sm"
                         className="d-flex align-items-center gap-1"
+                        onClick={() => handleEliminarDisponibilidad(disp.dia, disp.turno)}
                       >
                         <i className="bi bi-trash-fill"></i>
                         Eliminar
