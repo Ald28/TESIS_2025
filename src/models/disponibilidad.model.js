@@ -81,7 +81,22 @@ const editarDisponibilidad = async (id, psicologo_id, hora_inicio, hora_fin) => 
     );
 };
 
+const eliminarDisponibilidad = async (dia, turno, psicologo_id) => {
+  const sql = `
+    DELETE FROM disponibilidad
+    WHERE dia = ? AND turno = ? AND psicologo_id = ?
+  `;
+  const result = await query(sql, [dia, turno, psicologo_id]);
+
+  if (result.affectedRows === 0) {
+    throw new Error("No se encontró la disponibilidad para eliminar.");
+  }
+
+  return result;
+};
+
 module.exports = {
     crearDisponibilidad,
     editarDisponibilidad,
+    eliminarDisponibilidad,
 }

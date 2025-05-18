@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-const verificarAutenticacion = (req, res, next)=>{
+const verificarToken = (req, res, next) => {
     console.log("Headers recibidos:", req.headers);
     const token = req.headers['authorization']?.split(" ")[1];
     console.log("Token recibido en la request:", req.headers['authorization']);
@@ -14,9 +14,9 @@ const verificarAutenticacion = (req, res, next)=>{
         if (err) {
             return res.status(403).json({ mensaje: "Token inválido." });
         }
-        req.usuarioId = decoded.usuarioId;
-        next(); 
+        req.usuario = decoded;
+        next();
     });
 }
 
-module.exports = verificarAutenticacion;
+module.exports = { verificarToken };

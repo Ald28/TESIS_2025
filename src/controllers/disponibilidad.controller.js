@@ -1,4 +1,5 @@
-const { crearDisponibilidad, editarDisponibilidad } = require('../models/disponibilidad.model');
+const { crearDisponibilidad, editarDisponibilidad,eliminarDisponibilidad } = require('../models/disponibilidad.model');
+const {obtenerPsicologoPorUsuarioId} = require('../models/psicologo.model');
 
 const crearDisponibilidadPsicologo = async (req, res) => {
   try {
@@ -57,7 +58,32 @@ const cambiarDisponibilidad = async (req, res) => {
   }
 };
 
+const quitarDisponibilidad = async (req, res) => {
+  try {
+    const { dia, turno } = req.params;
+    const usuario_id = req.usuario.id;
+
+    if (!dia || !turno) {
+      return res.status(400).json({ message: "Día y turno son requeridos." });
+    }
+    
+    const psicologo = await obtenerPsicologoPorUsuarioId(usuario_id);
+    
+    if (!psicologo) {
+      return res.status(404).json({ message: "Psicólogo no encontrado" });
+    }
+
+    await eliminarDisponibilidad(dia.toLowerCase(), turno.toLowerCase(), psicologo.id);
+
+    res.status(200).json({ message: `Disponibilidad del turno ${turno} para el día ${dia} eliminada correctamente.` });
+  } catch (error) {
+    console.error("Error al eliminar disponibilidad:", error.message);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   crearDisponibilidadPsicologo,
   cambiarDisponibilidad,
+  quitarDisponibilidad,
 };
