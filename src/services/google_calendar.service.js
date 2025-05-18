@@ -4,7 +4,7 @@ const { query } = require('../config/conexion');
 const oAuth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID_WEB,
   process.env.GOOGLE_CLIENT_SECRET,
-  'http://localhost:8080/auth/google/calendar-callback'
+  'http://localhost:8080/auth/psicologo/google/calendar-callback'
 );
 
 const guardarTokensPsicologo = async (correo, tokens) => {
@@ -31,46 +31,80 @@ const guardarTokensPsicologo = async (correo, tokens) => {
 // Función para crear el evento
 const crearEventoPsicologo = async (correo, eventoData) => {
   // Paso 1: Buscar tokens
-  const rows = await query('SELECT id FROM usuario WHERE correo = ?', [correo]);
-  const usuario_id = rows[0]?.id;
-  console.log('Usuario ID:', usuario_id);
+  const usuario = await query('SELECT id FROM usuario WHERE correo = ?', [correo]);
+  const usuario_id = usuario[0]?.id;
   if (!usuario_id) throw new Error('Usuario no encontrado');
 
-  const psicologos = await query('SELECT id FROM psicologo WHERE usuario_id = ?', [usuario_id]);
-  const psicologo_id = psicologos[0]?.id;
+  const psicologo = await query('SELECT id FROM psicologo WHERE usuario_id = ?', [usuario_id]);
+  const psicologo_id = psicologo[0]?.id;
   if (!psicologo_id) throw new Error('Psicólogo no encontrado');
 
   const tokens = await query('SELECT access_token, refresh_token FROM google_tokens WHERE psicologo_id = ?', [psicologo_id]);
   const { access_token, refresh_token } = tokens[0] || {};
   if (!access_token || !refresh_token) throw new Error('Tokens de Google no encontrados');
 
-  // Paso 2: Asignar tokens
+  // Paso 2: Preparar cliente OAuth
   oAuth2Client.setCredentials({ access_token, refresh_token });
 
-  // Paso 3: Crear evento con Google Calendar API
+  // Paso 3: Intentar crear evento, si falla por token, refrescar
   const calendar = google.calendar({ version: 'v3', auth: oAuth2Client });
-
   const evento = {
     summary: eventoData.summary,
     description: eventoData.description,
     start: {
-      dateTime: eventoData.start, // formato: '2025-04-23T10:00:00-05:00'
+      dateTime: eventoData.start,
       timeZone: 'America/Lima',
     },
     end: {
       dateTime: eventoData.end,
       timeZone: 'America/Lima',
     },
-    attendees: eventoData.attendees, // [{ email: 'paciente@gmail.com' }]
+    attendees: eventoData.attendees,
   };
 
-  const response = await calendar.events.insert({
-    calendarId: 'primary',
-    resource: evento,
-  });
-  console.log('Evento creado:', response.data);
+  try {
+    const response = await calendar.events.insert({
+      calendarId: 'primary',
+      resource: evento,
+    });
 
-  return response.data;
+    console.log('✅ Evento creado con access_token:', response.data);
+    return response.data;
+
+  } catch (error) {
+    // Si el error es 401 (token expirado)
+    if (error.response?.status === 401) {
+      console.warn('⚠️ Token expirado. Intentando refrescar...');
+
+      // Refrescar token
+      const newTokens = await oAuth2Client.refreshAccessToken();
+      const updatedToken = newTokens.credentials;
+
+      // Guardar nuevo access_token
+      await query(`
+        UPDATE google_tokens SET access_token = ? WHERE psicologo_id = ?
+      `, [updatedToken.access_token, psicologo_id]);
+
+      // Reintentar crear el evento con el nuevo token
+      oAuth2Client.setCredentials({
+        access_token: updatedToken.access_token,
+        refresh_token: refresh_token, // conservar el mismo
+      });
+
+      const calendarRetry = google.calendar({ version: 'v3', auth: oAuth2Client });
+
+      const retryResponse = await calendarRetry.events.insert({
+        calendarId: 'primary',
+        resource: evento,
+      });
+
+      console.log('🔁 Evento creado tras refrescar token:', retryResponse.data);
+      return retryResponse.data;
+    }
+
+    console.error('❌ Error al crear evento:', error.message);
+    throw error;
+  }
 };
 
 const obtenerTokensPorCorreo = async (correo) => {
