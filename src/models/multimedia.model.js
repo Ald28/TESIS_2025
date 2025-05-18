@@ -5,4 +5,11 @@ const crearMultimedia = async ({ url }) => {
     return await query(sql, [url]);
 }
 
-module.exports = {crearMultimedia};
+// CAMBIAR PERFIL ESTUDIANTE
+const insertarMultimedia = async (url) => {
+  const sql = `INSERT INTO multimedia (url) VALUES (?)`;
+  const result = await query(sql, [url]);
+  return result.insertId;
+};
+
+module.exports = {crearMultimedia, insertarMultimedia};

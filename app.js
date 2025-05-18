@@ -10,6 +10,7 @@ const crearMetodo = require('./src/routes/metodo_relajacion.routes');
 const adminAuthRoutes = require('./src/routes/admin_auth.routes');
 const observacionRoutes = require('./src/routes/observacion.routes');
 const chatRoutes = require('./src/routes/chat.routes');
+const perfil = require("./src/routes/multimedia.routes") // CAMBIAR PERFIL ESTUDIANTE
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use(bodyParser.json());
 app.use(express.json());
 
 // Rutas
+app.use("/api/multimedia", perfil); // CAMBIAR PERFIL ESTUDIANTE
 app.use('/auth/psicologo', psicologoAuthRoutes);
 app.use('/auth', estudianteAuthRoutes);
 app.use('/auth/admin', adminAuthRoutes);
