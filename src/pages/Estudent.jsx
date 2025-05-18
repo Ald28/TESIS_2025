@@ -66,7 +66,7 @@ export default function Estudent() {
                     </div>
                   </td>
                   <td>{est.ciclo}</td>
-                  <td>{est.edad}</td>
+                  <td>{est.fecha_nacimiento}</td>
                   <td>{est.carrera}</td>
                   <td>
                     <button className="btn-more">⋯</button>

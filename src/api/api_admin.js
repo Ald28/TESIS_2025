@@ -23,9 +23,9 @@ export const getEstudiantes = async () => {
     }
 };
 
-export const getPsicologos = async () => {
+export const getPsicologos = async (estado = "activo") => {
     try {
-        const response = await axios.get(`${API}/psicologos`);
+        const response = await axios.get(`${API}/psicologos?estado=${estado}`);
         return response.data.datos;
     } catch (error) {
         console.error("Error al obtener psicólogos:", error);
@@ -44,11 +44,33 @@ export const registrarPsicologo = async (psicologoData) => {
 };
 
 export const getDisponibilidadPorPsicologo = async (id) => {
-  try {
-    const response = await axios.get(`${API_PSICO}/disponibilidad/${id}`);
-    return response.data.disponibilidad;
-  } catch (error) {
-    console.error("Error al obtener disponibilidad:", error);
-    throw error;
-  }
+    try {
+        const response = await axios.get(`${API_PSICO}/disponibilidad/${id}`);
+        return response.data.disponibilidad;
+    } catch (error) {
+        console.error("Error al obtener disponibilidad:", error);
+        throw error;
+    }
+};
+
+export const eliminarPsicologo = async (usuario_id) => {
+    console.log("Eliminando psicólogo con ID:", usuario_id);
+    try {
+        const response = await axios.delete(`${API}/eliminar/${usuario_id}`);
+        return response.data;
+    } catch (error) {
+        console.log("Error al eliminar psicólogo:", error.message);
+        console.error("Error al eliminar psicólogo:", error);
+        throw error;
+    }
+};
+
+export const activarPsicologo = async (usuario_id) => {
+    try {
+        const response = await axios.post(`${API}/activar/${usuario_id}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error al activar psicólogo:", error);
+        throw error;
+    }
 };
