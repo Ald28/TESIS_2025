@@ -11,7 +11,8 @@ import {
   cambiarEstadoCita,
   buscarPsicologoPorUsuarioId,
   obtenerDisponibilidadPorTurno,
-  crearDisponibilidadPsicologo
+  crearDisponibilidadPsicologo,
+  actualizarDisponibilidad
 } from "../Api/api_psicologo";
 
 export default function Dashboard() {
@@ -23,7 +24,21 @@ export default function Dashboard() {
   const [mostrarDisponibilidades, setMostrarDisponibilidades] = useState(false);
   const [showModalDisponibilidad, setShowModalDisponibilidad] = useState(false);
   const abrirModalDisponibilidad = () => setShowModalDisponibilidad(true);
-  const cerrarModalDisponibilidad = () => setShowModalDisponibilidad(false);
+  const cerrarModalDisponibilidad = () => {
+    setShowModalDisponibilidad(false);
+    setDisponibilidadEditando(null);
+    setFormData({
+      dia: "",
+      mañana_inicio: "",
+      mañana_fin: "",
+      tarde_inicio: "",
+      tarde_fin: "",
+      hora_inicio: "",
+      hora_fin: "",
+    });
+  };
+
+  const [disponibilidadEditando, setDisponibilidadEditando] = useState(null); // la disponibilidad seleccionada
   const [formData, setFormData] = useState({
     dia: "",
     mañana_inicio: "",
@@ -78,7 +93,7 @@ export default function Dashboard() {
     try {
       const token = localStorage.getItem("token");
       await cambiarEstadoCita({ cita_id, estado: "aceptada", evento_google_id: null }, token);
-      toast.success("✅ Cita aceptada correctamente.");
+      toast.success("Cita aceptada correctamente.");
       fetchCitas();
     } catch (error) {
       console.error(error.message);
@@ -90,7 +105,7 @@ export default function Dashboard() {
     try {
       const token = localStorage.getItem("token");
       await cambiarEstadoCita({ cita_id, estado: "rechazada", evento_google_id: null }, token);
-      toast.success("✅ Cita rechazada correctamente.");
+      toast.success("Cita rechazada correctamente.");
       fetchCitas();
     } catch (error) {
       console.error(error.message);
@@ -116,10 +131,40 @@ export default function Dashboard() {
       };
 
       await crearDisponibilidadPsicologo(dataConPsicologo, token);
-      toast.success("✅ Disponibilidad creada con éxito.");
+      toast.success("Disponibilidad creada con éxito.");
       fetchCitas();
     } catch (error) {
-      toast.error("❌ Error al crear disponibilidad: " + (error.response?.data?.mensaje || error.message));
+      toast.error("Error al crear disponibilidad: " + (error.response?.data?.mensaje || error.message));
+    }
+  };
+
+  const handleEditarDisponibilidad = (disponibilidad) => {
+    setDisponibilidadEditando(disponibilidad);
+    setFormData({
+      dia: disponibilidad.dia,
+      turno: disponibilidad.turno, // opcional si quieres mostrarlo
+      hora_inicio: disponibilidad.hora_inicio,
+      hora_fin: disponibilidad.hora_fin,
+    });
+    setShowModalDisponibilidad(true);
+  };
+
+  const handleActualizarDisponibilidad = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const datos = {
+        hora_inicio: formData.hora_inicio,
+        hora_fin: formData.hora_fin,
+        psicologo_id: (await buscarPsicologoPorUsuarioId(JSON.parse(localStorage.getItem("usuario")).id)).psicologo_id,
+      };
+
+      await actualizarDisponibilidad(disponibilidadEditando.id, datos, token);
+      toast.success("Disponibilidad actualizada correctamente.");
+      fetchCitas();
+      cerrarModalDisponibilidad();
+    } catch (error) {
+      console.error(error);
+      toast.error("Error al actualizar disponibilidad.");
     }
   };
 
@@ -214,14 +259,27 @@ export default function Dashboard() {
                     <td className="text-capitalize">{disp.turno}</td>
                     <td>{disp.hora_inicio}</td>
                     <td>{disp.hora_fin}</td>
-                    <td>
-                      <Button variant="link" size="sm" className="text-warning">
+                    <td className="d-flex gap-2">
+                      <Button
+                        variant="warning"
+                        size="sm"
+                        className="d-flex align-items-center gap-1"
+                        onClick={() => handleEditarDisponibilidad(disp)}
+                      >
                         <i className="bi bi-pencil-fill"></i>
+                        Editar
                       </Button>
-                      <Button variant="link" size="sm" className="text-danger">
+
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        className="d-flex align-items-center gap-1"
+                      >
                         <i className="bi bi-trash-fill"></i>
+                        Eliminar
                       </Button>
                     </td>
+
                   </tr>
                 ))
               ) : (
@@ -301,44 +359,120 @@ export default function Dashboard() {
       </Modal>
       <Modal show={showModalDisponibilidad} onHide={cerrarModalDisponibilidad} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Registrar Disponibilidad</Modal.Title>
+          <Modal.Title>
+            {disponibilidadEditando ? "Editar Disponibilidad" : "Registrar Disponibilidad"}
+          </Modal.Title>
         </Modal.Header>
+
         <Modal.Body>
           <Form>
             <Row className="align-items-end g-3">
               <Col md={12}>
                 <Form.Label>Día</Form.Label>
-                <Form.Control type="text" name="dia" placeholder="ej. lunes" onChange={handleFormChange} />
+                <Form.Control
+                  type="text"
+                  name="dia"
+                  placeholder="ej. lunes"
+                  value={formData.dia || ""}
+                  onChange={handleFormChange}
+                  disabled={!!disponibilidadEditando}
+                />
               </Col>
 
-              <Col md={6}>
-                <Form.Label>Turno Mañana</Form.Label>
-                <Row>
-                  <Col><Form.Control type="time" name="mañana_inicio" onChange={handleFormChange} /></Col>
-                  <Col><Form.Control type="time" name="mañana_fin" onChange={handleFormChange} /></Col>
-                </Row>
-              </Col>
+              {/* Si se está editando una disponibilidad */}
+              {disponibilidadEditando ? (
+                <>
+                  <Col md={12}>
+                    <Form.Label>Hora Inicio</Form.Label>
+                    <Form.Control
+                      type="time"
+                      name="hora_inicio"
+                      value={formData.hora_inicio || ""}
+                      onChange={handleFormChange}
+                    />
+                  </Col>
 
-              <Col md={6}>
-                <Form.Label>Turno Tarde</Form.Label>
-                <Row>
-                  <Col><Form.Control type="time" name="tarde_inicio" onChange={handleFormChange} /></Col>
-                  <Col><Form.Control type="time" name="tarde_fin" onChange={handleFormChange} /></Col>
-                </Row>
-              </Col>
+                  <Col md={12}>
+                    <Form.Label>Hora Fin</Form.Label>
+                    <Form.Control
+                      type="time"
+                      name="hora_fin"
+                      value={formData.hora_fin || ""}
+                      onChange={handleFormChange}
+                    />
+                  </Col>
+                </>
+              ) : (
+                <>
+                  {/* Si se está creando: mostrar campos para turno mañana y tarde */}
+                  <Col md={12}>
+                    <Form.Label>Turno Mañana</Form.Label>
+                    <Row>
+                      <Col>
+                        <Form.Control
+                          type="time"
+                          name="mañana_inicio"
+                          value={formData.mañana_inicio || ""}
+                          onChange={handleFormChange}
+                        />
+                      </Col>
+                      <Col>
+                        <Form.Control
+                          type="time"
+                          name="mañana_fin"
+                          value={formData.mañana_fin || ""}
+                          onChange={handleFormChange}
+                        />
+                      </Col>
+                    </Row>
+                  </Col>
+
+                  <Col md={12}>
+                    <Form.Label>Turno Tarde</Form.Label>
+                    <Row>
+                      <Col>
+                        <Form.Control
+                          type="time"
+                          name="tarde_inicio"
+                          value={formData.tarde_inicio || ""}
+                          onChange={handleFormChange}
+                        />
+                      </Col>
+                      <Col>
+                        <Form.Control
+                          type="time"
+                          name="tarde_fin"
+                          value={formData.tarde_fin || ""}
+                          onChange={handleFormChange}
+                        />
+                      </Col>
+                    </Row>
+                  </Col>
+                </>
+              )}
             </Row>
           </Form>
         </Modal.Body>
+
         <Modal.Footer>
-          <Button variant="secondary" onClick={cerrarModalDisponibilidad}>Cancelar</Button>
-          <Button variant="primary" onClick={() => {
-            handleCrearDisponibilidad();
-            cerrarModalDisponibilidad();
-          }}>
-            Guardar
+          <Button variant="secondary" onClick={cerrarModalDisponibilidad}>
+            Cancelar
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => {
+              if (disponibilidadEditando) {
+                handleActualizarDisponibilidad();
+              } else {
+                handleCrearDisponibilidad();
+              }
+            }}
+          >
+            {disponibilidadEditando ? "Actualizar" : "Guardar"}
           </Button>
         </Modal.Footer>
       </Modal>
+
       <ToastContainer position="bottom-right" autoClose={3000} />
     </Container>
   );

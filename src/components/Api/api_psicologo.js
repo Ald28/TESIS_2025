@@ -107,3 +107,14 @@ export const crearDisponibilidadPsicologo = async (data, token) => {
     throw error;
   }
 };
+
+export const actualizarDisponibilidad = async (id, datos, token) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+
+  const response = await axios.put(`${API}/disponibilidad/editar/${id}`, datos, config);
+  return response.data;
+};
