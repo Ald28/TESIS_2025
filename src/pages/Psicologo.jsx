@@ -39,6 +39,14 @@ export default function Psicologo() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const correoValido = nuevoPsicologo.correo.endsWith("@tecsup.edu.pe");
+
+    if (!correoValido) {
+      toast.error("❌ El correo debe terminar en @tecsup.edu.pe");
+      return;
+    }
+
     try {
       await registrarPsicologo(nuevoPsicologo);
       await fetchData(estadoFiltro);
