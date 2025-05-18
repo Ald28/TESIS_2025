@@ -28,6 +28,8 @@ router.get('/disponibilidad/:id', psicologoController.obtenerDisponibilidadPorId
 router.get('/horas-ocupadas/:psicologo_id/:fecha', psicologoController.obtenerHorasOcupadas);
 // Ruta para crear una nueva disponibilidad
 router.post('/disponibilidad/crear', disponibilidad.crearDisponibilidadPsicologo);
+// Ruta para editar disponibilidad
+router.put("/disponibilidad/editar/:id", disponibilidad.cambiarDisponibilidad);
 
 
 // Ruta para listar citas de un psicólogo

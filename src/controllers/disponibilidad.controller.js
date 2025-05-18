@@ -1,4 +1,4 @@
-const { crearDisponibilidad } = require('../models/admin.model');
+const { crearDisponibilidad, editarDisponibilidad } = require('../models/disponibilidad.model');
 
 const crearDisponibilidadPsicologo = async (req, res) => {
   try {
@@ -38,6 +38,26 @@ const crearDisponibilidadPsicologo = async (req, res) => {
   }
 };
 
+const cambiarDisponibilidad = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { hora_inicio, hora_fin, psicologo_id } = req.body;
+
+    if (!hora_inicio || !hora_fin || !psicologo_id) {
+      return res.status(400).json({ mensaje: "Faltan datos obligatorios." });
+    }
+
+    await editarDisponibilidad(id, psicologo_id, hora_inicio, hora_fin);
+
+    return res.status(200).json({ mensaje: "✅ Horario actualizado correctamente." });
+
+  } catch (error) {
+    console.error("❌ Error al actualizar disponibilidad:", error.message);
+    return res.status(500).json({ mensaje: error.message });
+  }
+};
+
 module.exports = {
   crearDisponibilidadPsicologo,
+  cambiarDisponibilidad,
 };
