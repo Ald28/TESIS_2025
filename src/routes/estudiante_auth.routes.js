@@ -19,5 +19,7 @@ router.put('/cancelar-cita', estudianteController.cancelarCita);
 router.get('/citas-activas', estudianteController.obtenerCitasActivas);
 // Listar citas de estudiantes
 router.get('/historial-canceladas/:estudiante_id', psicologoController.obtenerHistorial);
+// Editar perfil estudiante
+router.put("/editar-perfil", estudianteController.editarPerfilEstudiante);
 
 module.exports = router;

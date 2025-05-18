@@ -232,4 +232,29 @@ const obtenerCitasActivas = async (req, res) => {
   }
 };
 
-module.exports = { loginGoogleEstudiante, obtenerPerfilEstudiante, crearCita, listarTodosEstudiantes, cancelarCita, obtenerCitasActivas };
+const editarPerfilEstudiante = async (req, res) => {
+  try {
+    const { ciclo, fecha_nacimiento, carrera, multimedia_id } = req.body;
+    const usuario_id = req.usuario.id;
+
+    if (!ciclo || !fecha_nacimiento || !carrera || !multimedia_id) {
+      return res.status(400).json({ message: "Faltan campos obligatorios" });
+    }
+
+    await estudianteModel.actualizarEstudiante({
+      usuario_id,
+      ciclo,
+      fecha_nacimiento,
+      carrera
+    });
+
+    await usuarioModel.actualizarMultimediaUsuario(usuario_id, multimedia_id);
+
+    return res.status(200).json({ message: "Perfil actualizado correctamente" });
+  } catch (error) {
+    console.error("Error al actualizar perfil:", error.message);
+    return res.status(500).json({ message: "Error al actualizar perfil" });
+  }
+};
+
+module.exports = { loginGoogleEstudiante, obtenerPerfilEstudiante, crearCita, listarTodosEstudiantes, cancelarCita, obtenerCitasActivas, editarPerfilEstudiante };

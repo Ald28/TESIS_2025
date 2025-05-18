@@ -84,6 +84,15 @@ const listarPorPsicologo = async (psicologo_id) => {
   return resultado;
 };
 
+const actualizarEstudiante = async ({ usuario_id, ciclo, fecha_nacimiento, carrera }) => {
+  const sql = `
+    UPDATE estudiante
+    SET ciclo = ?, fecha_nacimiento = ?, carrera = ?
+    WHERE usuario_id = ?
+  `;
+  return await query(sql, [ciclo, fecha_nacimiento, carrera, usuario_id]);
+};
+
 module.exports = {
   crearEstudiante,
   obtenerDatosEstudiantePorId,
@@ -91,4 +100,5 @@ module.exports = {
   listarEstudiantes,
   obtenerUsuarioPorEstudianteId,
   listarPorPsicologo,
+  actualizarEstudiante,
 };
