@@ -1,5 +1,5 @@
 // CAMBIAR PERFIL ESTUDIANTE
-const cloudinary = require("../services/cloudinary");
+const cloudinary = require("../services/cloudinary.service");
 const streamifier = require("streamifier");
 const multer = require("multer");
 const multimediaModel = require("../models/multimedia.model");
