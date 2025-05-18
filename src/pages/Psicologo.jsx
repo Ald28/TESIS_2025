@@ -176,7 +176,7 @@ export default function Psicologo() {
                         className="btn btn-sm btn-outline-danger"
                         onClick={() => onEliminar(psic.usuario_id)}
                       >
-                        Eliminar
+                        Desactivar
                       </button>
                     ) : (
                       <button
