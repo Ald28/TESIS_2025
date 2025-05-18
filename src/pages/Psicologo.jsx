@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from "react";
+import Swal from "sweetalert2";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import MainLayout from "../layouts/MainLayout";
 import {
   getPsicologos,
@@ -39,6 +42,7 @@ export default function Psicologo() {
     try {
       await registrarPsicologo(nuevoPsicologo);
       await fetchData(estadoFiltro);
+      toast.success("✅ Psicólogo registrado correctamente.");
 
       setNuevoPsicologo({
         nombre: "",
@@ -50,18 +54,31 @@ export default function Psicologo() {
       setMostrarPanel(false);
     } catch (error) {
       console.error("Error al registrar psicólogo:", error.message);
-      alert("Error al registrar psicólogo: " + error.message);
+      toast.error("❌ Error al registrar psicólogo.");
     }
   };
 
   const onEliminar = async (usuario_id) => {
-    try {
-      await eliminarPsicologo(usuario_id);
-      await fetchData(estadoFiltro);
-      alert("✅ Psicólogo eliminado correctamente.");
-    } catch (error) {
-      console.error("Error al eliminar psicólogo:", error.message);
-      alert("❌ Error al eliminar psicólogo.");
+    const result = await Swal.fire({
+      title: "¿Estás seguro?",
+      text: "Esta acción eliminará al psicólogo del sistema.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await eliminarPsicologo(usuario_id);
+        await fetchData(estadoFiltro);
+        toast.success("✅ Psicólogo eliminado correctamente.");
+      } catch (error) {
+        console.error("Error al eliminar psicólogo:", error.message);
+        toast.error("❌ Error al eliminar psicólogo.");
+      }
     }
   };
 
@@ -69,15 +86,16 @@ export default function Psicologo() {
     try {
       await activarPsicologo(usuario_id);
       await fetchData(estadoFiltro);
-      alert("✅ Psicólogo activado correctamente.");
+      toast.success("✅ Psicólogo activado correctamente.");
     } catch (error) {
       console.error("Error al activar psicólogo:", error.message);
-      alert("❌ Error al activar psicólogo.");
+      toast.error("❌ Error al activar psicólogo.");
     }
   };
 
   return (
     <MainLayout>
+      <ToastContainer />
       <div className="psicologos-container">
         <div className="header d-flex justify-content-between align-items-center">
           <div>
@@ -93,7 +111,6 @@ export default function Psicologo() {
               value={estadoFiltro}
               onChange={(e) => setEstadoFiltro(e.target.value)}
             >
-
               <option value="activo">Activos</option>
               <option value="inactivo">Inactivos</option>
             </select>
@@ -140,30 +157,19 @@ export default function Psicologo() {
                   <td>{psic.descripcion}</td>
                   <td>
                     <span
-                      className={`status-badge ${psic.estado === "activo" ? "active" : "inactive"
-                        }`}
+                      className={`status-badge ${psic.estado === "activo" ? "active" : "inactive"}`}
                     >
                       {psic.estado}
                     </span>
                   </td>
                   <td className="d-flex gap-2">
                     {psic.estado === "activo" ? (
-                      <>
-                        <button
-                          className="btn btn-sm btn-outline-danger"
-                          onClick={() => {
-                            if (
-                              window.confirm(
-                                "¿Estás seguro de eliminar este psicólogo?"
-                              )
-                            ) {
-                              onEliminar(psic.usuario_id);
-                            }
-                          }}
-                        >
-                          Eliminar
-                        </button>
-                      </>
+                      <button
+                        className="btn btn-sm btn-outline-danger"
+                        onClick={() => onEliminar(psic.usuario_id)}
+                      >
+                        Eliminar
+                      </button>
                     ) : (
                       <button
                         className="btn btn-sm btn-outline-success"
@@ -184,10 +190,7 @@ export default function Psicologo() {
       <div className={`side-panel ${mostrarPanel ? "open" : ""}`}>
         <div className="panel-header">
           <h4>Registrar Psicólogo</h4>
-          <button
-            className="close-btn"
-            onClick={() => setMostrarPanel(false)}
-          >
+          <button className="close-btn" onClick={() => setMostrarPanel(false)}>
             <FaTimes />
           </button>
         </div>
@@ -206,10 +209,7 @@ export default function Psicologo() {
             placeholder="Apellido"
             value={nuevoPsicologo.apellido}
             onChange={(e) =>
-              setNuevoPsicologo({
-                ...nuevoPsicologo,
-                apellido: e.target.value,
-              })
+              setNuevoPsicologo({ ...nuevoPsicologo, apellido: e.target.value })
             }
             required
           />
@@ -227,20 +227,14 @@ export default function Psicologo() {
             placeholder="Especialidad"
             value={nuevoPsicologo.especialidad}
             onChange={(e) =>
-              setNuevoPsicologo({
-                ...nuevoPsicologo,
-                especialidad: e.target.value,
-              })
+              setNuevoPsicologo({ ...nuevoPsicologo, especialidad: e.target.value })
             }
           />
           <textarea
             placeholder="Descripción"
             value={nuevoPsicologo.descripcion}
             onChange={(e) =>
-              setNuevoPsicologo({
-                ...nuevoPsicologo,
-                descripcion: e.target.value,
-              })
+              setNuevoPsicologo({ ...nuevoPsicologo, descripcion: e.target.value })
             }
           />
           <div className="d-flex gap-2 mt-3">
