@@ -88,10 +88,12 @@ export default function Psicologo() {
           </div>
           <div className="d-flex gap-2">
             <select
-              className="form-select"
+              className="form-select form-select-sm"
+              style={{ width: "130px", height: "35px", fontSize: "0.9rem" }}
               value={estadoFiltro}
               onChange={(e) => setEstadoFiltro(e.target.value)}
             >
+
               <option value="activo">Activos</option>
               <option value="inactivo">Inactivos</option>
             </select>
@@ -147,12 +149,6 @@ export default function Psicologo() {
                   <td className="d-flex gap-2">
                     {psic.estado === "activo" ? (
                       <>
-                        <button
-                          className="btn btn-sm btn-outline-primary"
-                          onClick={() => onEditar(psic)}
-                        >
-                          Editar
-                        </button>
                         <button
                           className="btn btn-sm btn-outline-danger"
                           onClick={() => {
