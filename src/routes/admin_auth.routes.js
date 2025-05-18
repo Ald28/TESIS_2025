@@ -8,5 +8,7 @@ router.get('/listar', adminController.obtenerEstudiantes);
 router.get('/psicologos', adminController.obtenerPsicologos);
 router.get('/disponibilidad/turnos/:psicologo_id', adminController.listarDisponibilidadPorTurno);
 router.post('/psicologos/registrar', adminController.registrarPsicologo);
+router.delete('/eliminar/:usuario_id', adminController.eliminarPsicologo);
+router.post('/activar/:usuario_id', adminController.activarPsicologo);
 
 module.exports = router;

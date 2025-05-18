@@ -2,13 +2,13 @@ const { query } = require('../config/conexion');
 const padHora = (hora) => (hora.length === 5 ? hora + ":00" : hora);
 
 const buscarAdminPorCorreo = async (correo) => {
-    const sql = `SELECT * FROM usuario WHERE correo = ? AND rol_id = 3`;
-    const resultado = await query(sql, [correo]);
-    return resultado[0] || null;
+  const sql = `SELECT * FROM usuario WHERE correo = ? AND rol_id = 3`;
+  const resultado = await query(sql, [correo]);
+  return resultado[0] || null;
 };
 
 const listarEstudiantes = async () => {
-    const sql = `
+  const sql = `
       SELECT 
         u.id AS usuario_id,
         u.nombre,
@@ -24,12 +24,12 @@ const listarEstudiantes = async () => {
       INNER JOIN estudiante e ON u.id = e.usuario_id
       WHERE u.rol_id = 2
     `;
-    const resultado = await query(sql);
-    return resultado;
+  const resultado = await query(sql);
+  return resultado;
 };
 
-const listarPsicologos = async () => {
-    const sql = `
+const listarPsicologos = async (estado = 'activo') => {
+  const sql = `
     SELECT 
       u.id AS usuario_id,
       u.nombre,
@@ -40,87 +40,104 @@ const listarPsicologos = async () => {
       m.url AS foto,
       p.id AS psicologo_id,
       p.especialidad,
-      p.descripcion
+      p.descripcion,
+      u.estado
     FROM usuario u
     INNER JOIN psicologo p ON u.id = p.usuario_id
     LEFT JOIN multimedia m ON u.multimedia_id = m.id
-    WHERE u.rol_id = 1
+    WHERE u.rol_id = 1 AND u.estado = ?
   `;
-    const resultado = await query(sql);
-    return resultado;
+  const resultado = await query(sql, [estado]);
+  return resultado;
 };
 
 const crearDisponibilidad = async (dia, hora_inicio, hora_fin, turno, psicologo_id) => {
-    const verificarSql = `
+  const verificarSql = `
     SELECT id FROM disponibilidad
     WHERE dia = ? AND turno = ? AND psicologo_id = ?
   `;
-    const existentes = await query(verificarSql, [dia, turno, psicologo_id]);
+  const existentes = await query(verificarSql, [dia, turno, psicologo_id]);
 
-    if (existentes.length > 0) {
-        throw new Error(`Ya existe un turno '${turno}' registrado para el día '${dia}'.`);
+  if (existentes.length > 0) {
+    throw new Error(`Ya existe un turno '${turno}' registrado para el día '${dia}'.`);
+  }
+
+  const horaInicio = padHora(hora_inicio);
+  const horaFin = padHora(hora_fin);
+
+  if (turno === 'temrano') {
+    if (horaInicio < '08:00:00' || horaFin > '11:59:59') {
+      throw new Error("El horario de la mañana debe estar entre 08:00:00 y 11:59:59.");
     }
-
-    const horaInicio = padHora(hora_inicio);
-    const horaFin = padHora(hora_fin);
-
-    if (turno === 'temrano') {
-        if (horaInicio < '08:00:00' || horaFin > '11:59:59') {
-            throw new Error("El horario de la mañana debe estar entre 08:00:00 y 11:59:59.");
-        }
-    } else if (turno === 'tarde') {
-        if (horaInicio < '12:00:00' || horaFin > '18:00:00') {
-            throw new Error("El horario de la tarde debe estar entre 12:00:00 y 18:00:00.");
-        }
+  } else if (turno === 'tarde') {
+    if (horaInicio < '12:00:00' || horaFin > '18:00:00') {
+      throw new Error("El horario de la tarde debe estar entre 12:00:00 y 18:00:00.");
     }
+  }
 
-    const insertarSql = `
+  const insertarSql = `
     INSERT INTO disponibilidad (dia, hora_inicio, hora_fin, turno, psicologo_id)
     VALUES (?, ?, ?, ?, ?)
   `;
-    await query(insertarSql, [dia, hora_inicio, hora_fin, turno, psicologo_id]);
+  await query(insertarSql, [dia, hora_inicio, hora_fin, turno, psicologo_id]);
 };
 
 const listarDisponibilidadPorTurno = async (psicologo_id) => {
-    const sql = `
+  const sql = `
     SELECT dia, turno, hora_inicio, hora_fin
     FROM disponibilidad
     WHERE psicologo_id = ?
     ORDER BY FIELD(dia, 'lunes','martes','miércoles','jueves','viernes','sábado','domingo'), turno;
   `;
-    const resultado = await query(sql, [psicologo_id]);
-    return resultado;
+  const resultado = await query(sql, [psicologo_id]);
+  return resultado;
 };
 
 const registrarUsuarioPsicologoPreRegistro = async ({ nombre, apellido, correo, especialidad, descripcion }) => {
-    // Verificar si ya existe
-    const existe = await query(`SELECT * FROM usuario WHERE correo = ?`, [correo]);
-    if (existe.length > 0) {
-        throw new Error("Ya existe un usuario con este correo.");
-    }
+  const existe = await query(`SELECT * FROM usuario WHERE correo = ?`, [correo]);
+  if (existe.length > 0) {
+    throw new Error("Ya existe un usuario con este correo.");
+  }
 
-    // Insertar usuario sin multimedia ni contraseña
-    const usuario = await query(`
+  const usuario = await query(`
         INSERT INTO usuario (nombre, apellido, correo, rol_id)
         VALUES (?, ?, ?, 1)
     `, [nombre, apellido, correo]);
 
-    const usuario_id = usuario.insertId;
+  const usuario_id = usuario.insertId;
 
-    // Insertar en psicólogo
-    await query(`
+  await query(`
         INSERT INTO psicologo (usuario_id, especialidad, descripcion)
         VALUES (?, ?, ?)
     `, [usuario_id, especialidad, descripcion]);
 
-    return usuario_id;
+  return usuario_id;
+};
+
+const eliminarPsicologo = async (usuario_id) => {
+  const sql = `
+    UPDATE usuario
+    SET estado = 'inactivo'
+    WHERE id = ?
+  `;
+  const result = await query(sql, [usuario_id]);
+  console.log("Resultado de la desactivación:", result);
+  return result.affectedRows;
+};
+
+const activarPsicologo = async (usuario_id) => {
+  const sql = `UPDATE usuario SET estado = 'activo' WHERE id = ?`;
+  const result = await query(sql, [usuario_id]);
+  return result.affectedRows;
 };
 
 module.exports = {
-    buscarAdminPorCorreo,
-    listarEstudiantes,
-    listarPsicologos,
-    crearDisponibilidad,
-    listarDisponibilidadPorTurno,
-    registrarUsuarioPsicologoPreRegistro,
+  buscarAdminPorCorreo,
+  listarEstudiantes,
+  listarPsicologos,
+  crearDisponibilidad,
+  listarDisponibilidadPorTurno,
+  registrarUsuarioPsicologoPreRegistro,
+  eliminarPsicologo,
+  activarPsicologo,
 };
