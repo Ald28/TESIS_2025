@@ -110,7 +110,7 @@ export default function Usuarios() {
             <tr>
               <th>Usuario</th>
               <th>Ciclo</th>
-              <th>Edad</th>
+              <th>Nacimiento</th>
               <th>Carrera</th>
               <th>Comentario</th>
             </tr>
@@ -129,32 +129,18 @@ export default function Usuarios() {
                     </div>
                   </td>
                   <td>{est.ciclo || "-"}</td>
-                  <td>{est.edad || "-"}</td>
+                  <td>{est.fecha_nacimiento || "-"}</td>
                   <td>{est.carrera || "-"}</td>
                   <td>
-                    <div className="comentario-container">
-                      <textarea
-                        className="form-control mb-2"
-                        placeholder="Escribe un comentario"
-                        value={comentarios[est.estudiante_id] || ""}
-                        onChange={(e) =>
-                          handleComentarioChange(est.estudiante_id, e.target.value)
-                        }
-                      />
+                    <div className="comentario-container d-flex gap-2">
                       <button
                         className="btn btn-sm btn-primary"
-                        onClick={() => handleEnviarComentario(est.estudiante_id)}
-                      >
-                        Enviar
-                      </button>
-                      <button
-                        className="btn btn-link btn-sm mt-2"
                         onClick={() => abrirModalObservaciones(est.estudiante_id)}
                       >
-                        Ver observaciones
+                        Comentario
                       </button>
                       <button
-                        className="btn btn-outline-secondary btn-sm mt-2"
+                        className="btn btn-outline-secondary btn-sm"
                         onClick={() => abrirModalHistorial(est.estudiante_id)}
                       >
                         Ver historial
@@ -173,7 +159,7 @@ export default function Usuarios() {
           </tbody>
         </table>
       </div>
-      
+
       {modalVisible && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -199,7 +185,7 @@ export default function Usuarios() {
       {modalHistorialVisible && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h5 className="mb-3">Historial de citas canceladas</h5>
+            <h5 className="mb-3">Historial de citas</h5>
             <button className="modal-close" onClick={cerrarModalHistorial}>✕</button>
             <ul className="list-unstyled small mt-3">
               {(historiales[modalHistorialEstudianteId] || []).map((h, idx) => (
@@ -210,12 +196,54 @@ export default function Usuarios() {
                 </li>
               ))}
               {(!historiales[modalHistorialEstudianteId] || historiales[modalHistorialEstudianteId].length === 0) && (
-                <li className="text-muted">Sin historial de cancelaciones</li>
+                <li className="text-muted">Sin historial de citas</li>
               )}
             </ul>
           </div>
         </div>
       )}
+
+      {modalVisible && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <button className="modal-close" onClick={cerrarModal}>✕</button>
+            <h5 className="mb-3">Observaciones del estudiante</h5>
+
+            <textarea
+              className="form-control mb-2"
+              placeholder="Escribe un comentario"
+              value={comentarios[modalEstudianteId] || ""}
+              onChange={(e) =>
+                handleComentarioChange(modalEstudianteId, e.target.value)
+              }
+            />
+            <button
+              className="btn btn-success btn-sm mb-3"
+              onClick={() => handleEnviarComentario(modalEstudianteId)}
+            >
+              Enviar Comentario
+            </button>
+
+            <ul className="list-unstyled small mt-2">
+              {(observaciones[modalEstudianteId] || []).map((obs, idx) => (
+                <li key={idx} className="mb-3 border-bottom pb-2">
+                  <span className="fw-bold">
+                    {obs.psicologo_nombre} {obs.psicologo_apellido}:
+                  </span> {obs.comentario}
+                  <br />
+                  <span className="text-muted" style={{ fontSize: "0.75rem" }}>
+                    {new Date(obs.fecha_creacion).toLocaleString()}
+                  </span>
+                </li>
+              ))}
+              {(observaciones[modalEstudianteId]?.length === 0 || !observaciones[modalEstudianteId]) && (
+                <li className="text-muted">Sin observaciones registradas.</li>
+              )}
+            </ul>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

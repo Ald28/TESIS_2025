@@ -19,6 +19,9 @@ export default function Dashboard() {
   const [citas, setCitas] = useState([]);
   const [disponibilidades, setDisponibilidades] = useState([]);
   const [mostrarDisponibilidades, setMostrarDisponibilidades] = useState(false);
+  const [showModalDisponibilidad, setShowModalDisponibilidad] = useState(false);
+  const abrirModalDisponibilidad = () => setShowModalDisponibilidad(true);
+  const cerrarModalDisponibilidad = () => setShowModalDisponibilidad(false);
   const [formData, setFormData] = useState({
     dia: "",
     mañana_inicio: "",
@@ -175,84 +178,59 @@ export default function Dashboard() {
         </Col>
       </Row>
 
-      <Row className="g-4 mb-4">
-        <Table hover responsive borderless className="mt-3">
-          <thead className="table-light">
-            <tr>
-              <th>Día</th>
-              <th>Turno</th>
-              <th>Hora Inicio</th>
-              <th>Hora Fin</th>
-            </tr>
-          </thead>
-          <tbody>
-            {disponibilidades.length > 0 ? (
-              disponibilidades.map((disp, index) => (
-                <tr key={index} className="align-middle">
-                  <td className="fw-medium text-capitalize">{disp.dia}</td>
-                  <td className="fst-italic text-capitalize">{disp.turno}</td>
-                  <td className="text-nowrap">{disp.hora_inicio}</td>
-                  <td className="text-nowrap">{disp.hora_fin}</td>
-                </tr>
-              ))
-            ) : (
+      <Card className="border-0 shadow-sm mt-4">
+        <Card.Body>
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <h5 className="fw-semibold mb-0">Horas Disponibles</h5>
+            <div className="d-flex gap-2">
+              <Button variant="primary" onClick={abrirModalDisponibilidad}>
+                <i className="bi bi-plus-circle me-1"></i> Agregar Hora
+              </Button>
+              <Button variant="success" onClick={abrirModal}>
+                <i className="bi bi-calendar-check me-1"></i> Conectar Google Calendar
+              </Button>
+            </div>
+          </div>
+
+          <Table hover responsive borderless className="mb-0">
+            <thead className="table-light">
               <tr>
-                <td colSpan="4" className="text-center text-muted fst-italic">
-                  No tienes disponibilidad registrada.
-                </td>
+                <th>Día</th>
+                <th>Turno</th>
+                <th>Hora Inicio</th>
+                <th>Hora Fin</th>
+                <th>Acciones</th>
               </tr>
-            )}
-          </tbody>
-        </Table>
-
-        <Card className="border-0 shadow-sm mt-4">
-          <Card.Body>
-            <h5 className="fw-semibold mb-3">Registrar Disponibilidad</h5>
-            <Form>
-              <Row className="align-items-end g-3">
-                <Col md={2}>
-                  <Form.Label>Día</Form.Label>
-                  <Form.Control type="text" name="dia" placeholder="ej. lunes" onChange={handleFormChange} />
-                </Col>
-
-                <Col md={5}>
-                  <Form.Label>Turno Mañana</Form.Label>
-                  <Row>
-                    <Col><Form.Control type="time" name="mañana_inicio" onChange={handleFormChange} /></Col>
-                    <Col><Form.Control type="time" name="mañana_fin" onChange={handleFormChange} /></Col>
-                  </Row>
-                </Col>
-
-                <Col md={5}>
-                  <Form.Label>Turno Tarde</Form.Label>
-                  <Row>
-                    <Col><Form.Control type="time" name="tarde_inicio" onChange={handleFormChange} /></Col>
-                    <Col><Form.Control type="time" name="tarde_fin" onChange={handleFormChange} /></Col>
-                  </Row>
-                </Col>
-              </Row>
-
-              <div className="mt-3 text-end">
-                <Button onClick={handleCrearDisponibilidad}>Guardar</Button>
-              </div>
-            </Form>
-          </Card.Body>
-        </Card>
-
-        <Col md={12}>
-          <Card className="border-0 shadow-sm text-center p-4">
-            <FaGoogle size={40} className="text-danger mb-3" />
-            <h5 className="fw-semibold">Sincroniza tu calendario</h5>
-            <p className="text-muted small">
-              Mantén tus citas organizadas y sincronizadas con tu calendario de Google.
-            </p>
-            <Button variant="danger" onClick={abrirModal}>
-              Conectar Google Calendar
-            </Button>
-          </Card>
-        </Col>
-
-      </Row>
+            </thead>
+            <tbody>
+              {disponibilidades.length > 0 ? (
+                disponibilidades.map((disp, index) => (
+                  <tr key={index} className="align-middle">
+                    <td className="fw-medium text-capitalize">{disp.dia}</td>
+                    <td className="text-capitalize">{disp.turno}</td>
+                    <td>{disp.hora_inicio}</td>
+                    <td>{disp.hora_fin}</td>
+                    <td>
+                      <Button variant="link" size="sm" className="text-warning">
+                        <i className="bi bi-pencil-fill"></i>
+                      </Button>
+                      <Button variant="link" size="sm" className="text-danger">
+                        <i className="bi bi-trash-fill"></i>
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" className="text-center text-muted fst-italic">
+                    No tienes disponibilidad registrada.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+        </Card.Body>
+      </Card>
 
       <Card className="border-0 shadow-sm">
         <Card.Body>
@@ -314,6 +292,46 @@ export default function Dashboard() {
           </Button>
           <Button variant="danger" onClick={handleConectarCalendar}>
             Conectar Ahora
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      <Modal show={showModalDisponibilidad} onHide={cerrarModalDisponibilidad} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Registrar Disponibilidad</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Row className="align-items-end g-3">
+              <Col md={12}>
+                <Form.Label>Día</Form.Label>
+                <Form.Control type="text" name="dia" placeholder="ej. lunes" onChange={handleFormChange} />
+              </Col>
+
+              <Col md={6}>
+                <Form.Label>Turno Mañana</Form.Label>
+                <Row>
+                  <Col><Form.Control type="time" name="mañana_inicio" onChange={handleFormChange} /></Col>
+                  <Col><Form.Control type="time" name="mañana_fin" onChange={handleFormChange} /></Col>
+                </Row>
+              </Col>
+
+              <Col md={6}>
+                <Form.Label>Turno Tarde</Form.Label>
+                <Row>
+                  <Col><Form.Control type="time" name="tarde_inicio" onChange={handleFormChange} /></Col>
+                  <Col><Form.Control type="time" name="tarde_fin" onChange={handleFormChange} /></Col>
+                </Row>
+              </Col>
+            </Row>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={cerrarModalDisponibilidad}>Cancelar</Button>
+          <Button variant="primary" onClick={() => {
+            handleCrearDisponibilidad();
+            cerrarModalDisponibilidad();
+          }}>
+            Guardar
           </Button>
         </Modal.Footer>
       </Modal>
