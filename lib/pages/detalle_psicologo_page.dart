@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../classes/psicologo.dart';
 import '../services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:async';
 
 class PaginaDetallePsicologo extends StatefulWidget {
   final Psicologo? psicologo;
@@ -17,10 +18,17 @@ class _PaginaDetallePsicologoState extends State<PaginaDetallePsicologo> {
   int? estudianteId;
 
   @override
-  void initState() {
-    super.initState();
-    _cargarEstudianteId();
-  }
+void initState() {
+  super.initState();
+  _cargarEstudianteId();
+
+  Timer.periodic(const Duration(seconds: 40), (timer) {
+    if (mounted && token != null) {
+      setState(() {});
+    }
+  });
+}
+
 
   Future<void> _cargarEstudianteId() async {
     final prefs = await SharedPreferences.getInstance();
@@ -139,6 +147,7 @@ class _PaginaDetallePsicologoState extends State<PaginaDetallePsicologo> {
                       ),
                     ),
                   ),
+
                   const SizedBox(height: 32),
                   Card(
                     elevation: 2,
@@ -327,9 +336,129 @@ class _PaginaDetallePsicologoState extends State<PaginaDetallePsicologo> {
                               textAlign: TextAlign.center,
                             ),
                           ),
+                          (token == null)
+                            ? const Center(child: CircularProgressIndicator())
+                            : FutureBuilder<List<Map<String, dynamic>>>(
+                                future: ApiService.fetchHorasOcupadas(psicologo.id, DateTime.now(), token!),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState == ConnectionState.waiting) {
+                                    return const Center(child: CircularProgressIndicator());
+                                  } else if (snapshot.hasError) {
+                                    return Row(
+                                      children: const [
+                                        Icon(Icons.error, color: Colors.red),
+                                        SizedBox(width: 6),
+                                        Text("Error al cargar horas ocupadas"),
+                                      ],
+                                    );
+                                  }
+
+                                  final horas = snapshot.data ?? [];
+                                  if (horas.isEmpty) {
+                                    return const Text("No hay horas ocupadas hoy.");
+                                  }
+
+                                  return Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text("Horas ocupadas:", style: TextStyle(fontWeight: FontWeight.bold)),
+                                      const SizedBox(height: 8),
+                                      ...horas.map((h) {
+                                      final inicio = h['hora_inicio'];
+                                      final fin = h['hora_fin'];
+                                      return Padding(
+                                        padding: const EdgeInsets.only(bottom: 8.0),
+                                        child: Text("⛔ $inicio - $fin", style: const TextStyle(color: Colors.redAccent)),
+                                      );
+                                    }).toList(),
+
+                                    ],
+                                  );
+                                },
+                              ),
+
+
                         ],
                       ),
                     ),
+                  ),
+                  const SizedBox(height: 32),
+                  FutureBuilder<List<Map<String, dynamic>>>(
+                    future: (token != null) ? ApiService.fetchCitasActivas(token!) : Future.value([]),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                         print("❌ Error al obtener citas activas: ${snapshot.error}");
+                          return const Text("❌ Error al cargar citas activas");
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return Column(
+                          children: const [
+                            Icon(Icons.event_busy, size: 40, color: Colors.grey),
+                            SizedBox(height: 8),
+                            Text("No tienes citas activas"),
+                          ],
+                        );
+                      }
+
+                      final citas = snapshot.data!.where((cita) => cita['estado'] == 'pendiente').toList();
+                      if (citas.isEmpty) {
+                        return Column(
+                          children: const [
+                            Icon(Icons.event_available, size: 40, color: Colors.grey),
+                            SizedBox(height: 8),
+                            Text("No tienes citas pendientes"),
+                          ],
+                        );
+                      }
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Tus citas activas",
+                            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 12),
+                          ...citas.map((cita) {
+                            final fecha = cita['fecha_inicio'].toString().substring(0, 10);
+                            final horaInicio = cita['fecha_inicio'].toString().substring(11, 16);
+                            final horaFin = cita['fecha_fin'].toString().substring(11, 16);
+                            final nombrePsico = "${cita['psicologo_nombre']} ${cita['psicologo_apellido']}";
+
+                            return Card(
+                              margin: const EdgeInsets.symmetric(vertical: 8),
+                              child: ListTile(
+                                title: Text(nombrePsico),
+                                subtitle: Text("$fecha de $horaInicio a $horaFin"),
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.cancel, color: Colors.red),
+                                  onPressed: () async {
+                                    try {
+                                      await ApiService.cancelarCita(
+                                        citaId: cita['id'],
+                                        estudianteId: estudianteId!,
+                                        token: token!,
+                                      );
+
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text("✅ Cita cancelada")),
+                                      );
+
+                                      setState(() {}); // Refrescar
+                                    } catch (e) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text("❌ Error al cancelar: $e")),
+                                      );
+                                    }
+                                  },
+                                ),
+                              ),
+                            );
+                          }),
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),

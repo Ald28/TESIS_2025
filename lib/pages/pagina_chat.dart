@@ -6,7 +6,7 @@ class PaginaChat extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text("Mis citas (aun falta )", style: TextStyle(fontSize: 30),),
+      child: Text("este es el chat", style: TextStyle(fontSize: 30),),
     );
   }
 }

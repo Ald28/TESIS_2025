@@ -54,7 +54,7 @@ static Future<void> eliminarFavorito(int estudianteId, int metodoId) async {
   ///perfil usuario:
   static Future<Estudiante?> fetchPerfilEstudiante(int usuarioId) async {
   try {
-    final response = await http.get(Uri.parse('$baseUrl/estudiante/perfil/$usuarioId'));
+    final response = await http.get(Uri.parse('http://192.168.177.181:8080/auth/perfil?usuario_id=$usuarioId'));
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -70,6 +70,84 @@ static Future<void> eliminarFavorito(int estudianteId, int metodoId) async {
   }
 }
 
+///canelar cita
+static Future<void> cancelarCita({
+  required int citaId,
+  required int estudianteId,
+  required String token,
+}) async {
+  final response = await http.put(
+    Uri.parse('http://192.168.177.181:8080/auth/cancelar-cita'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+    body: jsonEncode({
+      'cita_id': citaId,
+      'estudiante_id': estudianteId,
+    }),
+  );
+
+  if (response.statusCode != 200) {
+    throw Exception("Error al cancelar cita: ${response.body}");
+  }
+}
+///finalizadas
+
+static Future<List<Map<String, dynamic>>> fetchCitasFinalizadas(int estudianteId) async {
+  final response = await http.get(
+    Uri.parse('http://192.168.177.181:8080/auth/historial-canceladas/$estudianteId'),
+  );
+
+  if (response.statusCode == 200) {
+    return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+  } else {
+    throw Exception("❌ Error al obtener historial de citas");
+  }
+}
+
+/// Obtener citas activas por token
+static Future<List<Map<String, dynamic>>> fetchCitasActivas(String token) async {
+  final response = await http.get(
+    Uri.parse('http://192.168.177.181:8080/auth/citas-activas'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+  );
+
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    print("📅 Citas activas:");
+    for (var cita in data['citas']) {
+      print("- ${cita['estado']} con ${cita['psicologo_nombre']} el ${cita['fecha_inicio']}");
+    }
+    return List<Map<String, dynamic>>.from(data['citas']);
+  } else {
+    throw Exception("❌ Error al obtener citas activas: ${response.body}");
+  }
+}
+///horas ocupadas
+
+static Future<List<Map<String, dynamic>>> fetchHorasOcupadas(int psicologoId, DateTime fecha, String token) async {
+  final fechaStr = fecha.toIso8601String().substring(0, 10);
+  final response = await http.get(
+    Uri.parse('http://192.168.177.181:8080/auth/psicologo/horas-ocupadas/$psicologoId/$fechaStr'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+  );
+
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    return List<Map<String, dynamic>>.from(data['horas']);
+  } else {
+    throw Exception('Error al obtener las horas ocupadas');
+  }
+}
+
+
 ////disponibilidad  para citas
   static Future<List<Disponibilidad>> fetchDisponibilidad(int psicologoId) async {
   final response = await http.get(
@@ -78,7 +156,7 @@ static Future<void> eliminarFavorito(int estudianteId, int metodoId) async {
 
   if (response.statusCode == 200) {
     final decoded = jsonDecode(response.body);
-    List<dynamic> data = decoded['disponibilidad']; // ✅ clave correcta
+    List<dynamic> data = decoded['disponibilidad']; 
     return data.map((d) => Disponibilidad.fromJson(d)).toList();
   } else {
     throw Exception('Error al obtener disponibilidad');
@@ -117,7 +195,7 @@ static Future<void> crearCita({
 
   static Future<List<Psicologo>> fetchPsicologos() async {
     try {
-      final response = await http.get(Uri.parse('http://192.168.177.181:8080/auth/listar-psicologo'));   ///esto tambien es una alternativa 
+      final response = await http.get(Uri.parse('http://192.168.177.181:8080/auth/psicologo/listar-psicologo'));   ///esto tambien es una alternativa 
                                                                                                         /// ya que tengo mi base url con 1..../api
                                                                                                         /// pero este es con auth
       if (response.statusCode == 200) {

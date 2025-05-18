@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:frondend/services/api_service.dart';
-import 'package:frondend/classes/metodo_relajacion.dart';
-import 'package:video_player/video_player.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../services/api_service.dart';
+import 'dart:async';
 
 class PaginaFavorito extends StatefulWidget {
   const PaginaFavorito({Key? key}) : super(key: key);
@@ -11,192 +11,110 @@ class PaginaFavorito extends StatefulWidget {
 }
 
 class _PaginaFavoritoState extends State<PaginaFavorito> {
-  List<MetodoRelajacion> _favoritos = [];
+  String? token;
+  int? estudianteId;
 
   @override
   void initState() {
     super.initState();
-    _cargarFavoritos();
-  }
-
-  Future<void> _cargarFavoritos() async {
-    const usuarioId = 2; // ID temporal de prueba
-    final favoritos = await ApiService.fetchFavoritos(usuarioId);
-    setState(() {
-      _favoritos = favoritos;
+    _cargarDatos();
+    Timer.periodic(const Duration(seconds: 60), (timer) {
+      if (mounted && token != null) {
+        setState(() {});
+      }
     });
   }
 
-  Future<void> _toggleFavorito(MetodoRelajacion metodo) async {
-    const usuarioId = 2;
-    await ApiService.eliminarFavorito(usuarioId, metodo.id);
+  Future<void> _cargarDatos() async {
+    final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _favoritos.removeWhere((m) => m.id == metodo.id);
+      token = prefs.getString('token');
+      estudianteId = prefs.getInt('estudiante_id');
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false, 
-        toolbarHeight: 0, 
-      ),
-
-      body: _favoritos.isEmpty
-          ? const Center(child: Text("No tienes favoritos aún."))
-          : ListView.builder(
-              itemCount: _favoritos.length,
-              itemBuilder: (context, index) {
-                final metodo = _favoritos[index];
-                return Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  child: Row(
-                    children: [
-                      ClipRRect(
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(15),
-                          bottomLeft: Radius.circular(15),
-                        ),
-                        child: SizedBox(
-                          width: 130,
-                          height: 130,
-                          child: metodo.url.endsWith('.mp4')
-                              ? VideoPlayerWidget(url: metodo.url)
-                              : Image.network(
-                                  metodo.url,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return const Center(child: Text('Error cargando imagen'));
-                                  },
-                                ),
-                        ),
-                      ),
-
-                      Expanded(
-                        child: Stack(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    metodo.titulo,
-                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    metodo.descripcion,
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.person, size: 16),
-                                      const SizedBox(width: 4),
-                                      Expanded(
-                                        child: Text(
-                                          "Dr. ${metodo.psicologo}",
-                                          style: const TextStyle(fontSize: 13),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Positioned(
-                              top: 4,
-                              right: 4,
-                              child: IconButton(
-                                icon: const Icon(Icons.favorite, color: Colors.red),
-                                onPressed: () => _toggleFavorito(metodo),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+      appBar: AppBar(title: const Text("Historial de Citas")),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text("Citas Activas", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            FutureBuilder<List<Map<String, dynamic>>>(
+              future: token != null ? ApiService.fetchCitasActivas(token!) : Future.value([]),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Row(
+                    children: const [
+                      Icon(Icons.close, color: Colors.red),
+                      SizedBox(width: 6),
+                      Text("Error al cargar citas activas"),
                     ],
-                  ),
-                );
+                  );
+                }
 
+                final citasPendientes = snapshot.data?.where((c) => c['estado'] == 'pendiente' || c['estado'] == 'aceptada').toList() ?? [];
+
+                if (citasPendientes.isEmpty) {
+                  return const Text("No tienes citas activas");
+                }
+
+                return Column(
+                  children: citasPendientes.map((cita) {
+                    final fecha = cita['fecha_inicio'].toString().substring(0, 10);
+                    final horaInicio = cita['fecha_inicio'].toString().substring(11, 16);
+                    final horaFin = cita['fecha_fin'].toString().substring(11, 16);
+                    final nombrePsico = "${cita['psicologo_nombre']} ${cita['psicologo_apellido']}";
+
+                    return Card(
+                      child: ListTile(
+                        title: Text(nombrePsico),
+                        subtitle: Text("$fecha de $horaInicio a $horaFin"),
+                        trailing: Text(cita['estado'], style: const TextStyle(color: Colors.orange)),
+                      ),
+                    );
+                  }).toList(),
+                );
               },
             ),
-    );
-  }
-}
+            const SizedBox(height: 24),
+            const Text("Historial de Citas Finalizadas", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            FutureBuilder<List<Map<String, dynamic>>>(
+              future: estudianteId != null ? ApiService.fetchCitasFinalizadas(estudianteId!) : Future.value([]),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return const Text("❌ Error al cargar historial de citas");
+                }
 
-class VideoPlayerWidget extends StatefulWidget {
-  final String url;
-  const VideoPlayerWidget({Key? key, required this.url}) : super(key: key);
+                final finalizadas = snapshot.data ?? [];
 
-  @override
-  State<VideoPlayerWidget> createState() => _VideoPlayerWidgetState();
-}
+                if (finalizadas.isEmpty) {
+                  return const Text("No tienes citas finalizadas");
+                }
 
-class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
-  late VideoPlayerController _controller;
-  bool _showControls = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.url))
-      ..initialize().then((_) {
-        setState(() {});
-        _controller.setLooping(true);
-      });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _controller.value.isInitialized
-        ? GestureDetector(
-            onTap: () {
-              setState(() {
-                _showControls = !_showControls;
-              });
-            },
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                AspectRatio(
-                  aspectRatio: _controller.value.aspectRatio,
-                  child: VideoPlayer(_controller),
-                ),
-                if (_showControls)
-                  IconButton(
-                    icon: Icon(
-                      _controller.value.isPlaying
-                          ? Icons.pause_circle_filled
-                          : Icons.play_circle_fill,
-                      size: 60,
-                      color: Colors.white,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        if (_controller.value.isPlaying) {
-                          _controller.pause();
-                        } else {
-                          _controller.play();
-                          _showControls = false;
-                        }
-                      });
-                    },
-                  ),
-              ],
+                return Column(
+                  children: finalizadas.map((cita) {
+                    final fecha = cita['fecha_inicio'].toString().substring(0, 10);
+                    final nombrePsico = "${cita['nombre_psicologo']} ${cita['apellido_psicologo']}";
+                    return ListTile(
+                      title: Text(nombrePsico),
+                      subtitle: Text("Realizada el $fecha"),
+                      leading: const Icon(Icons.check_circle, color: Colors.green),
+                    );
+                  }).toList(),
+                );
+              },
             ),
-          )
-        : const Center(child: CircularProgressIndicator());
+          ],
+        ),
+      ),
+    );
   }
 }

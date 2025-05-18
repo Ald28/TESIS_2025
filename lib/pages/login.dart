@@ -55,10 +55,13 @@ class _LoginState extends State<Login> {
         if (perfilResponse.statusCode == 200) {
           final perfilData = json.decode(perfilResponse.body);
           final estudianteId = perfilData['estudiante']['estudiante_id'];
+          final usuarioId = perfilData['estudiante']['usuario_id'];
 
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('token', token);
           await prefs.setInt('estudiante_id', estudianteId);
+          await prefs.setInt('usuario_id', usuarioId);
+
 
           Navigator.pushReplacementNamed(context, '/quiz-page');
         } else {

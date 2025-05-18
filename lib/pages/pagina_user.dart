@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 import '../classes/estudiante.dart';
 
@@ -10,20 +11,32 @@ class PaginaUser extends StatefulWidget {
 }
 
 class _PaginaUserState extends State<PaginaUser> {
-  late Future<Estudiante?> _perfilFuture;
+  Future<Estudiante?>? _perfilFuture;
 
   @override
   void initState() {
     super.initState();
-    int usuarioId = 4; // ID temporal para prueba
-    _perfilFuture = ApiService.fetchPerfilEstudiante(usuarioId);
+    _cargarPerfil();
+  }
+
+  Future<void> _cargarPerfil() async {
+    final prefs = await SharedPreferences.getInstance();
+    final usuarioId = prefs.getInt('usuario_id');
+
+    if (usuarioId != null) {
+      setState(() {
+        _perfilFuture = ApiService.fetchPerfilEstudiante(usuarioId);
+      });
+    } else {
+      print("❌ No se encontró usuario_id en SharedPreferences");
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: FutureBuilder<Estudiante?>(
-        future: _perfilFuture,
+        future: _perfilFuture ?? Future.value(null),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
