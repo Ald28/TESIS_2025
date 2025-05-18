@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { FiRefreshCw } from "react-icons/fi";
 import { Container, Row, Col, Card, Button, Table, Modal, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
@@ -76,10 +78,11 @@ export default function Dashboard() {
     try {
       const token = localStorage.getItem("token");
       await cambiarEstadoCita({ cita_id, estado: "aceptada", evento_google_id: null }, token);
+      toast.success("✅ Cita aceptada correctamente.");
       fetchCitas();
     } catch (error) {
       console.error(error.message);
-      alert("Error al aceptar la cita");
+      toast.error("❌ Error al aceptar la cita");
     }
   };
 
@@ -87,10 +90,11 @@ export default function Dashboard() {
     try {
       const token = localStorage.getItem("token");
       await cambiarEstadoCita({ cita_id, estado: "rechazada", evento_google_id: null }, token);
+      toast.success("✅ Cita rechazada correctamente.");
       fetchCitas();
     } catch (error) {
       console.error(error.message);
-      alert("Error al rechazar la cita");
+      toast.error("❌ Error al rechazar la cita");
     }
   };
 
@@ -112,10 +116,10 @@ export default function Dashboard() {
       };
 
       await crearDisponibilidadPsicologo(dataConPsicologo, token);
-      alert("✅ Disponibilidad creada con éxito.");
+      toast.success("✅ Disponibilidad creada con éxito.");
       fetchCitas();
     } catch (error) {
-      alert("❌ Error al crear disponibilidad: " + (error.response?.data?.mensaje || error.message));
+      toast.error("❌ Error al crear disponibilidad: " + (error.response?.data?.mensaje || error.message));
     }
   };
 
@@ -335,7 +339,7 @@ export default function Dashboard() {
           </Button>
         </Modal.Footer>
       </Modal>
-
+      <ToastContainer position="bottom-right" autoClose={3000} />
     </Container>
   );
 }
