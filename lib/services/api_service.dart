@@ -49,6 +49,27 @@ static Future<void> eliminarFavorito(int estudianteId, int metodoId) async {
   );
 }
 
+///cahtbot
+static Future<String> enviarMensajeAlChatbot(String mensaje) async {
+    final url = Uri.parse('http://192.168.177.181:8080/api/chat-estudiante');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'mensaje': mensaje}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['respuesta'];
+      } else {
+        throw Exception('Error del servidor: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('❌ Error al conectar con el chatbot: $e');
+    }
+  }
+
 
 
   ///perfil usuario:
