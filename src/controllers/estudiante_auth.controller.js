@@ -237,7 +237,7 @@ const editarPerfilEstudiante = async (req, res) => {
     const { ciclo, fecha_nacimiento, carrera, multimedia_id } = req.body;
     const usuario_id = req.usuario.id;
 
-    if (!ciclo || !fecha_nacimiento || !carrera || multimedia_id) {
+    if (!ciclo || !fecha_nacimiento || !carrera) {
       return res.status(400).json({ message: "Faltan campos obligatorios" });
     }
 
@@ -248,7 +248,9 @@ const editarPerfilEstudiante = async (req, res) => {
       carrera
     });
 
-    await usuarioModel.actualizarMultimediaUsuario(usuario_id, multimedia_id);
+    if (multimedia_id) {
+      await usuarioModel.actualizarMultimediaUsuario(usuario_id, multimedia_id);
+    }
 
     return res.status(200).json({ message: "Perfil actualizado correctamente" });
   } catch (error) {
