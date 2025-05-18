@@ -52,7 +52,7 @@ const listarPsicologos = async (estado = 'activo') => {
 
 const listarDisponibilidadPorTurno = async (psicologo_id) => {
   const sql = `
-    SELECT dia, turno, hora_inicio, hora_fin
+    SELECT id, dia, turno, hora_inicio, hora_fin
     FROM disponibilidad
     WHERE psicologo_id = ?
     ORDER BY FIELD(dia, 'lunes','martes','miércoles','jueves','viernes','sábado','domingo'), turno;
