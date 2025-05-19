@@ -99,10 +99,45 @@ const listarPreguntasConOpciones = async (req, res) => {
     }
 };
 
+const actualizarPreguntaYOpciones = async (req, res) => {
+    const preguntaId = req.params.id;
+    const { txt_pregunta, tipo, opciones } = req.body;
+
+    try {
+        await preguntaModel.editarPregunta({ id: preguntaId, txt_pregunta, tipo });
+
+        if (tipo === "abierto") {
+            await preguntaModel.eliminarOpcionesPorPregunta(preguntaId);
+        }
+
+        if (tipo === "cerrada" && Array.isArray(opciones)) {
+            for (const opcion of opciones) {
+                const { id, txt_opcion } = opcion;
+
+                if (id) {
+                    await preguntaModel.editarOpcion({ id, txt_opcion, pregunta_id: preguntaId });
+                } else {
+                    await preguntaModel.crearOpcion({
+                        txt_opcion,
+                        pregunta_id: preguntaId,
+                        psicologo_id: req.body.psicologo_id || null,
+                    });
+                }
+            }
+        }
+
+        res.status(200).json({ mensaje: 'Pregunta y opciones actualizadas correctamente' });
+    } catch (error) {
+        console.error('Error al editar pregunta y opciones:', error);
+        res.status(500).json({ mensaje: 'Error al editar la pregunta' });
+    }
+};
+
 module.exports = {
     crearPregunta,
     crearOpcion,
     listarTodasLasRespuestas,
     crearRespuesta,
-    listarPreguntasConOpciones
+    listarPreguntasConOpciones,
+    actualizarPreguntaYOpciones
 };

@@ -20,4 +20,7 @@ router.get('/respuestas', preguntaController.listarTodasLasRespuestas);
 // Listar preguntas con opciones
 router.get('/listar-preguntas-opciones', preguntaController.listarPreguntasConOpciones);
 
+// EDITAR PREGUNTA Y OPCION
+router.put('/preguntas/:id', preguntaController.actualizarPreguntaYOpciones);
+
 module.exports = router;

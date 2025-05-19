@@ -32,8 +32,29 @@ const listarPreguntasConOpciones = async () => {
   return result;
 };
 
+const editarPregunta = async ({ id, txt_pregunta, tipo }) => {
+  const sql = `UPDATE pregunta SET txt_pregunta = ?, tipo = ? WHERE id = ?`;
+  const result = await query(sql, [txt_pregunta, tipo, id]);
+  return result;
+};
+
+const editarOpcion = async ({ id, txt_opcion, pregunta_id }) => {
+  const sql = `UPDATE opciones SET txt_opcion = ? WHERE id = ? AND pregunta_id = ?`;
+  const result = await query(sql, [txt_opcion, id, pregunta_id]);
+  return result;
+};
+
+const eliminarOpcionesPorPregunta = async (pregunta_id) => {
+  const sql = `DELETE FROM opciones WHERE pregunta_id = ?`;
+  const result = await query(sql, [pregunta_id]);
+  return result;
+};
+
 module.exports = {
   crearPregunta,
   crearOpcion,
   listarPreguntasConOpciones,
+  editarPregunta,
+  editarOpcion,
+  eliminarOpcionesPorPregunta,
 };
