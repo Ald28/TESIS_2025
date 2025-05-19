@@ -146,7 +146,7 @@ export default function Cuestionario() {
       const data = {
         txt_pregunta: nuevaPregunta,
         tipo: tipoPregunta,
-         psicologo_id: psicologoId,
+        psicologo_id: psicologoId,
         opciones: tipoPregunta === "cerrada"
           ? opciones.map(op => ({
             id: op.id,
