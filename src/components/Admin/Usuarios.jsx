@@ -8,6 +8,7 @@ import {
   crearCalificacion,
   obtenerCalificacionesPorEstudiante,
   editarCalificacion,
+  eliminarCalificacion,
 } from "../Api/api_observacion";
 import { FaUserGraduate } from "react-icons/fa";
 import "../Styles/Usuarios.css";
@@ -122,6 +123,22 @@ export default function Usuarios() {
     }
   };
 
+  const handleEliminarComentario = async (calificacionId, estudianteId) => {
+    if (!window.confirm("¿Estás seguro de eliminar este comentario?")) return;
+
+    try {
+      await eliminarCalificacion(calificacionId, psicologoId);
+
+      const nuevasObservaciones = await obtenerCalificacionesPorEstudiante(estudianteId);
+      setObservaciones(prev => ({ ...prev, [estudianteId]: nuevasObservaciones }));
+
+      alert("✅ Comentario eliminado correctamente.");
+    } catch (error) {
+      console.error("❌ Error al eliminar comentario:", error);
+      alert("❌ No se pudo eliminar el comentario.");
+    }
+  };
+
   return (
     <div className="estudiantes-container">
       <div className="header">
@@ -190,6 +207,19 @@ export default function Usuarios() {
           <div className="modal-content">
             <h5 className="mb-3">Observaciones del estudiante</h5>
             <button className="modal-close" onClick={cerrarModal}>✕</button>
+            <textarea
+              className="form-control mb-2"
+              placeholder="Escribe un comentario"
+              value={comentarios[modalEstudianteId] || ""}
+              onChange={(e) => handleComentarioChange(modalEstudianteId, e.target.value)}
+            />
+            <button
+              className="btn btn-success btn-sm mb-3"
+              onClick={() => handleEnviarComentario(modalEstudianteId)}
+            >
+              Enviar Comentario
+            </button>
+            <button className="modal-close" onClick={cerrarModal}>✕</button>
             <ul className="list-unstyled small mt-2">
               {(observaciones[modalEstudianteId] || []).map((obs, idx) => (
                 <li key={idx} className="mb-3 border-bottom pb-2">
@@ -223,12 +253,20 @@ export default function Usuarios() {
                       {obs.comentario}
 
                       {parseInt(obs.psicologo_id) === parseInt(psicologoId) && (
-                        <button
-                          className="btn btn-sm btn-link"
-                          onClick={() => handleEditarComentario(obs.id, obs.comentario)}
-                        >
-                          Editar
-                        </button>
+                        <>
+                          <button
+                            className="btn btn-sm btn-link"
+                            onClick={() => handleEditarComentario(obs.id, obs.comentario)}
+                          >
+                            Editar
+                          </button>
+                          <button
+                            className="btn btn-sm btn-danger"
+                            onClick={() => handleEliminarComentario(obs.id, modalEstudianteId)}
+                          >
+                            Eliminar
+                          </button>
+                        </>
                       )}
                     </>
                   )}
