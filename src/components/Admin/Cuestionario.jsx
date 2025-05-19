@@ -5,7 +5,8 @@ import {
   crearPregunta,
   crearOpcion,
   listarTodasLasRespuestas,
-  listarPreguntasConOpciones
+  listarPreguntasConOpciones,
+  editarPreguntaYOpciones,
 } from "../api/api_cuestionarios";
 import { buscarPsicologoPorUsuarioId } from "../api/api_psicologo";
 
@@ -21,6 +22,9 @@ export default function Cuestionario() {
   const [respuestasEstudiante, setRespuestasEstudiante] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [tabActivo, setTabActivo] = useState("preguntas"); // 👈 Nuevo
+  const [modoEdicion, setModoEdicion] = useState(false);
+  const [preguntaEditando, setPreguntaEditando] = useState(null);
+  const [opcionesEditables, setOpcionesEditables] = useState([]);
 
   useEffect(() => {
     const fetchPsicologoId = async () => {
@@ -97,6 +101,74 @@ export default function Cuestionario() {
     return acc;
   }, {});
 
+  const iniciarEdicion = (pregunta) => {
+    setNuevaPregunta(pregunta.txt_pregunta);
+    setTipoPregunta(pregunta.tipo);
+    setPreguntaEditando(pregunta);
+    setModoEdicion(true);
+    setShowForm(true);
+
+    if (pregunta.tipo === "cerrada") {
+      let opciones = pregunta.opciones || [];
+
+      if (opciones.length < 2) {
+        const yaTieneSi = opciones.some(op => op.txt_opcion.toLowerCase() === "sí");
+        const yaTieneNo = opciones.some(op => op.txt_opcion.toLowerCase() === "no");
+
+        if (!yaTieneSi) {
+          opciones.push({ id: null, txt_opcion: "Sí" });
+        }
+        if (!yaTieneNo) {
+          opciones.push({ id: null, txt_opcion: "No" });
+        }
+      }
+
+      setOpcionesEditables(opciones);
+    } else {
+      setOpcionesEditables([]);
+    }
+  };
+
+  const handleActualizarPregunta = async () => {
+    if (!preguntaEditando) return;
+
+    let opciones = opcionesEditables;
+
+    if (tipoPregunta === "cerrada" && opciones.length < 2) {
+      const tieneSi = opciones.some(op => op.txt_opcion?.toLowerCase() === "sí");
+      const tieneNo = opciones.some(op => op.txt_opcion?.toLowerCase() === "no");
+
+      if (!tieneSi) opciones.push({ id: null, txt_opcion: "Sí" });
+      if (!tieneNo) opciones.push({ id: null, txt_opcion: "No" });
+    }
+
+    try {
+      const data = {
+        txt_pregunta: nuevaPregunta,
+        tipo: tipoPregunta,
+         psicologo_id: psicologoId,
+        opciones: tipoPregunta === "cerrada"
+          ? opciones.map(op => ({
+            id: op.id,
+            txt_opcion: op.txt_opcion
+          }))
+          : [],
+      };
+
+      await editarPreguntaYOpciones(preguntaEditando.id, data);
+
+      alert("Pregunta actualizada con éxito");
+      setNuevaPregunta("");
+      setModoEdicion(false);
+      setPreguntaEditando(null);
+      setOpcionesEditables([]);
+      setShowForm(false);
+      await cargarPreguntas();
+    } catch (error) {
+      console.error("Error al actualizar pregunta:", error.message);
+    }
+  };
+
   const abrirModal = (estudiante) => {
     setEstudianteSeleccionado(estudiante);
     setRespuestasEstudiante(estudiante.respuestas);
@@ -159,9 +231,30 @@ export default function Cuestionario() {
                   <option value="cerrada">Cerrada (Sí/No)</option>
                   <option value="abierto">Abierta (Texto libre)</option>
                 </select>
-                <Button variant="success" onClick={handleCrearPregunta}>
-                  <Save size={18} className="me-2" /> Guardar
+
+                <Button
+                  variant={modoEdicion ? "warning" : "success"}
+                  onClick={modoEdicion ? handleActualizarPregunta : handleCrearPregunta}
+                >
+                  <Save size={18} className="me-2" />
+                  {modoEdicion ? "Actualizar" : "Guardar"}
                 </Button>
+
+                {modoEdicion && (
+                  <Button
+                    variant="secondary"
+                    className="ms-2"
+                    onClick={() => {
+                      setModoEdicion(false);
+                      setNuevaPregunta("");
+                      setPreguntaEditando(null);
+                      setOpcionesEditables([]);
+                      setShowForm(false);
+                    }}
+                  >
+                    Cancelar edición
+                  </Button>
+                )}
               </div>
             )}
 
@@ -171,10 +264,9 @@ export default function Cuestionario() {
                   <li key={pregunta.id} className="list-group-item d-flex justify-content-between align-items-center">
                     <div>
                       <h6 className="fw-bold mb-1">{pregunta.txt_pregunta}</h6>
-                      <span className={`badge rounded-pill me-2 ${
-                        pregunta.tipo === 'cerrada' ? 'bg-primary' :
+                      <span className={`badge rounded-pill me-2 ${pregunta.tipo === 'cerrada' ? 'bg-primary' :
                         pregunta.tipo === 'abierto' ? 'bg-success' : 'bg-warning'
-                      }`}>
+                        }`}>
                         {pregunta.tipo.charAt(0).toUpperCase() + pregunta.tipo.slice(1)}
                       </span>
                       {pregunta.opciones.length > 0 && (
@@ -184,7 +276,12 @@ export default function Cuestionario() {
                       )}
                     </div>
                     <div>
-                      <Button variant="outline-primary" size="sm" className="me-2">
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
+                        className="me-2"
+                        onClick={() => iniciarEdicion(pregunta)}
+                      >
                         <Edit size={16} />
                       </Button>
                       <Button variant="outline-danger" size="sm">
