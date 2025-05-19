@@ -1,5 +1,6 @@
 const estudianteController = require('../controllers/estudiante_auth.controller');
 const psicologoController = require('../controllers/psicologo_auth.controller');
+const verificarAutenticacion = require('../middlewares/verificarAutenticacion');
 const express = require('express');
 const router = express.Router();
 
@@ -20,6 +21,6 @@ router.get('/citas-activas', estudianteController.obtenerCitasActivas);
 // Listar citas de estudiantes
 router.get('/historial-canceladas/:estudiante_id', psicologoController.obtenerHistorial);
 // Editar perfil estudiante
-router.put("/editar-perfil", estudianteController.editarPerfilEstudiante);
+router.put("/editar-perfil", verificarAutenticacion.verificarToken,estudianteController.editarPerfilEstudiante);
 
 module.exports = router;
