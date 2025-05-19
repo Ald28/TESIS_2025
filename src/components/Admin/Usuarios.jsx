@@ -219,7 +219,6 @@ export default function Usuarios() {
             >
               Enviar Comentario
             </button>
-            <button className="modal-close" onClick={cerrarModal}>✕</button>
             <ul className="list-unstyled small mt-2">
               {(observaciones[modalEstudianteId] || []).map((obs, idx) => (
                 <li key={idx} className="mb-3 border-bottom pb-2">
