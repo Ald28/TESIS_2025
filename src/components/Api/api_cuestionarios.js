@@ -31,3 +31,9 @@ export const editarPreguntaYOpciones = async (id, data) => {
   const response = await axios.put(`${API_URL}/preguntas/${id}`, data);
   return response.data;
 };
+
+// ELIMINAR PREGUNTAS Y OPCIONES:
+export const eliminarPreguntaYOpciones = async (id) => {
+  const response = await axios.delete(`${API_URL}/preguntas/${id}`);
+  return response.data;
+};

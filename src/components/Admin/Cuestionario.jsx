@@ -7,6 +7,7 @@ import {
   listarTodasLasRespuestas,
   listarPreguntasConOpciones,
   editarPreguntaYOpciones,
+  eliminarPreguntaYOpciones,
 } from "../api/api_cuestionarios";
 import { buscarPsicologoPorUsuarioId } from "../api/api_psicologo";
 
@@ -181,6 +182,19 @@ export default function Cuestionario() {
     setEstudianteSeleccionado(null);
   };
 
+  const handleEliminarPregunta = async (id) => {
+    if (window.confirm("¿Estás seguro de eliminar esta pregunta y sus opciones?")) {
+      try {
+        await eliminarPreguntaYOpciones(id);
+        alert("Pregunta eliminada correctamente.");
+        await cargarPreguntas();
+      } catch (error) {
+        console.error("Error al eliminar la pregunta:", error.message);
+        alert("Ocurrió un error al intentar eliminar la pregunta.");
+      }
+    }
+  };
+
   return (
     <div className="container py-3">
       <h1 className="mb-4 fw-bold text-primary">
@@ -284,7 +298,11 @@ export default function Cuestionario() {
                       >
                         <Edit size={16} />
                       </Button>
-                      <Button variant="outline-danger" size="sm">
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        onClick={() => handleEliminarPregunta(pregunta.id)}
+                      >
                         <Trash size={16} />
                       </Button>
                     </div>
