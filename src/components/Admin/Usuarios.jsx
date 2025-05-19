@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import { listarEstudiantesRelacionados } from "../Api/api_citas";
 import {
   buscarPsicologoPorUsuarioId,
-  obtenerHistorial
+  obtenerHistorial,
 } from "../Api/api_psicologo";
 import {
   crearCalificacion,
-  obtenerCalificacionesPorEstudiante
+  obtenerCalificacionesPorEstudiante,
+  editarCalificacion,
 } from "../Api/api_observacion";
 import { FaUserGraduate } from "react-icons/fa";
 import "../Styles/Usuarios.css";
@@ -21,6 +22,8 @@ export default function Usuarios() {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalHistorialVisible, setModalHistorialVisible] = useState(false);
   const [modalHistorialEstudianteId, setModalHistorialEstudianteId] = useState(null);
+  const [editandoComentarioId, setEditandoComentarioId] = useState(null);
+  const [nuevoComentario, setNuevoComentario] = useState("");
 
   useEffect(() => {
     const cargarDatos = async () => {
@@ -97,6 +100,28 @@ export default function Usuarios() {
     }
   };
 
+  const handleEditarComentario = (calificacionId, texto) => {
+    setEditandoComentarioId(calificacionId);
+    setNuevoComentario(texto);
+  };
+
+  const handleGuardarComentarioEditado = async (calificacionId, estudianteId) => {
+    try {
+      await editarCalificacion(calificacionId, {
+        comentario: nuevoComentario,
+        psicologo_id: psicologoId,
+      });
+
+      const nuevasObservaciones = await obtenerCalificacionesPorEstudiante(estudianteId);
+      setObservaciones(prev => ({ ...prev, [estudianteId]: nuevasObservaciones }));
+      setEditandoComentarioId(null);
+      setNuevoComentario("");
+    } catch (error) {
+      console.error("❌ Error al editar comentario:", error);
+      alert("❌ No se pudo editar el comentario.");
+    }
+  };
+
   return (
     <div className="estudiantes-container">
       <div className="header">
@@ -167,10 +192,46 @@ export default function Usuarios() {
             <button className="modal-close" onClick={cerrarModal}>✕</button>
             <ul className="list-unstyled small mt-2">
               {(observaciones[modalEstudianteId] || []).map((obs, idx) => (
-                <li key={idx} className="mb-3">
+                <li key={idx} className="mb-3 border-bottom pb-2">
                   <span className="fw-bold">
                     {obs.psicologo_nombre} {obs.psicologo_apellido}:
-                  </span> {obs.comentario}
+                  </span>{" "}
+                  {editandoComentarioId === obs.id ? (
+                    <>
+                      <textarea
+                        className="form-control form-control-sm mb-2"
+                        value={nuevoComentario}
+                        onChange={(e) => setNuevoComentario(e.target.value)}
+                      />
+                      <button
+                        className="btn btn-sm btn-success me-2"
+                        onClick={() =>
+                          handleGuardarComentarioEditado(obs.id, modalEstudianteId)
+                        }
+                      >
+                        Guardar
+                      </button>
+                      <button
+                        className="btn btn-sm btn-secondary"
+                        onClick={() => setEditandoComentarioId(null)}
+                      >
+                        Cancelar
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      {obs.comentario}
+
+                      {parseInt(obs.psicologo_id) === parseInt(psicologoId) && (
+                        <button
+                          className="btn btn-sm btn-link"
+                          onClick={() => handleEditarComentario(obs.id, obs.comentario)}
+                        >
+                          Editar
+                        </button>
+                      )}
+                    </>
+                  )}
                   <br />
                   <span className="text-muted" style={{ fontSize: "0.75rem" }}>
                     {new Date(obs.fecha_creacion).toLocaleString()}
@@ -180,70 +241,31 @@ export default function Usuarios() {
             </ul>
           </div>
         </div>
-      )}
+      )
+      }
 
-      {modalHistorialVisible && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h5 className="mb-3">Historial de citas</h5>
-            <button className="modal-close" onClick={cerrarModalHistorial}>✕</button>
-            <ul className="list-unstyled small mt-3">
-              {(historiales[modalHistorialEstudianteId] || []).map((h, idx) => (
-                <li key={idx} className="mb-3 border-bottom pb-2">
-                  <strong>{h.tipo_cita.toUpperCase()}</strong> — {new Date(h.fecha_inicio).toLocaleString()}
-                  <br />
-                  <span className="text-muted">Estado: {h.estado}</span>
-                </li>
-              ))}
-              {(!historiales[modalHistorialEstudianteId] || historiales[modalHistorialEstudianteId].length === 0) && (
-                <li className="text-muted">Sin historial de citas</li>
-              )}
-            </ul>
+      {
+        modalHistorialVisible && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <h5 className="mb-3">Historial de citas</h5>
+              <button className="modal-close" onClick={cerrarModalHistorial}>✕</button>
+              <ul className="list-unstyled small mt-3">
+                {(historiales[modalHistorialEstudianteId] || []).map((h, idx) => (
+                  <li key={idx} className="mb-3 border-bottom pb-2">
+                    <strong>{h.tipo_cita.toUpperCase()}</strong> — {new Date(h.fecha_inicio).toLocaleString()}
+                    <br />
+                    <span className="text-muted">Estado: {h.estado}</span>
+                  </li>
+                ))}
+                {(!historiales[modalHistorialEstudianteId] || historiales[modalHistorialEstudianteId].length === 0) && (
+                  <li className="text-muted">Sin historial de citas</li>
+                )}
+              </ul>
+            </div>
           </div>
-        </div>
-      )}
-
-      {modalVisible && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <button className="modal-close" onClick={cerrarModal}>✕</button>
-            <h5 className="mb-3">Observaciones del estudiante</h5>
-
-            <textarea
-              className="form-control mb-2"
-              placeholder="Escribe un comentario"
-              value={comentarios[modalEstudianteId] || ""}
-              onChange={(e) =>
-                handleComentarioChange(modalEstudianteId, e.target.value)
-              }
-            />
-            <button
-              className="btn btn-success btn-sm mb-3"
-              onClick={() => handleEnviarComentario(modalEstudianteId)}
-            >
-              Enviar Comentario
-            </button>
-
-            <ul className="list-unstyled small mt-2">
-              {(observaciones[modalEstudianteId] || []).map((obs, idx) => (
-                <li key={idx} className="mb-3 border-bottom pb-2">
-                  <span className="fw-bold">
-                    {obs.psicologo_nombre} {obs.psicologo_apellido}:
-                  </span> {obs.comentario}
-                  <br />
-                  <span className="text-muted" style={{ fontSize: "0.75rem" }}>
-                    {new Date(obs.fecha_creacion).toLocaleString()}
-                  </span>
-                </li>
-              ))}
-              {(observaciones[modalEstudianteId]?.length === 0 || !observaciones[modalEstudianteId]) && (
-                <li className="text-muted">Sin observaciones registradas.</li>
-              )}
-            </ul>
-          </div>
-        </div>
-      )}
-
-    </div>
+        )
+      }
+    </div >
   );
 }
