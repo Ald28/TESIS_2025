@@ -133,11 +133,24 @@ const actualizarPreguntaYOpciones = async (req, res) => {
     }
 };
 
+const eliminarPreguntaYOpciones = async (req, res) => {
+  const preguntaId = req.params.id;
+
+  try {
+    await preguntaModel.eliminarPreguntaYOpciones(preguntaId);
+    res.status(200).json({ mensaje: 'Pregunta y sus opciones eliminadas correctamente' });
+  } catch (error) {
+    console.error('Error al eliminar la pregunta:', error);
+    res.status(500).json({ mensaje: 'Error al eliminar la pregunta' });
+  }
+};
+
 module.exports = {
     crearPregunta,
     crearOpcion,
     listarTodasLasRespuestas,
     crearRespuesta,
     listarPreguntasConOpciones,
-    actualizarPreguntaYOpciones
+    actualizarPreguntaYOpciones,
+    eliminarPreguntaYOpciones,
 };

@@ -23,4 +23,7 @@ router.get('/listar-preguntas-opciones', preguntaController.listarPreguntasConOp
 // EDITAR PREGUNTA Y OPCION
 router.put('/preguntas/:id', preguntaController.actualizarPreguntaYOpciones);
 
+// ELIMINAR PREGUNTA Y OPCION
+router.delete('/preguntas/:id', preguntaController.eliminarPreguntaYOpciones);
+
 module.exports = router;

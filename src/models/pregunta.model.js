@@ -50,6 +50,16 @@ const eliminarOpcionesPorPregunta = async (pregunta_id) => {
   return result;
 };
 
+const eliminarPreguntaYOpciones = async (pregunta_id) => {
+  const eliminarOpcionesSQL = `DELETE FROM opciones WHERE pregunta_id = ?`;
+  const eliminarPreguntaSQL = `DELETE FROM pregunta WHERE id = ?`;
+
+  await query(eliminarOpcionesSQL, [pregunta_id]);
+  const result = await query(eliminarPreguntaSQL, [pregunta_id]);
+
+  return result;
+};
+
 module.exports = {
   crearPregunta,
   crearOpcion,
@@ -57,4 +67,5 @@ module.exports = {
   editarPregunta,
   editarOpcion,
   eliminarOpcionesPorPregunta,
+  eliminarPreguntaYOpciones,
 };
