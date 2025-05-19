@@ -1,4 +1,4 @@
-const {insertarCalificacion, obtenerCalificacionesPorEstudiante} = require('../models/observacion.model');
+const { insertarCalificacion, obtenerCalificacionesPorEstudiante, actualizarCalificacion, eliminarComentario } = require('../models/observacion.model');
 
 // Crear una calificación
 const crearCalificacion = async (req, res) => {
@@ -30,7 +30,41 @@ const listarCalificacionesPorEstudiante = async (req, res) => {
     }
 };
 
+const editarCalificacion = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { comentario } = req.body;
+        const psicologo_id = req.body.psicologo_id || req.user?.id;
+
+        if (!comentario || !psicologo_id) {
+            return res.status(400).json({ mensaje: 'Comentario y psicólogo son obligatorios.' });
+        }
+
+        await actualizarCalificacion(id, comentario, psicologo_id);
+
+        res.status(200).json({ mensaje: 'Calificación actualizada correctamente.' });
+
+    } catch (error) {
+        console.error("Error al editar calificación:", error.message);
+        res.status(403).json({ mensaje: error.message });
+    }
+};
+
+const eliminarCalificacion = async (req, res) => {
+    const { id } = req.params;
+    const { psicologo_id } = req.body;
+
+    try {
+        await eliminarComentario(id, psicologo_id);
+        res.status(200).json({ mensaje: "✅ Calificación eliminada correctamente." });
+    } catch (error) {
+        res.status(403).json({ error: error.message });
+    }
+};
+
 module.exports = {
     crearCalificacion,
-    listarCalificacionesPorEstudiante
+    listarCalificacionesPorEstudiante,
+    editarCalificacion,
+    eliminarCalificacion,
 };
