@@ -30,10 +30,16 @@ const buscarUsuarioPorId = async (id) => {
   return resultado[0]; 
 };
 
+const actualizarUltimaConexion = async (usuario_id) => {
+  const sql = 'UPDATE usuario SET ultima_conexion = NOW() WHERE id = ?';
+  await query(sql, [usuario_id]);
+};
+
 module.exports = {
   buscarUsuarioPorCorreo,
   insertarMultimedia,
   crearUsuario,
   actualizarMultimediaUsuario,
   buscarUsuarioPorId,
+  actualizarUltimaConexion,
 };

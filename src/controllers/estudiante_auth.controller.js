@@ -34,6 +34,8 @@ const loginGoogleEstudiante = async (req, res) => {
         estudiante = await estudianteModel.buscarPorUsuarioId(usuario.id);
       }
 
+      await usuarioModel.actualizarUltimaConexion(usuario.id);
+
       const token = jwt.sign({ id: usuario.id, rol: usuario.rol_id }, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_TIMEOUT,
       });
@@ -259,4 +261,17 @@ const editarPerfilEstudiante = async (req, res) => {
   }
 };
 
-module.exports = { loginGoogleEstudiante, obtenerPerfilEstudiante, crearCita, listarTodosEstudiantes, cancelarCita, obtenerCitasActivas, editarPerfilEstudiante };
+const actualizarConexion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await usuarioModel.actualizarUltimaConexion(id);
+
+    return res.status(200).json({ message: 'Ultima conexcion agregada correctamente' });
+  } catch (error) {
+    console.log('Error al actualziar ultima conexion', error);
+    return res.status(500).json({ message: 'Error al actialziar conexcion' });
+
+  }
+};
+
+module.exports = { loginGoogleEstudiante, obtenerPerfilEstudiante, crearCita, listarTodosEstudiantes, cancelarCita, obtenerCitasActivas, editarPerfilEstudiante, actualizarConexion };

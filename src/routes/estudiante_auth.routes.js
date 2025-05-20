@@ -22,5 +22,7 @@ router.get('/citas-activas', estudianteController.obtenerCitasActivas);
 router.get('/historial-canceladas/:estudiante_id', psicologoController.obtenerHistorial);
 // Editar perfil estudiante
 router.put("/editar-perfil", verificarAutenticacion.verificarToken,estudianteController.editarPerfilEstudiante);
+// ULTIMA COENXCION ESTUDIANTE
+router.put('/ultima-conexion/:id', estudianteController.actualizarConexion);
 
 module.exports = router;
