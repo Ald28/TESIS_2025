@@ -133,7 +133,7 @@ const eliminarMetodoRelajacion = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const resultado = await metodoModel.eliminarMetodo(id);
+    const resultado = await multimediaModel.eliminarMetodo(id);
 
     if (resultado.affectedRows === 0) {
       return res.status(404).json({ message: 'Método no encontrado o ya eliminado.' });
