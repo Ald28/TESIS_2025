@@ -15,6 +15,7 @@
     "@sendgrid/mail": "^8.1.5",
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
+    "calmatec-backend": "file:",
     "cloudinary": "^2.6.1",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
@@ -23,7 +24,7 @@
     "googleapis": "^148.0.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
-    "multer": "^1.4.5-lts.2",
+    "multer": "^1.4.5-lts.1",
     "mysql2": "^3.14.1",
     "nodemailer": "^7.0.3",
     "streamifier": "^0.1.1"
