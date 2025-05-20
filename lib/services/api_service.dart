@@ -6,6 +6,11 @@ import 'package:frondend/classes/psicologo.dart';
 import 'package:frondend/classes/estudiante.dart';
 import 'package:frondend/classes/disponibilidad.dart';
 import 'package:frondend/classes/metodo_relajacion.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
+import 'package:http_parser/http_parser.dart';
+import 'package:mime/mime.dart';
+
 
 
 class ApiService {
@@ -70,26 +75,101 @@ static Future<String> enviarMensajeAlChatbot(String mensaje) async {
     }
   }
 
-
-
   ///perfil usuario:
-  static Future<Estudiante?> fetchPerfilEstudiante(int usuarioId) async {
+static Future<Estudiante?> fetchPerfilEstudiante(int usuarioId) async {
   try {
-    final response = await http.get(Uri.parse('http://192.168.177.181:8080/auth/perfil?usuario_id=$usuarioId'));
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    final url = 'http://192.168.177.181:8080/auth/perfil?usuario_id=$usuarioId';
+
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      final estudiante = Estudiante.fromJson(data['datos'][0]);
-      return estudiante;
-    } else {
-      print("Error al obtener perfil: ${response.statusCode}");
-      return null;
+      return Estudiante.fromJson(data['estudiante']);
     }
-  } catch (e) {
-    print("Excepción al obtener perfil: $e");
+
+    return null;
+  } catch (_) {
     return null;
   }
 }
+///editar perfil
+static Future<bool> editarPerfilEstudiante({
+  required String fechaNacimiento,
+  required String carrera,
+  required String ciclo,
+  int? multimediaId, // ahora es opcional
+}) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token == null || token.isEmpty) {
+    print("❌ No se encontró token");
+    return false;
+}
+
+
+    final Map<String, dynamic> body = {
+      'fecha_nacimiento': fechaNacimiento,
+      'carrera': carrera,
+      'ciclo': ciclo,
+    };
+
+    if (multimediaId != null) {
+      body['multimedia_id'] = multimediaId;
+    }
+
+    final response = await http.put(
+  Uri.parse('http://192.168.177.181:8080/auth/editar-perfil'),
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer $token',
+  },
+  body: jsonEncode(body),
+);
+
+print("🧾 Código: ${response.statusCode}");
+print("📥 Respuesta: ${response.body}");
+
+
+    return response.statusCode == 200;
+  } catch (e) {
+    return false;
+  }
+}
+
+///subir iamgen perfil del estudiante:
+static Future<int?> subirImagen(File imagen) async {
+  final uri = Uri.parse('http://192.168.177.181:8080/api/multimedia/upload');
+  final request = http.MultipartRequest('POST', uri);
+
+  final mimeType = lookupMimeType(imagen.path) ?? 'image/jpeg';
+  final fileStream = await http.MultipartFile.fromPath(
+    'imagen',
+    imagen.path,
+    contentType: MediaType.parse(mimeType),
+  );
+
+  request.files.add(fileStream);
+
+  final response = await request.send();
+  if (response.statusCode == 200) {
+    final respStr = await response.stream.bytesToString();
+    final data = jsonDecode(respStr);
+    return data['multimedia_id'];
+  } else {
+    return null;
+  }
+}
+
 
 ///canelar cita
 static Future<void> cancelarCita({
