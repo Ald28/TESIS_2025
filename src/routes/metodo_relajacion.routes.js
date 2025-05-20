@@ -17,4 +17,10 @@ router.get('/recomendados', metodo.listarMetodosRecomendados);
 // Listar todos los métodos privados
 router.get('/privados-todos', metodo.listarTodosMetodosPrivados);
 
+// Editar actividades recomendadas
+router.put('/actividades/editar/:id', authPsicologo, upload.single('archivo'), metodo.editarMetodoRelajacion);
+
+// Eliminar método
+router.delete('/actividades/eliminar/:id', authPsicologo, metodo.eliminarMetodoRelajacion);
+
 module.exports = router;

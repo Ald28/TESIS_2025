@@ -83,9 +83,74 @@ const listarTodosMetodosPrivados = async (req, res) => {
     }
 };
 
+const editarMetodoRelajacion = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { titulo, descripcion, tipo, estudiante_id } = req.body;
+        const usuario_id = req.usuario.id;
+
+        if (!titulo || !tipo) {
+            return res.status(400).json({ message: 'Faltan campos obligatorios.' });
+        }
+
+        const psicologo = await obtenerPsicologoPorUsuarioId(usuario_id);
+        if (!psicologo) {
+            return res.status(404).json({ message: 'Psicólogo no encontrado.' });
+        }
+
+        const psicologo_id = psicologo.id;
+        let multimedia_actividad_id = req.body.multimedia_actividad_id;
+
+        if (req.file) {
+            const buffer = req.file.buffer;
+            const url = await MetodoRelajacionService.subirArchivoACloudinary(buffer);
+            const insertMultimedia = await multimediaModel.crearMultimedia({ url });
+            multimedia_actividad_id = insertMultimedia.insertId;
+        }
+
+        const resultado = await multimediaModel.editarMetodos(id, {
+            titulo,
+            descripcion: descripcion || null,
+            tipo,
+            psicologo_id,
+            multimedia_actividad_id,
+            estudiante_id: tipo === 'privado' ? estudiante_id : null,
+        });
+
+        if (resultado.affectedRows === 0) {
+            return res.status(404).json({ message: 'Método no encontrado.' });
+        }
+
+        res.status(200).json({ message: 'Método actualizado correctamente.' });
+
+    } catch (error) {
+        console.error('Error al editar método de relajación:', error);
+        res.status(500).json({ message: 'Error interno del servidor.' });
+    }
+};
+
+const eliminarMetodoRelajacion = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const resultado = await metodoModel.eliminarMetodo(id);
+
+    if (resultado.affectedRows === 0) {
+      return res.status(404).json({ message: 'Método no encontrado o ya eliminado.' });
+    }
+
+    res.status(200).json({ message: 'Método eliminado correctamente.' });
+  } catch (error) {
+    console.error('Error al eliminar método:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+};
+
 module.exports = {
     subirMetodoRelajacion,
     listarMetodosPrivados,
     listarMetodosRecomendados,
     listarTodosMetodosPrivados,
+    editarMetodoRelajacion,
+    eliminarMetodoRelajacion,
 };
