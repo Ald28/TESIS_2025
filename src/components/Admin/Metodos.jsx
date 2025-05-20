@@ -7,6 +7,7 @@ import {
   listarMetodosRecomendados,
   listarTodosMetodosPrivados,
   editarMetodo,
+  eliminarMetodo,
 } from '../Api/api_metodos';
 
 export default function Metodos() {
@@ -94,6 +95,22 @@ export default function Metodos() {
   const abrirModalArchivo = (url) => {
     setArchivoActual(url);
     setModalArchivoVisible(true);
+  };
+
+  const handleEliminar = async (id) => {
+    if (!window.confirm('¿Estás seguro de eliminar este método?')) return;
+
+    try {
+      const response = await eliminarMetodo(id);
+      alert(response.message);
+
+      const recomendadosData = await listarMetodosRecomendados();
+      setMetodosRecomendados(recomendadosData);
+      const privadosData = await listarTodosMetodosPrivados();
+      setTodosMetodosPrivados(privadosData);
+    } catch (error) {
+      alert('Ocurrió un error al eliminar el método.');
+    }
   };
 
   return (
@@ -267,6 +284,13 @@ export default function Metodos() {
                         >
                           Editar
                         </Button>
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          onClick={() => handleEliminar(metodo.id)}
+                        >
+                          Eliminar
+                        </Button>
                       </td>
                     </tr>
                   ))
@@ -324,6 +348,13 @@ export default function Metodos() {
                           }}
                         >
                           Editar
+                        </Button>
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          onClick={() => handleEliminar(metodo.id)}
+                        >
+                          Eliminar
                         </Button>
                       </td>
                     </tr>

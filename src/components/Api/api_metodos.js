@@ -75,3 +75,18 @@ export const editarMetodo = async (id, formData) => {
     throw error;
   }
 };
+
+export const eliminarMetodo = async (id) => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.delete(`${API_URL}/actividades/eliminar/${id}`, {
+      headers: {
+        Authorization: token,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error al eliminar método:', error.response?.data || error.message);
+    throw error;
+  }
+};
