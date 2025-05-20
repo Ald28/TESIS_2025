@@ -57,3 +57,21 @@ export const listarTodosMetodosPrivados = async () => {
     throw error;
   }
 };
+
+export const editarMetodo = async (id, formData) => {
+  try {
+    const token = localStorage.getItem('token');
+
+    const response = await axios.put(`${API_URL}/actividades/editar/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': token,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Error al editar método:', error.response?.data || error.message);
+    throw error;
+  }
+};

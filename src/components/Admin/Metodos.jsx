@@ -5,8 +5,9 @@ import {
   subirMetodo,
   listarEstudiantes,
   listarMetodosRecomendados,
-  listarTodosMetodosPrivados
-} from '../api/api_metodos';
+  listarTodosMetodosPrivados,
+  editarMetodo,
+} from '../Api/api_metodos';
 
 export default function Metodos() {
   const [titulo, setTitulo] = useState('');
@@ -19,6 +20,8 @@ export default function Metodos() {
   const [todosMetodosPrivados, setTodosMetodosPrivados] = useState([]);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [tabActivo, setTabActivo] = useState('recomendados');
+  const [modoEdicion, setModoEdicion] = useState(false);
+  const [idEditar, setIdEditar] = useState(null);
 
   const [modalArchivoVisible, setModalArchivoVisible] = useState(false);
   const [archivoActual, setArchivoActual] = useState(null);
@@ -41,35 +44,50 @@ export default function Metodos() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!archivo) {
+
+    if (!archivo && !modoEdicion) {
       alert('Selecciona un archivo');
       return;
     }
+
     const formData = new FormData();
     formData.append('titulo', titulo);
     formData.append('descripcion', descripcion);
     formData.append('tipo', tipo);
+
     if (tipo === 'privado') {
       formData.append('estudiante_id', estudianteId);
     }
-    formData.append('archivo', archivo);
+
+    if (archivo) {
+      formData.append('archivo', archivo);
+    }
 
     try {
-      const response = await subirMetodo(formData);
+      let response;
+
+      if (modoEdicion) {
+        response = await editarMetodo(idEditar, formData);
+      } else {
+        response = await subirMetodo(formData);
+      }
+
       alert(response.message);
       setTitulo('');
       setDescripcion('');
       setTipo('recomendado');
-      setArchivo(null);
       setEstudianteId('');
+      setArchivo(null);
       setMostrarModal(false);
+      setModoEdicion(false);
+      setIdEditar(null);
 
       const recomendadosData = await listarMetodosRecomendados();
       setMetodosRecomendados(recomendadosData);
       const privadosData = await listarTodosMetodosPrivados();
       setTodosMetodosPrivados(privadosData);
     } catch (error) {
-      alert('Error al subir el método. Por favor, intente nuevamente.');
+      alert('Ocurrió un error al guardar el método.');
     }
   };
 
@@ -113,9 +131,9 @@ export default function Metodos() {
       </div>
 
       <Modal show={mostrarModal} onHide={() => setMostrarModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Subir Nuevo Método</Modal.Title>
-        </Modal.Header>
+        <Modal.Title>
+          {modoEdicion ? 'Editar Método' : 'Subir Nuevo Método'}
+        </Modal.Title>
         <Modal.Body>
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
@@ -223,12 +241,32 @@ export default function Metodos() {
                     <tr key={metodo.id}>
                       <td>{metodo.titulo}</td>
                       <td>{metodo.descripcion}</td>
-                      <td>
+                      <td className="d-flex gap-2">
                         {metodo.multimedia_url && (
-                          <Button variant="outline-success" size="sm" onClick={() => abrirModalArchivo(metodo.multimedia_url)}>
+                          <Button
+                            variant="outline-success"
+                            size="sm"
+                            onClick={() => abrirModalArchivo(metodo.multimedia_url)}
+                          >
                             Ver Archivo
                           </Button>
                         )}
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          onClick={() => {
+                            setIdEditar(metodo.id);
+                            setTitulo(metodo.titulo);
+                            setDescripcion(metodo.descripcion);
+                            setTipo(metodo.tipo);
+                            setEstudianteId('');
+                            setArchivo(null);
+                            setModoEdicion(true);
+                            setMostrarModal(true);
+                          }}
+                        >
+                          Editar
+                        </Button>
                       </td>
                     </tr>
                   ))
@@ -261,12 +299,32 @@ export default function Metodos() {
                       <td>{metodo.nombre} {metodo.apellido}</td>
                       <td>{metodo.titulo}</td>
                       <td>{metodo.descripcion}</td>
-                      <td>
+                      <td className="d-flex gap-2">
                         {metodo.multimedia_url && (
-                          <Button variant="outline-danger" size="sm" onClick={() => abrirModalArchivo(metodo.multimedia_url)}>
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => abrirModalArchivo(metodo.multimedia_url)}
+                          >
                             Ver Archivo
                           </Button>
                         )}
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          onClick={() => {
+                            setIdEditar(metodo.id);
+                            setTitulo(metodo.titulo);
+                            setDescripcion(metodo.descripcion);
+                            setTipo(metodo.tipo);
+                            setEstudianteId(metodo.estudiante_id || '');
+                            setArchivo(null);
+                            setModoEdicion(true);
+                            setMostrarModal(true);
+                          }}
+                        >
+                          Editar
+                        </Button>
                       </td>
                     </tr>
                   ))
