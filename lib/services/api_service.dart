@@ -14,49 +14,10 @@ import 'package:mime/mime.dart';
 
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.177.181:8080/api';
-
-  /// Listar favoritos
-static Future<List<MetodoRelajacion>> fetchFavoritos(int estudianteId) async {
-  try {
-    final response = await http.get(Uri.parse('$baseUrl/favorito/listar/$estudianteId'));
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return List<MetodoRelajacion>.from(
-        data.map((json) => MetodoRelajacion.fromJson(json)),
-      );
-    } else {
-      return [];
-    }
-  } catch (e) {
-    print("Error al obtener favoritos: $e");
-    return [];
-  }
-}
-
-
-/// Agregar favorito
-static Future<void> agregarFavorito(int estudianteId, int metodoId) async {
-  await http.post(
-    Uri.parse('$baseUrl/favorito/agregar'),
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({"estudiante_id": estudianteId, "metodo_id": metodoId}),
-  );
-}
-
-/// Eliminar favorito
-static Future<void> eliminarFavorito(int estudianteId, int metodoId) async {
-  await http.delete(
-    Uri.parse('$baseUrl/favorito/eliminar'),
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({"estudiante_id": estudianteId, "metodo_id": metodoId}),
-  );
-}
-
+  static const String baseUrl = 'http://172.20.10.5:8080';
 ///cahtbot
 static Future<String> enviarMensajeAlChatbot(String mensaje) async {
-    final url = Uri.parse('http://192.168.177.181:8080/api/chat-estudiante');
+    final url = Uri.parse('$baseUrl/api/chat-estudiante');
     try {
       final response = await http.post(
         url,
@@ -81,7 +42,7 @@ static Future<Estudiante?> fetchPerfilEstudiante(int usuarioId) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
 
-    final url = 'http://192.168.177.181:8080/auth/perfil?usuario_id=$usuarioId';
+    final url = '$baseUrl/auth/perfil?usuario_id=$usuarioId';
 
     final response = await http.get(
       Uri.parse(url),
@@ -128,7 +89,7 @@ static Future<bool> editarPerfilEstudiante({
     }
 
     final response = await http.put(
-  Uri.parse('http://192.168.177.181:8080/auth/editar-perfil'),
+  Uri.parse('$baseUrl/auth/editar-perfil'),
   headers: {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer $token',
@@ -148,27 +109,47 @@ print("📥 Respuesta: ${response.body}");
 
 ///subir iamgen perfil del estudiante:
 static Future<int?> subirImagen(File imagen) async {
-  final uri = Uri.parse('http://192.168.177.181:8080/api/multimedia/upload');
-  final request = http.MultipartRequest('POST', uri);
+  try {
+    print('📤 Iniciando subida de imagen...');
+    
+    final uri = Uri.parse('$baseUrl/api/multimedia/upload');
+    final request = http.MultipartRequest('POST', uri);
 
-  final mimeType = lookupMimeType(imagen.path) ?? 'image/jpeg';
-  final fileStream = await http.MultipartFile.fromPath(
-    'imagen',
-    imagen.path,
-    contentType: MediaType.parse(mimeType),
-  );
+    final mimeType = lookupMimeType(imagen.path) ?? 'image/jpeg';
+    print('📄 Tipo MIME detectado: $mimeType');
 
-  request.files.add(fileStream);
+    final fileStream = await http.MultipartFile.fromPath(
+      'imagen',
+      imagen.path,
+      contentType: MediaType.parse(mimeType),
+    );
 
-  final response = await request.send();
-  if (response.statusCode == 200) {
-    final respStr = await response.stream.bytesToString();
-    final data = jsonDecode(respStr);
-    return data['multimedia_id'];
-  } else {
+    request.files.add(fileStream);
+    print('📎 Archivo añadido a la solicitud.');
+
+    final response = await request.send();
+    print('🔗 Solicitud enviada. Código de respuesta: ${response.statusCode}');
+
+    if (response.statusCode == 200) {
+      final respStr = await response.stream.bytesToString();
+      print('✅ Respuesta recibida: $respStr');
+
+      final data = jsonDecode(respStr);
+      final id = data['multimedia_id'];
+      print('🆔 ID de la imagen subida: $id');
+      return id;
+    } else {
+      print('❌ Error al subir imagen. Código de estado: ${response.statusCode}');
+      final errorStr = await response.stream.bytesToString();
+      print('⚠️ Mensaje de error: $errorStr');
+      return null;
+    }
+  } catch (e) {
+    print('🚨 Excepción durante la subida de imagen: $e');
     return null;
   }
 }
+
 
 
 ///canelar cita
@@ -178,7 +159,7 @@ static Future<void> cancelarCita({
   required String token,
 }) async {
   final response = await http.put(
-    Uri.parse('http://192.168.177.181:8080/auth/cancelar-cita'),
+    Uri.parse('$baseUrl/auth/cancelar-cita'),
     headers: {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
@@ -197,7 +178,7 @@ static Future<void> cancelarCita({
 
 static Future<List<Map<String, dynamic>>> fetchCitasFinalizadas(int estudianteId) async {
   final response = await http.get(
-    Uri.parse('http://192.168.177.181:8080/auth/historial-canceladas/$estudianteId'),
+    Uri.parse('$baseUrl/auth/historial-canceladas/$estudianteId'),
   );
 
   if (response.statusCode == 200) {
@@ -210,7 +191,7 @@ static Future<List<Map<String, dynamic>>> fetchCitasFinalizadas(int estudianteId
 /// Obtener citas activas por token
 static Future<List<Map<String, dynamic>>> fetchCitasActivas(String token) async {
   final response = await http.get(
-    Uri.parse('http://192.168.177.181:8080/auth/citas-activas'),
+    Uri.parse('$baseUrl/auth/citas-activas'),
     headers: {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
@@ -233,7 +214,7 @@ static Future<List<Map<String, dynamic>>> fetchCitasActivas(String token) async 
 static Future<List<Map<String, dynamic>>> fetchHorasOcupadas(int psicologoId, DateTime fecha, String token) async {
   final fechaStr = fecha.toIso8601String().substring(0, 10);
   final response = await http.get(
-    Uri.parse('http://192.168.177.181:8080/auth/psicologo/horas-ocupadas/$psicologoId/$fechaStr'),
+    Uri.parse('$baseUrl/auth/psicologo/horas-ocupadas/$psicologoId/$fechaStr'),
     headers: {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
@@ -252,7 +233,7 @@ static Future<List<Map<String, dynamic>>> fetchHorasOcupadas(int psicologoId, Da
 ////disponibilidad  para citas
   static Future<List<Disponibilidad>> fetchDisponibilidad(int psicologoId) async {
   final response = await http.get(
-    Uri.parse('http://192.168.177.181:8080/auth/disponibilidad/$psicologoId'),
+    Uri.parse('$baseUrl/auth/disponibilidad/$psicologoId'),
   );
 
   if (response.statusCode == 200) {
@@ -273,7 +254,7 @@ static Future<void> crearCita({
   required String token,
 }) async {
   final response = await http.post(
-    Uri.parse('http://192.168.177.181:8080/auth/cita'),
+    Uri.parse('$baseUrl/auth/cita'),
     headers: {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
@@ -296,7 +277,7 @@ static Future<void> crearCita({
 
   static Future<List<Psicologo>> fetchPsicologos() async {
     try {
-      final response = await http.get(Uri.parse('http://192.168.177.181:8080/auth/psicologo/listar-psicologo'));   ///esto tambien es una alternativa 
+      final response = await http.get(Uri.parse('$baseUrl/auth/psicologo/listar-psicologo'));   ///esto tambien es una alternativa 
                                                                                                         /// ya que tengo mi base url con 1..../api
                                                                                                         /// pero este es con auth
       if (response.statusCode == 200) {
@@ -415,7 +396,7 @@ static Future<List<MetodoRelajacion>> fetchMetodosPrivados(int estudianteId) asy
   
   /// Iniciar sesión con Google
 static Future<Map<String, dynamic>> loginConGoogle(String credential) async {
-  final url = Uri.parse('http://192.168.177.181:8080/auth/google/estudiante');
+  final url = Uri.parse('http://172.20.10.5:8080/auth/google/estudiante');
 
   try {
     final response = await http.post(
@@ -435,7 +416,7 @@ static Future<Map<String, dynamic>> loginConGoogle(String credential) async {
 }
 /// Obtener perfil con token (si lo separas)
 static Future<Map<String, dynamic>> obtenerPerfilConToken(String token) async {
-  final url = Uri.parse('http://192.168.177.181:8080/auth/perfil');
+  final url = Uri.parse('$baseUrl/auth/perfil');
 
   try {
     final response = await http.get(

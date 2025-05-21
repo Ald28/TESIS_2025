@@ -26,7 +26,6 @@ class _PaginaHomeState extends State<PaginaHome> {
   List<String> _categorias = [];
 
   String? _categoriaSeleccionada;
-  Set<int> _favoritos = {};
   bool mostrarPrivados = false;
 
   @override
@@ -49,11 +48,6 @@ void _cargarDatos() async {
   _metodosFuture = futureMetodos.then((metodos) async {
     _todosLosMetodos = metodos;
     _categorias = metodos.map((m) => m.categoria.trim().toLowerCase()).toSet().toList();
-
-    final favoritos = await ApiService.fetchFavoritos(estudianteId);
-    setState(() {
-      _favoritos = favoritos.map((m) => m.id).toSet();
-    });
 
     return metodos;
   });
@@ -287,36 +281,6 @@ void _cargarDatos() async {
                                         ],
                                       ),
                                     ],
-                                  ),
-                                ),
-                                Positioned(
-                                  top: 4,
-                                  right: 4,
-                                  child: IconButton(
-                                    icon: Icon(
-                                      _favoritos.contains(metodo.id)
-                                          ? Icons.favorite
-                                          : Icons.favorite_border,
-                                      color: Colors.red,
-                                    ),
-                                    onPressed: () async {
-                                      const usuarioId = 2;
-                                      final yaEsFavorito = _favoritos.contains(metodo.id);
-
-                                      setState(() {
-                                        if (yaEsFavorito) {
-                                          _favoritos.remove(metodo.id);
-                                        } else {
-                                          _favoritos.add(metodo.id);
-                                        }
-                                      });
-
-                                      if (yaEsFavorito) {
-                                        await ApiService.eliminarFavorito(usuarioId, metodo.id);
-                                      } else {
-                                        await ApiService.agregarFavorito(usuarioId, metodo.id);
-                                      }
-                                    },
                                   ),
                                 ),
                               ],
