@@ -14,7 +14,7 @@ import 'package:mime/mime.dart';
 
 
 class ApiService {
-  static const String baseUrl = 'http://172.20.10.5:8080';
+  static const String baseUrl = 'http://192.168.177.181:8080';
 ///cahtbot
 static Future<String> enviarMensajeAlChatbot(String mensaje) async {
     final url = Uri.parse('$baseUrl/api/chat-estudiante');
@@ -396,7 +396,7 @@ static Future<List<MetodoRelajacion>> fetchMetodosPrivados(int estudianteId) asy
   
   /// Iniciar sesión con Google
 static Future<Map<String, dynamic>> loginConGoogle(String credential) async {
-  final url = Uri.parse('http://172.20.10.5:8080/auth/google/estudiante');
+  final url = Uri.parse('http://192.168.177.181:8080/auth/google/estudiante');
 
   try {
     final response = await http.post(

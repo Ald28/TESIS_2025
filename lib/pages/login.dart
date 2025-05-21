@@ -22,7 +22,11 @@ class _LoginState extends State<Login> {
 
   Future<void> loginWithGoogle() async {
     setState(() => isLoading = true);
+
     try {
+      // Cierra sesión antes de intentar iniciar nuevamente (fuerza el selector de cuentas)
+      await _googleSignIn.signOut();
+
       final GoogleSignInAccount? user = await _googleSignIn.signIn();
       if (user == null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -62,7 +66,6 @@ class _LoginState extends State<Login> {
           await prefs.setInt('estudiante_id', estudianteId);
           await prefs.setInt('usuario_id', usuarioId);
 
-
           Navigator.pushReplacementNamed(context, '/quiz-page');
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -79,6 +82,7 @@ class _LoginState extends State<Login> {
         SnackBar(content: Text('Error: $error')),
       );
     }
+
     setState(() => isLoading = false);
   }
 
