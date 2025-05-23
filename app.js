@@ -11,6 +11,7 @@ const adminAuthRoutes = require('./src/routes/admin_auth.routes');
 const observacionRoutes = require('./src/routes/observacion.routes');
 const chatRoutes = require('./src/routes/chat.routes');
 const perfil = require("./src/routes/multimedia.routes") // CAMBIAR PERFIL ESTUDIANTE
+const notificacionRoutes = require('./src/routes/notificacion.routes');
 
 const app = express();
 
@@ -32,5 +33,6 @@ app.use('/api', observacionRoutes);
 app.use('/api', crearPreguntaRoutes);
 app.use('/api', crearMetodo);
 app.use('/api', chatRoutes);
+app.use('/api/notificaciones', notificacionRoutes);
 
 module.exports = app;

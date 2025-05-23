@@ -1,9 +1,8 @@
 const metodo = require('../controllers/metodo_relajacion.controller');
 const authPsicologo = require('../middlewares/authPsicologo');
 const express = require('express');
-const multer = require('multer');
 const router = express.Router();
-const upload = multer(); 
+const upload = require('../middlewares/multer');
 
 // Ruta para subir métodos de relajación
 router.post('/subir-metodo', authPsicologo, upload.single('archivo'), metodo.subirMetodoRelajacion);
