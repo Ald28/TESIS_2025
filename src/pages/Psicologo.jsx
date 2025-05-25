@@ -8,6 +8,7 @@ import {
   registrarPsicologo,
   eliminarPsicologo,
   activarPsicologo,
+  editarPsicologo,
 } from "../api/api_admin";
 import { FaUserMd, FaPlus, FaTimes } from "react-icons/fa";
 import "../styles/Psicologo.css";
@@ -16,6 +17,8 @@ export default function Psicologo() {
   const [psicologos, setPsicologos] = useState([]);
   const [estadoFiltro, setEstadoFiltro] = useState("activo");
   const [mostrarPanel, setMostrarPanel] = useState(false);
+  const [modoEdicion, setModoEdicion] = useState(false);
+  const [psicologoEditandoId, setPsicologoEditandoId] = useState(null);
   const [nuevoPsicologo, setNuevoPsicologo] = useState({
     nombre: "",
     apellido: "",
@@ -43,14 +46,20 @@ export default function Psicologo() {
     const correoValido = nuevoPsicologo.correo.endsWith("@tecsup.edu.pe");
 
     if (!correoValido) {
-      toast.error("❌ El correo debe terminar en @tecsup.edu.pe");
+      toast.error("El correo debe terminar en @tecsup.edu.pe");
       return;
     }
 
     try {
-      await registrarPsicologo(nuevoPsicologo);
+      if (modoEdicion) {
+        await editarPsicologo(psicologoEditandoId, nuevoPsicologo);
+        toast.success("Psicólogo editado correctamente.");
+      } else {
+        await registrarPsicologo(nuevoPsicologo);
+        toast.success("Psicólogo registrado correctamente.");
+      }
+
       await fetchData(estadoFiltro);
-      toast.success("✅ Psicólogo registrado correctamente.");
 
       setNuevoPsicologo({
         nombre: "",
@@ -59,10 +68,12 @@ export default function Psicologo() {
         especialidad: "",
         descripcion: "",
       });
+      setModoEdicion(false);
+      setPsicologoEditandoId(null);
       setMostrarPanel(false);
     } catch (error) {
-      console.error("Error al registrar psicólogo:", error.message);
-      toast.error("❌ Error al registrar psicólogo.");
+      console.error("Error al guardar psicólogo:", error.message);
+      toast.error("Error al guardar psicólogo.");
     }
   };
 
@@ -82,10 +93,10 @@ export default function Psicologo() {
       try {
         await eliminarPsicologo(usuario_id);
         await fetchData(estadoFiltro);
-        toast.success("✅ Psicólogo eliminado correctamente.");
+        toast.success("Psicólogo eliminado correctamente.");
       } catch (error) {
         console.error("Error al eliminar psicólogo:", error.message);
-        toast.error("❌ Error al eliminar psicólogo.");
+        toast.error("Error al eliminar psicólogo.");
       }
     }
   };
@@ -94,11 +105,24 @@ export default function Psicologo() {
     try {
       await activarPsicologo(usuario_id);
       await fetchData(estadoFiltro);
-      toast.success("✅ Psicólogo activado correctamente.");
+      toast.success("Psicólogo activado correctamente.");
     } catch (error) {
       console.error("Error al activar psicólogo:", error.message);
-      toast.error("❌ Error al activar psicólogo.");
+      toast.error("Error al activar psicólogo.");
     }
+  };
+
+  const onEditar = (psicologo) => {
+    setNuevoPsicologo({
+      nombre: psicologo.nombre,
+      apellido: psicologo.apellido,
+      correo: psicologo.correo,
+      especialidad: psicologo.especialidad,
+      descripcion: psicologo.descripcion,
+    });
+    setPsicologoEditandoId(psicologo.usuario_id);
+    setModoEdicion(true);
+    setMostrarPanel(true);
   };
 
   return (
@@ -186,6 +210,12 @@ export default function Psicologo() {
                         Activar
                       </button>
                     )}
+                    <button
+                      className="btn btn-sm btn-outline-primary"
+                      onClick={() => onEditar(psic)}
+                    >
+                      Editar
+                    </button>
                   </td>
                 </tr>
               ))}

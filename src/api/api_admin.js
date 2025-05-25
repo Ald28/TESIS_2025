@@ -43,6 +43,16 @@ export const registrarPsicologo = async (psicologoData) => {
     }
 };
 
+export const editarPsicologo = async (usuario_id, psicologoData) => {
+    try {
+        const response = await axios.put(`${API}/psicologo/${usuario_id}`, psicologoData);
+        return response.data;
+    } catch (error) {
+        console.error("Error al editar psicólogo:", error);
+        throw error;
+    }
+};
+
 export const getDisponibilidadPorPsicologo = async (id) => {
     try {
         const response = await axios.get(`${API_PSICO}/disponibilidad/${id}`);

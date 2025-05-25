@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "admin-superuser": "file:",
     "axios": "^1.9.0",
     "bootstrap": "^5.3.6",
     "cors": "^2.8.5",
