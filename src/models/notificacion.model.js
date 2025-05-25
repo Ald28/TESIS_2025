@@ -23,8 +23,29 @@ const crearNotificacion = async ({ titulo, mensaje, tipo = 'sistema', usuario_id
   return await query(sql, [titulo, mensaje, tipo, usuario_id]);
 };
 
+const listarNotificacionesPorUsuarioId = async (usuario_id) => {
+  const sql = `
+    SELECT id, titulo, mensaje, tipo, fecha_envio, leido
+    FROM notificaciones
+    WHERE usuario_id = ?
+    ORDER BY fecha_envio DESC
+  `;
+  const result = await query(sql, [usuario_id]);
+  return result;
+};
+
+const eliminarNotificaciones = async (id) =>{
+  const sql = `
+    DELETE FROM notificaciones
+    WHERE id = ?
+  `;
+  return await query(sql, [id]);
+}
+
 module.exports = {
   guardarTokenFCM,
   obtenerTokenPorUsuarioId,
   crearNotificacion,
+  listarNotificacionesPorUsuarioId,
+  eliminarNotificaciones,
 };

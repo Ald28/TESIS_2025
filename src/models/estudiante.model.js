@@ -52,13 +52,13 @@ const listarEstudiantes = async () => {
 
 const obtenerUsuarioPorEstudianteId = async (estudiante_id) => {
   const sql = `
-        SELECT u.*
-        FROM estudiante e
-        INNER JOIN usuario u ON e.usuario_id = u.id
-        WHERE e.id = ?
-    `;
+    SELECT u.id AS usuario_id, u.nombre, u.apellido, u.correo, u.rol_id, u.multimedia_id
+    FROM estudiante e
+    LEFT JOIN usuario u ON e.usuario_id = u.id
+    WHERE e.id = ?
+  `;
   const result = await query(sql, [estudiante_id]);
-  return result[0];
+  return result.length > 0 ? result[0] : null;
 };
 
 const listarPorPsicologo = async (psicologo_id) => {

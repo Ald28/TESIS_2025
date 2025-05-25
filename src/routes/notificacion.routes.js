@@ -4,5 +4,7 @@ const notificacionController = require('../controllers/notificacion.controller')
 
 router.post('/guardar-token-fcm', notificacionController.guardarTokenFCM);
 router.post('/enviar-notificacion', notificacionController.enviarNotificacion);
+router.get('/listar/:usuario_id', notificacionController.listarNotificaciones);
+router.delete('/eliminar/:id', notificacionController.eliminarNotificacion);
 
 module.exports = router;

@@ -50,7 +50,41 @@ const enviarNotificacion = async (req, res) => {
   }
 };
 
+const listarNotificaciones = async (req, res) => {
+  try {
+    const usuario_id = req.params.usuario_id;
+
+    if (!usuario_id) {
+      return res.status(400).json({ message: 'Falta el ID del usuario' });
+    }
+
+    const notificaciones = await notificacionModel.listarNotificacionesPorUsuarioId(usuario_id);
+    res.status(200).json({ notificaciones });
+  } catch (error) {
+    console.error('❌ Error al listar notificaciones:', error);
+    res.status(500).json({ message: 'Error al listar notificaciones' });
+  }
+};
+
+const eliminarNotificacion = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ message: 'Falta el ID de la notificación' });
+    }
+
+    await notificacionModel.eliminarNotificaciones(id);
+    res.status(200).json({ message: 'Notificación eliminada correctamente' });
+  } catch (error) {
+    console.error('❌ Error al eliminar notificación:', error);
+    res.status(500).json({ message: 'Error al eliminar notificación' });
+  }
+};
+
 module.exports = {
   guardarTokenFCM,
   enviarNotificacion,
+  listarNotificaciones,
+  eliminarNotificacion,
 };
