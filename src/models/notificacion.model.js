@@ -25,7 +25,7 @@ const crearNotificacion = async ({ titulo, mensaje, tipo = 'sistema', usuario_id
 
 const listarNotificacionesPorUsuarioId = async (usuario_id) => {
   const sql = `
-    SELECT id, titulo, mensaje, tipo, fecha_envio, leido
+    SELECT id, titulo, mensaje, tipo, fecha_envio
     FROM notificaciones
     WHERE usuario_id = ?
     ORDER BY fecha_envio DESC
