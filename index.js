@@ -1,5 +1,6 @@
-require('dotenv').config();
+require('./src/jobs/inactividad.job');
 require('./src/config/conexion.js');
+require('dotenv').config();
 
 const app = require('./app.js');
 

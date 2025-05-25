@@ -35,6 +35,16 @@ const actualizarUltimaConexion = async (usuario_id) => {
   await query(sql, [usuario_id]);
 };
 
+const obtenerEstudiantesInactivos = async (diasInactividad) => {
+  const sql = `
+    SELECT id AS usuario_id
+    FROM usuario
+    WHERE rol = 'estudiante'
+      AND TIMESTAMPDIFF(DAY, ultima_conexion, NOW()) >= ?
+  `;
+  return await query(sql, [diasInactividad]);
+};
+
 module.exports = {
   buscarUsuarioPorCorreo,
   insertarMultimedia,
@@ -42,4 +52,5 @@ module.exports = {
   actualizarMultimediaUsuario,
   buscarUsuarioPorId,
   actualizarUltimaConexion,
+  obtenerEstudiantesInactivos,
 };
