@@ -328,16 +328,39 @@ const cancelarCitaPsicologo = async (req, res) => {
         if (!cita_id) return res.status(400).json({ message: 'ID de cita requerido' });
 
         const resultado = await citaModel.cancelarCitaPorPsicologo(cita_id, psicologo.id);
-
-        if (resultado.exito) {
-            return res.status(200).json({ message: 'Cita cancelada correctamente' });
-        } else {
+        if (!resultado.exito) {
             return res.status(400).json({ message: resultado.mensaje });
         }
 
+        const cita = await citaModel.obtenerCitaPorId(cita_id);
+        if (!cita) return res.status(404).json({ message: 'Cita no encontrada' });
+
+        const usuarioId = psicologo.usuario_id || decoded.id;
+        const infoPsicologo = await psicologoModel.obtenerNombreCompletoPsicologo(usuarioId);
+        const nombrePsicologo = infoPsicologo?.nombre_completo || `${psicologo.nombre} ${psicologo.apellido}`;
+
+        const estudianteInfo = await estudianteModel.obtenerUsuarioPorEstudianteId(cita.estudiante_id);
+        if (!estudianteInfo || !estudianteInfo.usuario_id) {
+            console.error('⚠️ Estudiante sin usuario válido:', estudianteInfo);
+        } else {
+            try {
+                await enviarNotificacionSistema({
+                    usuario_id: estudianteInfo.usuario_id,
+                    titulo: 'Cita Cancelada',
+                    mensaje: `Tu cita con ${nombrePsicologo} ha sido cancelada.`,
+                    tipo: 'alerta',
+                });
+                console.log('Notificación enviada al estudiante:', estudianteInfo.usuario_id);
+            } catch (error) {
+                console.error('Error al enviar notificación push:', error.message || error);
+            }
+        }
+
+        return res.status(200).json({ message: 'Cita cancelada correctamente' });
+
     } catch (error) {
-        console.error('❌ Error al cancelar cita:', error);
-        res.status(500).json({ message: 'Error al cancelar cita' });
+        console.error('Error al cancelar cita:', error);
+        return res.status(500).json({ message: 'Error al cancelar cita' });
     }
 };
 
