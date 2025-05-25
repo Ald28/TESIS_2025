@@ -10,5 +10,6 @@ router.get('/disponibilidad/turnos/:psicologo_id', adminController.listarDisponi
 router.post('/psicologos/registrar', adminController.registrarPsicologo);
 router.delete('/eliminar/:usuario_id', adminController.eliminarPsicologo);
 router.post('/activar/:usuario_id', adminController.activarPsicologo);
+router.put('/psicologo/:usuario_id', adminController.editarPsicologo);
 
 module.exports = router;

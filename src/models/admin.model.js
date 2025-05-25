@@ -99,6 +99,22 @@ const activarPsicologo = async (usuario_id) => {
   return result.affectedRows;
 };
 
+const actualizarPreRegistro = async ({ usuario_id, nombre, apellido, correo, especialidad, descripcion }) => {
+  await query(`
+    UPDATE usuario
+    SET nombre = ?, apellido = ?, correo = ?
+    WHERE id = ?
+  `, [nombre, apellido, correo, usuario_id]);
+
+  await query(`
+    UPDATE psicologo
+    SET especialidad = ?, descripcion = ?
+    WHERE usuario_id = ?
+  `, [especialidad, descripcion, usuario_id]);
+
+  return true;
+};
+
 module.exports = {
   buscarAdminPorCorreo,
   listarEstudiantes,
@@ -107,4 +123,5 @@ module.exports = {
   registrarUsuarioPsicologoPreRegistro,
   eliminarPsicologo,
   activarPsicologo,
+  actualizarPreRegistro,
 };

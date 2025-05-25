@@ -148,6 +148,33 @@ const activarPsicologo = async (req, res) => {
   }
 };
 
+const editarPsicologo = async (req, res) => {
+  try {
+    const { usuario_id } = req.params;
+    const { nombre, apellido, correo, especialidad, descripcion } = req.body;
+
+    if (!usuario_id || !nombre || !apellido || !correo) {
+      return res.status(400).json({ mensaje: "Datos incompletos para la actualización." });
+    }
+
+    await adminModel.actualizarPreRegistro({
+      usuario_id,
+      nombre,
+      apellido,
+      correo,
+      especialidad,
+      descripcion
+    });
+
+    res.status(200).json({ ok: true, mensaje: "Datos del psicólogo actualizados correctamente." });
+
+  } catch (error) {
+    console.error("Error al editar psicólogo:", error.message);
+    res.status(500).json({ ok: false, mensaje: "Error del servidor." });
+  }
+};
+
+
 module.exports = {
   loginAdmin,
   obtenerEstudiantes,
@@ -155,5 +182,6 @@ module.exports = {
   listarDisponibilidadPorTurno,
   registrarPsicologo,
   eliminarPsicologo,
-  activarPsicologo
+  activarPsicologo,
+  editarPsicologo,
 };
