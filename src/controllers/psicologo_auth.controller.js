@@ -266,6 +266,41 @@ const cambiarEstadoCita = async (req, res) => {
             });
         }
 
+        if (estado === 'rechazada') {
+            const cita = await psicologoModel.obtenerDetallesCita(cita_id);
+
+            if (!cita) {
+                return res.status(404).json({ message: 'Cita no encontrada' });
+            }
+
+            const usuario = await usuarioModel.buscarUsuarioPorId(cita.usuario_psicologo);
+            const nombrePsicologo = usuario ? `${usuario.nombre} ${usuario.apellido}` : 'Psicólogo';
+
+            await citaModel.actualizarEstadoCita({
+                cita_id,
+                estado,
+                evento_google_id: null,
+            });
+
+            const estudianteInfo = await estudianteModel.obtenerUsuarioPorEstudianteId(cita.estudiante_id);
+            if (estudianteInfo?.usuario_id) {
+                try {
+                    await enviarNotificacionSistema({
+                        usuario_id: estudianteInfo.usuario_id,
+                        titulo: 'Cita Rechazada',
+                        mensaje: `Tu cita con ${nombrePsicologo} ha sido rechazada.`,
+                        tipo: 'alerta',
+                    });
+                } catch (err) {
+                    console.error('❌ Error al enviar notificación push:', err.message || err);
+                }
+            }
+
+            return res.status(200).json({
+                message: 'Cita rechazada correctamente',
+            });
+        }
+
         await citaModel.actualizarEstadoCita({ cita_id, estado, evento_google_id });
 
         res.status(200).json({
