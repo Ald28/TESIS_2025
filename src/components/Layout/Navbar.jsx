@@ -23,7 +23,7 @@ const Navbar = ({ collapsed }) => {
       </a>
 
       <div className="d-flex align-items-center gap-3">
-        <a className="text-dark" href="/admin/notifications">
+        <a className="text-dark" href="/admin/notificaciones">
           <FaBell size={20} />
         </a>
         <a className="text-dark" href="/admin/perfil">
