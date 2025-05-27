@@ -11,6 +11,9 @@ import {
   eliminarCalificacion,
 } from "../Api/api_observacion";
 import { FaUserGraduate } from "react-icons/fa";
+import { toast, ToastContainer } from "react-toastify";
+import Swal from "sweetalert2";
+import "react-toastify/dist/ReactToastify.css";
 import "../Styles/Usuarios.css";
 
 export default function Usuarios() {
@@ -46,6 +49,7 @@ export default function Usuarios() {
           setHistoriales(prev => ({ ...prev, [est.estudiante_id]: historial }));
         }
       } catch (error) {
+        toast.error("Error al cargar los datos");
         console.error("❌ Error al cargar datos:", error);
       }
     };
@@ -80,24 +84,19 @@ export default function Usuarios() {
   const handleEnviarComentario = async (estudiante_id) => {
     const comentario = comentarios[estudiante_id];
     if (!comentario || comentario.trim() === "") {
-      alert("Escribe un comentario antes de enviarlo.");
+      toast.warn("Escribe un comentario antes de enviarlo");
       return;
     }
 
     try {
-      await crearCalificacion({
-        psicologo_id: psicologoId,
-        estudiante_id,
-        comentario
-      });
-
+      await crearCalificacion({ psicologo_id: psicologoId, estudiante_id, comentario });
       const nuevasObservaciones = await obtenerCalificacionesPorEstudiante(estudiante_id);
       setObservaciones(prev => ({ ...prev, [estudiante_id]: nuevasObservaciones }));
-      alert("✅ Comentario enviado correctamente.");
       setComentarios(prev => ({ ...prev, [estudiante_id]: "" }));
+      toast.success("Comentario enviado correctamente");
     } catch (error) {
       console.error("❌ Error al enviar comentario:", error);
-      alert("❌ Error al enviar comentario.");
+      toast.error("No se pudo enviar el comentario");
     }
   };
 
@@ -108,39 +107,44 @@ export default function Usuarios() {
 
   const handleGuardarComentarioEditado = async (calificacionId, estudianteId) => {
     try {
-      await editarCalificacion(calificacionId, {
-        comentario: nuevoComentario,
-        psicologo_id: psicologoId,
-      });
-
+      await editarCalificacion(calificacionId, { comentario: nuevoComentario, psicologo_id: psicologoId });
       const nuevasObservaciones = await obtenerCalificacionesPorEstudiante(estudianteId);
       setObservaciones(prev => ({ ...prev, [estudianteId]: nuevasObservaciones }));
       setEditandoComentarioId(null);
       setNuevoComentario("");
+      toast.success("Comentario actualizado correctamente");
     } catch (error) {
       console.error("❌ Error al editar comentario:", error);
-      alert("❌ No se pudo editar el comentario.");
+      toast.error("No se pudo editar el comentario");
     }
   };
 
   const handleEliminarComentario = async (calificacionId, estudianteId) => {
-    if (!window.confirm("¿Estás seguro de eliminar este comentario?")) return;
+    const confirmar = await Swal.fire({
+      title: '¿Eliminar comentario?',
+      text: 'Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+    });
+
+    if (!confirmar.isConfirmed) return;
 
     try {
       await eliminarCalificacion(calificacionId, psicologoId);
-
       const nuevasObservaciones = await obtenerCalificacionesPorEstudiante(estudianteId);
       setObservaciones(prev => ({ ...prev, [estudianteId]: nuevasObservaciones }));
-
-      alert("✅ Comentario eliminado correctamente.");
+      toast.success("Comentario eliminado correctamente");
     } catch (error) {
       console.error("❌ Error al eliminar comentario:", error);
-      alert("❌ No se pudo eliminar el comentario.");
+      toast.error("No se pudo eliminar el comentario");
     }
   };
 
   return (
     <div className="estudiantes-container">
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
       <div className="header">
         <h2 className="title">Estudiantes</h2>
         <p className="subtitle">Gestiona a los estudiantes registrados en el sistema</p>
@@ -221,55 +225,63 @@ export default function Usuarios() {
             </button>
             <ul className="list-unstyled small mt-2">
               {(observaciones[modalEstudianteId] || []).map((obs, idx) => (
-                <li key={idx} className="mb-3 border-bottom pb-2">
+                <li key={idx} className="mb-4 border-bottom pb-3">
                   <span className="fw-bold">
                     {obs.psicologo_nombre} {obs.psicologo_apellido}:
-                  </span>{" "}
+                  </span>
+
                   {editandoComentarioId === obs.id ? (
                     <>
                       <textarea
-                        className="form-control form-control-sm mb-2"
+                        className="form-control form-control-sm mt-2 mb-2"
                         value={nuevoComentario}
                         onChange={(e) => setNuevoComentario(e.target.value)}
                       />
-                      <button
-                        className="btn btn-sm btn-success me-2"
-                        onClick={() =>
-                          handleGuardarComentarioEditado(obs.id, modalEstudianteId)
-                        }
-                      >
-                        Guardar
-                      </button>
-                      <button
-                        className="btn btn-sm btn-secondary"
-                        onClick={() => setEditandoComentarioId(null)}
-                      >
-                        Cancelar
-                      </button>
+                      <div className="d-flex justify-content-center gap-2 mb-2">
+                        <button
+                          className="btn btn-sm btn-success"
+                          onClick={() =>
+                            handleGuardarComentarioEditado(obs.id, modalEstudianteId)
+                          }
+                        >
+                          Guardar
+                        </button>
+                        <button
+                          className="btn btn-sm btn-secondary"
+                          onClick={() => setEditandoComentarioId(null)}
+                        >
+                          Cancelar
+                        </button>
+                      </div>
                     </>
                   ) : (
                     <>
-                      {obs.comentario}
-
+                      <p className="mt-2 mb-3">{obs.comentario}</p>
                       {parseInt(obs.psicologo_id) === parseInt(psicologoId) && (
-                        <>
+                        <div className="d-flex justify-content-center gap-2 mb-2">
                           <button
-                            className="btn btn-sm btn-link"
-                            onClick={() => handleEditarComentario(obs.id, obs.comentario)}
+                            className="btn btn-sm btn-outline-primary"
+                            onClick={() =>
+                              handleEditarComentario(obs.id, obs.comentario)
+                            }
+                            title="Editar comentario"
                           >
-                            Editar
+                            <i className="me-1 fas fa-edit"></i> Editar
                           </button>
                           <button
                             className="btn btn-sm btn-danger"
-                            onClick={() => handleEliminarComentario(obs.id, modalEstudianteId)}
+                            onClick={() =>
+                              handleEliminarComentario(obs.id, modalEstudianteId)
+                            }
+                            title="Eliminar comentario"
                           >
-                            Eliminar
+                            <i className="me-1 fas fa-trash-alt"></i> Eliminar
                           </button>
-                        </>
+                        </div>
                       )}
                     </>
                   )}
-                  <br />
+
                   <span className="text-muted" style={{ fontSize: "0.75rem" }}>
                     {new Date(obs.fecha_creacion).toLocaleString()}
                   </span>
