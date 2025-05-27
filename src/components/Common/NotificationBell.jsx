@@ -1,9 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { FaBell } from "react-icons/fa";
+import {
+  FaBell,
+  FaTimes,
+  FaUser,
+  FaCheckCircle,
+  FaCommentDots,
+} from "react-icons/fa";
 import {
   listarNotificacionesPorUsuario,
   eliminarNotificacionPorId,
 } from "../Api/api_notificaciones";
+import "../Styles/NotificationBell.css";
 
 const NotificationBell = () => {
   const [notificaciones, setNotificaciones] = useState([]);
@@ -14,7 +21,10 @@ const NotificationBell = () => {
 
   const toggleDropdown = () => {
     setMostrar(!mostrar);
-    if (!mostrar) setNuevas(0);
+    if (!mostrar) {
+      // Al abrir el dropdown, se marcan como leídas
+      setNuevas(0);
+    }
   };
 
   const cargarNotificaciones = async () => {
@@ -52,98 +62,62 @@ const NotificationBell = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const getIconByTipo = (tipo) => {
+    switch (tipo) {
+      case "completado":
+        return <FaCheckCircle className="notif-icon success" />;
+      case "mensaje":
+        return <FaCommentDots className="notif-icon info" />;
+      default:
+        return <FaUser className="notif-icon default" />;
+    }
+  };
+
   return (
-    <div style={{ position: "relative" }}>
+    <div className="notification-bell">
       <audio ref={audioRef} src="/notification.mp3" preload="auto" />
 
-      <div style={{ position: "relative", cursor: "pointer" }} onClick={toggleDropdown}>
+      <div className="bell-wrapper" onClick={toggleDropdown}>
         <FaBell size={20} />
         {nuevas > 0 && (
-          <span
-            style={{
-              position: "absolute",
-              top: "-6px",
-              right: "-6px",
-              background: "red",
-              color: "white",
-              fontSize: "10px",
-              borderRadius: "50%",
-              padding: "2px 5px",
-              minWidth: "18px",
-              textAlign: "center",
-              fontWeight: "bold",
-            }}
-          >
-            {nuevas}
-          </span>
+          <span className="notif-badge">{nuevas}</span>
         )}
       </div>
 
       {mostrar && (
-        <div
-          style={{
-            position: "absolute",
-            top: "30px",
-            right: 0,
-            width: "300px",
-            backgroundColor: "white",
-            border: "1px solid #ccc",
-            borderRadius: "5px",
-            boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.15)",
-            zIndex: 999,
-            maxHeight: "300px",
-            overflowY: "auto",
-          }}
-        >
-          <div
-            style={{
-              padding: "10px",
-              fontWeight: "bold",
-              borderBottom: "1px solid #eee",
-            }}
-          >
-            Notificaciones
+        <div className="notif-dropdown">
+          <div className="notif-header">
+            <span>Notificaciones</span>
           </div>
-          {notificaciones.length === 0 ? (
-            <div style={{ padding: "10px", textAlign: "center" }}>
-              Sin notificaciones
-            </div>
-          ) : (
-            notificaciones.map((n) => (
-              <div
-                key={n.id}
-                style={{
-                  padding: "10px",
-                  borderBottom: "1px solid #eee",
-                  fontSize: "14px",
-                  position: "relative",
-                }}
-              >
-                <strong>{n.titulo}</strong>
-                <div>{n.mensaje}</div>
-                <div style={{ fontSize: "12px", color: "gray" }}>
-                  {new Date(n.fecha_envio).toLocaleString()}
-                </div>
 
-                <button
-                  onClick={() => handleEliminar(n.id)}
-                  style={{
-                    position: "absolute",
-                    top: "8px",
-                    right: "10px",
-                    background: "transparent",
-                    border: "none",
-                    color: "red",
-                    fontWeight: "bold",
-                    fontSize: "16px",
-                    cursor: "pointer",
-                  }}
-                  title="Eliminar notificación"
+          {notificaciones.length === 0 ? (
+            <div className="notif-empty">Sin notificaciones</div>
+          ) : (
+            <>
+              {notificaciones.map((n, index) => (
+                <div
+                  key={n.id}
+                  className={`notif-item ${index < nuevas ? "new" : ""}`}
                 >
-                  ×
-                </button>
+                  {getIconByTipo(n.tipo)}
+                  <div className="notif-content">
+                    <strong>{n.titulo}</strong>
+                    <div>{n.mensaje}</div>
+                    <span className="notif-time">
+                      {new Date(n.fecha_envio).toLocaleString()}
+                    </span>
+                  </div>
+                  <FaTimes
+                    className="notif-delete"
+                    onClick={() => handleEliminar(n.id)}
+                  />
+                </div>
+              ))}
+
+              <div className="notif-footer">
+                <a href="/admin/notificaciones">Ver todas las notificaciones</a>
               </div>
-            ))
+            </>
           )}
         </div>
       )}
