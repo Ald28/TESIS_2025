@@ -16,7 +16,6 @@
     "datatables.net-bs5": "^2.2.2",
     "datatables.net-dt": "^2.2.2",
     "firebase": "^11.8.1",
-    "front-web-tesis": "file:",
     "jquery": "^3.7.1",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.476.0",
