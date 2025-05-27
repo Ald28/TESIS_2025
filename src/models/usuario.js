@@ -30,6 +30,17 @@ const buscarUsuarioPorId = async (id) => {
   return resultado[0]; 
 };
 
+const obtenerUsuarioPorPsicologoId = async (psicologo_id) => {
+  const sql = `
+    SELECT u.* 
+    FROM psicologo p
+    JOIN usuario u ON u.id = p.usuario_id
+    WHERE p.id = ?
+  `;
+  const resultado = await query(sql, [psicologo_id]);
+  return resultado[0];
+};
+
 const actualizarUltimaConexion = async (usuario_id) => {
   const sql = 'UPDATE usuario SET ultima_conexion = NOW() WHERE id = ?';
   await query(sql, [usuario_id]);
@@ -53,4 +64,5 @@ module.exports = {
   buscarUsuarioPorId,
   actualizarUltimaConexion,
   obtenerEstudiantesInactivos,
+  obtenerUsuarioPorPsicologoId,
 };

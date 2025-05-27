@@ -1,3 +1,4 @@
+const { enviarNotificacionSistema, enviarNotificacionWeb } = require('../services/notificacion.service');
 const { verifyGoogleToken } = require('../services/googleAuth.service');
 const estudianteModel = require('../models/estudiante.model');
 const usuarioModel = require('../models/usuario');
@@ -169,6 +170,22 @@ const crearCita = async (req, res) => {
       estudiante_id: estudiante.estudiante_id,
       psicologo_id
     });
+
+    // ENVIAR NOTIFICACIÓN AL PSICÓLOGO
+    const usuarioPsicologo = await usuarioModel.obtenerUsuarioPorPsicologoId(psicologo_id);
+    if (usuarioPsicologo?.id) {
+      try {
+        const nombreEstudiante = `${estudiante.nombre} ${estudiante.apellido}`;
+        await enviarNotificacionWeb({
+          usuario_id: usuarioPsicologo.id,
+          titulo: 'Nueva cita pendiente',
+          mensaje: `Tienes una nueva cita pendiente con ${nombreEstudiante}.`,
+          tipo: 'sistema',
+        });
+      } catch (error) {
+        console.error('Error al enviar notificación al psicólogo:', error.message || error);
+      }
+    }
 
     return res.status(201).json({ message: 'Cita registrada', id });
   } catch (error) {

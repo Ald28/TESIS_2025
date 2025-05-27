@@ -15,6 +15,24 @@ const obtenerTokenPorUsuarioId = async (usuario_id, plataforma = 'android') => {
   return result.length > 0 ? result[0].token : null;
 };
 
+const obtenerTokenPorUsuarioWeb = async (usuario_id, plataforma = 'web') => {
+  const sql = `
+    SELECT token 
+    FROM tokens_fcm 
+    WHERE usuario_id = ? AND plataforma = ? 
+    ORDER BY fecha_registro DESC 
+    LIMIT 1
+  `;
+  const result = await query(sql, [usuario_id, plataforma]);
+  return result.length > 0 ? result[0].token : null;
+};
+
+const verificarExistenciaTokenFCM = async (token) => {
+  const sql = `SELECT COUNT(*) AS existe FROM tokens_fcm WHERE token = ?`;
+  const result = await query(sql, [token]);
+  return result[0].existe > 0;
+};
+
 const crearNotificacion = async ({ titulo, mensaje, tipo = 'sistema', usuario_id }) => {
   const sql = `
     INSERT INTO notificaciones (titulo, mensaje, tipo, usuario_id)
@@ -48,4 +66,6 @@ module.exports = {
   crearNotificacion,
   listarNotificacionesPorUsuarioId,
   eliminarNotificaciones,
+  obtenerTokenPorUsuarioWeb,
+  verificarExistenciaTokenFCM,
 };

@@ -82,9 +82,21 @@ const eliminarNotificacion = async (req, res) => {
   }
 };
 
+const verificarTokenFCM = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const existe = await notificacionModel.verificarExistenciaTokenFCM(token);
+    return res.json({ existe });
+  } catch (error) {
+    console.error("❌ Error al verificar token FCM:", error);
+    return res.status(500).json({ message: "Error interno del servidor" });
+  }
+};
+
 module.exports = {
   guardarTokenFCM,
   enviarNotificacion,
   listarNotificaciones,
   eliminarNotificacion,
+  verificarTokenFCM,
 };
