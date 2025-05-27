@@ -5,6 +5,9 @@ import { FiRefreshCw } from "react-icons/fi";
 import { Container, Row, Col, Card, Button, Table, Modal, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { FaUsers, FaCalendarCheck, FaTasks, FaClock, FaGoogle } from "react-icons/fa";
+import { getToken, onMessage, deleteToken } from 'firebase/messaging';
+import { messaging } from '../services/firebase';
+import { guardarTokenFCM } from "../Api/api_notificaciones";
 import {
   obtenerCitasDelPsicologo,
   conectarGoogleCalendar,
@@ -39,7 +42,7 @@ export default function Dashboard() {
     });
   };
 
-  const [disponibilidadEditando, setDisponibilidadEditando] = useState(null); // la disponibilidad seleccionada
+  const [disponibilidadEditando, setDisponibilidadEditando] = useState(null);
   const [formData, setFormData] = useState({
     dia: "",
     mañana_inicio: "",
@@ -72,14 +75,55 @@ export default function Dashboard() {
     const token = localStorage.getItem("token");
     if (!token) {
       navigate("/");
+      return;
     }
 
     const storedUser = localStorage.getItem("usuario");
     if (storedUser) {
-      setUsuario(JSON.parse(storedUser));
+      const usuario = JSON.parse(storedUser);
+      setUsuario(usuario);
+
+      getToken(messaging, {
+        vapidKey: "BB0WPjs9OnfG0bpHdwi-2nc9Y91T3eOSLSBZKpmubcH1DFeIkuu8yqV6M7d3WE30A856MGYmbsYpcGUJV2QMI0I"
+      })
+        .then(async (currentToken) => {
+
+          const token = localStorage.getItem("token");
+          const tokenGuardado = localStorage.getItem("token_fcm");
+
+          try {
+            await guardarTokenFCM(
+              {
+                token: currentToken,
+                plataforma: "web",
+                usuario_id: usuario.id,
+              },
+              token
+            );
+            localStorage.setItem("token_fcm", currentToken);
+          } catch (error) {
+            console.error("Error al guardar/verificar token FCM:", error.message);
+          }
+        })
+
+        .catch((err) => console.error("Error al obtener token FCM:", err));
     }
 
     fetchCitas();
+
+    // Escuchar notificaciones
+    const unsubscribe = onMessage(messaging, (payload) => {
+      const { title, body } = payload.notification;
+
+      toast.info(`${title}: ${body}`, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+      });
+    });
+
+    return () => unsubscribe();
   }, [navigate]);
 
   const abrirModal = () => setShowModal(true);
