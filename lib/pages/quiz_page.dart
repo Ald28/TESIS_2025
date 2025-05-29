@@ -16,7 +16,7 @@ class _QuizPageState extends State<QuizPage> {
   int questionIndex = 0;
   int progressIndex = 0;
   Quiz quiz = Quiz(name: "Preguntas", questions: []);
-  TextEditingController _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
   bool _isLoading = true;
 
   @override
@@ -117,10 +117,10 @@ class _QuizPageState extends State<QuizPage> {
   @override
   Widget build(BuildContext context) {
     // Colores principales
-    final Color backgroundColor = const Color(0xFFB2EBF2);
-    final Color cardColor = Colors.white;
-    final Color progressColor = const Color(0xFF00838F); // Color turquesa oscuro que combina con el fondo
-    final Color accentColor = const Color(0xFF00ACC1); // Color de acento
+    const Color backgroundColor = Color(0xFFB2EBF2);
+    const Color cardColor = Colors.white;
+    const Color progressColor = Color(0xFF00838F); // Color turquesa oscuro que combina con el fondo
+    const Color accentColor = Color(0xFF00ACC1); // Color de acento
     
     return Scaffold(
       backgroundColor: backgroundColor,

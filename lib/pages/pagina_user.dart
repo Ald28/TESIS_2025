@@ -6,7 +6,7 @@ import '../services/api_service.dart';
 import '../classes/estudiante.dart';
 
 class PaginaUser extends StatefulWidget {
-  const PaginaUser({Key? key}) : super(key: key);
+  const PaginaUser({super.key});
 
   @override
   State<PaginaUser> createState() => _PaginaUserState();

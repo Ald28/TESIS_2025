@@ -7,7 +7,7 @@ import 'dart:async';
 class PaginaDetallePsicologo extends StatefulWidget {
   final Psicologo? psicologo;
 
-  const PaginaDetallePsicologo({Key? key, this.psicologo}) : super(key: key);
+  const PaginaDetallePsicologo({super.key, this.psicologo});
 
   @override
   State<PaginaDetallePsicologo> createState() => _PaginaDetallePsicologoState();
@@ -344,8 +344,8 @@ void initState() {
                                   if (snapshot.connectionState == ConnectionState.waiting) {
                                     return const Center(child: CircularProgressIndicator());
                                   } else if (snapshot.hasError) {
-                                    return Row(
-                                      children: const [
+                                    return const Row(
+                                      children: [
                                         Icon(Icons.error, color: Colors.red),
                                         SizedBox(width: 6),
                                         Text("Error al cargar horas ocupadas"),
@@ -370,7 +370,7 @@ void initState() {
                                         padding: const EdgeInsets.only(bottom: 8.0),
                                         child: Text("⛔ $inicio - $fin", style: const TextStyle(color: Colors.redAccent)),
                                       );
-                                    }).toList(),
+                                    }),
 
                                     ],
                                   );
@@ -392,8 +392,8 @@ void initState() {
                          print("❌ Error al obtener citas activas: ${snapshot.error}");
                           return const Text("❌ Error al cargar citas activas");
                       } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return Column(
-                          children: const [
+                        return const Column(
+                          children: [
                             Icon(Icons.event_busy, size: 40, color: Colors.grey),
                             SizedBox(height: 8),
                             Text("No tienes citas activas"),
@@ -403,8 +403,8 @@ void initState() {
 
                       final citas = snapshot.data!.where((cita) => cita['estado'] == 'pendiente').toList();
                       if (citas.isEmpty) {
-                        return Column(
-                          children: const [
+                        return const Column(
+                          children: [
                             Icon(Icons.event_available, size: 40, color: Colors.grey),
                             SizedBox(height: 8),
                             Text("No tienes citas pendientes"),

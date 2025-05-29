@@ -12,7 +12,7 @@ import '../classes/metodo_relajacion.dart';
 class NavigationScreen extends StatefulWidget {
   final int paginaInicial;
 
-  const NavigationScreen({Key? key, this.paginaInicial = 0}) : super(key: key);
+  const NavigationScreen({super.key, this.paginaInicial = 0});
 
   @override
   _NavigationScreenState createState() => _NavigationScreenState();

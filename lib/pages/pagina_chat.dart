@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class PaginaChat extends StatefulWidget {
-  const PaginaChat({Key? key}) : super(key: key);
+  const PaginaChat({super.key});
 
   @override
   State<PaginaChat> createState() => _PaginaChatState();

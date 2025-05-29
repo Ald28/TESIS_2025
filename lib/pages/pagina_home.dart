@@ -11,7 +11,7 @@ class PaginaHome extends StatefulWidget {
   final Function(MetodoRelajacion)? onSeleccionarMetodo;
 
   
-  const PaginaHome({Key? key, this.onSeleccionarPsicologo, this.onSeleccionarMetodo}) : super(key: key);
+  const PaginaHome({super.key, this.onSeleccionarPsicologo, this.onSeleccionarMetodo});
 
 
   @override
@@ -27,16 +27,23 @@ class _PaginaHomeState extends State<PaginaHome> {
 
   String? _categoriaSeleccionada;
   bool mostrarPrivados = false;
+  bool _datosCargados = false;
+
 
   @override
-void initState() {
+  void initState() {
   super.initState();
   _cargarDatos();
   
 }
 
 void _cargarDatos() async {
-  const estudianteId = 2;
+  final prefs = await SharedPreferences.getInstance();
+  final estudianteId = prefs.getInt('estudiante_id');
+  if (estudianteId == null) {
+    print("❌ No se encontró el ID del estudiante");
+    return;
+  }
 
   Future<List<MetodoRelajacion>> futureMetodos;
   if (mostrarPrivados) {
@@ -45,18 +52,26 @@ void _cargarDatos() async {
     futureMetodos = ApiService.fetchMetodosRecomendados();
   }
 
-  _metodosFuture = futureMetodos.then((metodos) async {
+  _metodosFuture = futureMetodos.then((metodos)  {
     _todosLosMetodos = metodos;
     _categorias = metodos.map((m) => m.categoria.trim().toLowerCase()).toSet().toList();
-
     return metodos;
   });
 
   _psicologosFuture = ApiService.fetchPsicologos();
+
+  setState(() {
+    _datosCargados = true;
+  });
 }
+
+
 
   @override
   Widget build(BuildContext context) {
+    if (!_datosCargados) {
+    return const Center(child: CircularProgressIndicator());
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -137,10 +152,10 @@ void _cargarDatos() async {
                     });
                     _cargarDatos();
                   },
-                  child: const Text('Recomendados'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: mostrarPrivados ? Colors.grey : Colors.blue,
                   ),
+                  child: const Text('Recomendados'),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -149,10 +164,10 @@ void _cargarDatos() async {
                     });
                     _cargarDatos();
                   },
-                  child: const Text('Mis Privados'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: mostrarPrivados ? Colors.blue : Colors.grey,
                   ),
+                  child: const Text('Mis Privados'),
                 ),
               ],
             ),
@@ -302,7 +317,7 @@ void _cargarDatos() async {
 
 class VideoPlayerWidget extends StatefulWidget {
   final String url;
-  const VideoPlayerWidget({Key? key, required this.url}) : super(key: key);
+  const VideoPlayerWidget({super.key, required this.url});
 
   @override
   State<VideoPlayerWidget> createState() => _VideoPlayerWidgetState();

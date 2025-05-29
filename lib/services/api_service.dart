@@ -14,7 +14,7 @@ import 'package:mime/mime.dart';
 
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.177.181:8080';
+  static const String baseUrl = 'http://192.168.1.102:8080';////cambiar qui para todo y tambien en el login buscar lo de pi
 ///cahtbot
 static Future<String> enviarMensajeAlChatbot(String mensaje) async {
     final url = Uri.parse('$baseUrl/api/chat-estudiante');
@@ -110,13 +110,13 @@ print("📥 Respuesta: ${response.body}");
 ///subir iamgen perfil del estudiante:
 static Future<int?> subirImagen(File imagen) async {
   try {
-    print('📤 Iniciando subida de imagen...');
+    print('Iniciando subida de imagen...');
     
     final uri = Uri.parse('$baseUrl/api/multimedia/upload');
     final request = http.MultipartRequest('POST', uri);
 
     final mimeType = lookupMimeType(imagen.path) ?? 'image/jpeg';
-    print('📄 Tipo MIME detectado: $mimeType');
+    print(' Tipo MIME detectado: $mimeType');
 
     final fileStream = await http.MultipartFile.fromPath(
       'imagen',
@@ -125,27 +125,27 @@ static Future<int?> subirImagen(File imagen) async {
     );
 
     request.files.add(fileStream);
-    print('📎 Archivo añadido a la solicitud.');
+    print(' Archivo añadido a la solicitud.');
 
     final response = await request.send();
-    print('🔗 Solicitud enviada. Código de respuesta: ${response.statusCode}');
+    print(' Solicitud enviada. Código de respuesta: ${response.statusCode}');
 
     if (response.statusCode == 200) {
       final respStr = await response.stream.bytesToString();
-      print('✅ Respuesta recibida: $respStr');
+      print(' Respuesta recibida: $respStr');
 
       final data = jsonDecode(respStr);
       final id = data['multimedia_id'];
-      print('🆔 ID de la imagen subida: $id');
+      print(' ID de la imagen subida: $id');
       return id;
     } else {
-      print('❌ Error al subir imagen. Código de estado: ${response.statusCode}');
+      print(' Error al subir imagen. Código de estado: ${response.statusCode}');
       final errorStr = await response.stream.bytesToString();
-      print('⚠️ Mensaje de error: $errorStr');
+      print(' Mensaje de error: $errorStr');
       return null;
     }
   } catch (e) {
-    print('🚨 Excepción durante la subida de imagen: $e');
+    print(' Excepción durante la subida de imagen: $e');
     return null;
   }
 }
@@ -184,7 +184,7 @@ static Future<List<Map<String, dynamic>>> fetchCitasFinalizadas(int estudianteId
   if (response.statusCode == 200) {
     return List<Map<String, dynamic>>.from(jsonDecode(response.body));
   } else {
-    throw Exception("❌ Error al obtener historial de citas");
+    throw Exception(" Error al obtener historial de citas");
   }
 }
 
@@ -269,7 +269,7 @@ static Future<void> crearCita({
   );
 
   if (response.statusCode != 201) {
-    throw Exception('❌ Error al crear la cita: ${response.body}');
+    throw Exception('❌Error al crear la cita: ${response.body}');
   }
 }
 
@@ -297,7 +297,7 @@ static Future<void> crearCita({
  ///metodo relajacion
   static Future<List<MetodoRelajacion>> fetchMetodosRecomendados() async {
   try {
-    final response = await http.get(Uri.parse('$baseUrl/recomendados'));
+    final response = await http.get(Uri.parse('$baseUrl/api/recomendados'));
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);
       final data = body['metodos']; 
@@ -314,7 +314,7 @@ static Future<void> crearCita({
 
 static Future<List<MetodoRelajacion>> fetchMetodosPrivados(int estudianteId) async {
   try {
-    final response = await http.get(Uri.parse('$baseUrl/privados/$estudianteId'));
+    final response = await http.get(Uri.parse('$baseUrl/api/privados/$estudianteId'));
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);
       final data = body['metodos']; // ✅ accede al array interno
@@ -331,7 +331,7 @@ static Future<List<MetodoRelajacion>> fetchMetodosPrivados(int estudianteId) asy
 
   /// Obtener preguntas por cuestionario 
     static Future<List<Question>> fetchAllQuestions() async {
-    final response = await http.get(Uri.parse('$baseUrl/listar-preguntas-opciones'));
+    final response = await http.get(Uri.parse('$baseUrl/api/listar-preguntas-opciones'));
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -396,7 +396,7 @@ static Future<List<MetodoRelajacion>> fetchMetodosPrivados(int estudianteId) asy
   
   /// Iniciar sesión con Google
 static Future<Map<String, dynamic>> loginConGoogle(String credential) async {
-  final url = Uri.parse('http://192.168.177.181:8080/auth/google/estudiante');
+  final url = Uri.parse('$baseUrl/auth/google/estudiante');
 
   try {
     final response = await http.post(

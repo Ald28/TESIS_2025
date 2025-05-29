@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 
 class PaginaFavorito extends StatefulWidget {
-  const PaginaFavorito({Key? key}) : super(key: key);
+  const PaginaFavorito({super.key});
 
   @override
   State<PaginaFavorito> createState() => _PaginaFavoritoState();

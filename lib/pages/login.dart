@@ -39,7 +39,7 @@ class _LoginState extends State<Login> {
       final GoogleSignInAuthentication auth = await user.authentication;
 
       final response = await http.post(
-        Uri.parse('http://192.168.177.181:8080/auth/google/estudiante'),
+        Uri.parse('http://192.168.1.102:8080/auth/google/estudiante'),////cambiar aqui
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'credential': auth.idToken}),
       );
@@ -49,7 +49,7 @@ class _LoginState extends State<Login> {
         final token = data['token'];
 
         final perfilResponse = await http.get(
-          Uri.parse('http://192.168.177.181:8080/auth/perfil'),
+          Uri.parse('http://192.168.1.102:8080/auth/perfil'),////cambiar aqui segun la ip
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer $token',

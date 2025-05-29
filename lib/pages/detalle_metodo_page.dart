@@ -5,7 +5,7 @@ import '../classes/metodo_relajacion.dart';
 class PaginaDetalleMetodo extends StatelessWidget {
   final MetodoRelajacion metodo;
 
-  const PaginaDetalleMetodo({Key? key, required this.metodo}) : super(key: key);
+  const PaginaDetalleMetodo({super.key, required this.metodo});
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +93,7 @@ class PaginaDetalleMetodo extends StatelessWidget {
 
 class VideoDetalle extends StatefulWidget {
   final String url;
-  const VideoDetalle({Key? key, required this.url}) : super(key: key);
+  const VideoDetalle({super.key, required this.url});
 
   @override
   State<VideoDetalle> createState() => _VideoDetalleState();

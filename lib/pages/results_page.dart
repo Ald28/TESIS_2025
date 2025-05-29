@@ -3,16 +3,16 @@ import 'package:frondend/classes/quiz.dart';
 import 'package:frondend/pages/navigation_screen.dart'; // Importa la pantalla con el Navigation Bar
 
 class ResultsPage extends StatelessWidget {
-  const ResultsPage({Key? key, required this.quiz}) : super(key: key);
+  const ResultsPage({super.key, required this.quiz});
   final Quiz quiz;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFB2EBF2),
+      backgroundColor: const Color(0xFFB2EBF2),
       appBar: AppBar(
         title: Text(quiz.name),
-        backgroundColor: Color(0xFFB2EBF2),
+        backgroundColor: const Color(0xFFB2EBF2),
         elevation: 0,
       ),
       body: Center(
@@ -72,14 +72,14 @@ class ResultsPage extends StatelessWidget {
                 onPressed: () {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => NavigationScreen()),
+                    MaterialPageRoute(builder: (context) => const NavigationScreen()),
                   );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blueAccent,
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                 ),
-                child: Text('Finalizar', style: TextStyle(fontSize: 18, color: Colors.white)),
+                child: const Text('Finalizar', style: TextStyle(fontSize: 18, color: Colors.white)),
               ),
             ),
           ],

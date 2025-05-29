@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class PaginaEdit extends StatelessWidget {
-  const PaginaEdit({Key? key}) : super(key: key);
+  const PaginaEdit({super.key});
 
   @override
   Widget build(BuildContext context) {
