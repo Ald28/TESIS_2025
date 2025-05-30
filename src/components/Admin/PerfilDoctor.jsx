@@ -75,7 +75,7 @@ const PerfilDoctor = () => {
             display: "inline-block",
           }}
         >
-          Perfil del Doctor
+          Perfil del Psicologo
         </h1>
         <div style={{ marginBottom: "15px" }}>
           <strong style={{ color: "#555" }}>Nombre:</strong>{" "}

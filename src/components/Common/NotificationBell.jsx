@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   FaBell,
   FaTimes,
@@ -22,7 +23,6 @@ const NotificationBell = () => {
   const toggleDropdown = () => {
     setMostrar(!mostrar);
     if (!mostrar) {
-      // Al abrir el dropdown, se marcan como leídas
       setNuevas(0);
     }
   };
@@ -115,7 +115,7 @@ const NotificationBell = () => {
               ))}
 
               <div className="notif-footer">
-                <a href="/admin/notificaciones">Ver todas las notificaciones</a>
+                <Link to="/admin/notificaciones">Ver todas las notificaciones</Link>
               </div>
             </>
           )}

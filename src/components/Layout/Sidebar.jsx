@@ -58,7 +58,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
           }}
         />
         {!collapsed && (
-          <h5 className="mb-0 text-center">Psicologo</h5>
+          <h5 className="mb-0 text-center">Psicólogo</h5>
         )}
       </div>
 
