@@ -21,8 +21,7 @@ export default function Layout() {
         }}
       >
         <Navbar collapsed={collapsed} />
-
-        {/* 🔥 Reducido el espacio de margen superior aquí */}
+        
         <div style={{ marginTop: "60px", padding: "20px", flexGrow: 1 }}>
           <Outlet />
         </div>

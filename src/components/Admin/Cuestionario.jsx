@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 import { Plus, Save, Eye, X, Trash, Edit, ClipboardList, Users } from "lucide-react";
 import { Modal, Button } from "react-bootstrap";
 import {
@@ -9,7 +11,7 @@ import {
   editarPreguntaYOpciones,
   eliminarPreguntaYOpciones,
 } from "../api/api_cuestionarios";
-import { buscarPsicologoPorUsuarioId } from "../api/api_psicologo";
+import { buscarPsicologoPorUsuarioId } from "../Api/api_psicologo";
 
 export default function Cuestionario() {
   const [nuevaPregunta, setNuevaPregunta] = useState("");
@@ -30,7 +32,8 @@ export default function Cuestionario() {
   useEffect(() => {
     const fetchPsicologoId = async () => {
       try {
-        const storedUser = JSON.parse(localStorage.getItem("usuario"));
+        const usuarioStr = localStorage.getItem("usuario");
+        const storedUser = usuarioStr ? JSON.parse(usuarioStr) : null;
         if (storedUser) {
           const data = await buscarPsicologoPorUsuarioId(storedUser.id);
           setPsicologoId(data.psicologo_id);
@@ -63,7 +66,7 @@ export default function Cuestionario() {
       };
       const response = await crearPregunta(data);
       const preguntaId = response.preguntaId;
-      alert(`Pregunta creada con ID: ${preguntaId}`);
+      toast.success(`Pregunta creada con ID`);
       setNuevaPregunta("");
       if (tipoPregunta === "cerrada") {
         await crearOpcion({ txt_opcion: "Sí", pregunta_id: preguntaId, psicologo_id: psicologoId });
@@ -158,7 +161,7 @@ export default function Cuestionario() {
 
       await editarPreguntaYOpciones(preguntaEditando.id, data);
 
-      alert("Pregunta actualizada con éxito");
+      toast.success("Pregunta actualizada con éxito");
       setNuevaPregunta("");
       setModoEdicion(false);
       setPreguntaEditando(null);
@@ -183,14 +186,25 @@ export default function Cuestionario() {
   };
 
   const handleEliminarPregunta = async (id) => {
-    if (window.confirm("¿Estás seguro de eliminar esta pregunta y sus opciones?")) {
+    const result = await Swal.fire({
+      title: '¿Estás seguro?',
+      text: "Esta acción eliminará la pregunta y sus opciones.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (result.isConfirmed) {
       try {
         await eliminarPreguntaYOpciones(id);
-        alert("Pregunta eliminada correctamente.");
+        toast.success("Pregunta eliminada correctamente.");
         await cargarPreguntas();
       } catch (error) {
         console.error("Error al eliminar la pregunta:", error.message);
-        alert("Ocurrió un error al intentar eliminar la pregunta.");
+        toast.error("Ocurrió un error al intentar eliminar la pregunta.");
       }
     }
   };

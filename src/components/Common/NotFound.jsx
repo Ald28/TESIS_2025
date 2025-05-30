@@ -1,4 +1,3 @@
-// src/components/Common/NotFound.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
 

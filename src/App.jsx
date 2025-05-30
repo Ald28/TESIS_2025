@@ -12,10 +12,13 @@ import Cuestionario from "./components/Admin/Cuestionario";
 import Metodos from "./components/Admin/Metodos";
 import Citas from "./components/Admin/Citas";
 import "./index.css";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const App = () => {
   return (
     <Router>
+        <ToastContainer position="top-right" autoClose={3000} />
       <Routes>
         {/* Rutas públicas */}
         <Route path="/" element={<Login />} />

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { ClipboardList, ShieldCheck } from "lucide-react";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 import {
   subirMetodo,
   listarEstudiantes,
@@ -47,7 +49,7 @@ export default function Metodos() {
     e.preventDefault();
 
     if (!archivo && !modoEdicion) {
-      alert('Selecciona un archivo');
+      toast.warn('Selecciona un archivo');
       return;
     }
 
@@ -69,11 +71,13 @@ export default function Metodos() {
 
       if (modoEdicion) {
         response = await editarMetodo(idEditar, formData);
+        toast.success('Método actualizado correctamente');
       } else {
         response = await subirMetodo(formData);
+        toast.success('Método subido correctamente');
       }
 
-      alert(response.message);
+      // Limpiar formulario
       setTitulo('');
       setDescripcion('');
       setTipo('recomendado');
@@ -83,12 +87,14 @@ export default function Metodos() {
       setModoEdicion(false);
       setIdEditar(null);
 
+      // Recargar listas
       const recomendadosData = await listarMetodosRecomendados();
       setMetodosRecomendados(recomendadosData);
       const privadosData = await listarTodosMetodosPrivados();
       setTodosMetodosPrivados(privadosData);
     } catch (error) {
-      alert('Ocurrió un error al guardar el método.');
+      toast.error('Ocurrió un error al guardar el método.');
+      console.error(error);
     }
   };
 
@@ -98,18 +104,29 @@ export default function Metodos() {
   };
 
   const handleEliminar = async (id) => {
-    if (!window.confirm('¿Estás seguro de eliminar este método?')) return;
+    const result = await Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Este método será eliminado permanentemente.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       const response = await eliminarMetodo(id);
-      alert(response.message);
+      toast.success(response.message);
 
       const recomendadosData = await listarMetodosRecomendados();
       setMetodosRecomendados(recomendadosData);
       const privadosData = await listarTodosMetodosPrivados();
       setTodosMetodosPrivados(privadosData);
     } catch (error) {
-      alert('Ocurrió un error al eliminar el método.');
+      toast.error('Ocurrió un error al eliminar el método.');
     }
   };
 

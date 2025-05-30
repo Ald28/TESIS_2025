@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Table, Button, Modal, Form } from "react-bootstrap";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 import {
   obtenerCitasAceptadas,
   cancelarCitaAceptada,
@@ -40,35 +42,64 @@ export default function Citas() {
     try {
       const token = localStorage.getItem("token");
       await crearCitaSeguimiento(token, nuevoCita);
-      alert("✅ Cita creada correctamente.");
+      toast.success("Cita de seguimiento creada correctamente.");
       setShowModal(false);
       setNuevoCita({ estudiante_id: "", fecha: "", hora_inicio: "", hora_fin: "" });
     } catch (error) {
-      alert("❌ Error al crear cita.");
+      toast.error("❌ Error al crear cita.");
+      console.error(error);
     }
   };
 
   const handleRealizarCita = async (id) => {
-    if (!window.confirm("¿Cita realizada?")) return;
+    const result = await Swal.fire({
+      title: "¿Cita realizada?",
+      text: "Esta acción marcará la cita como realizada.",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#198754",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "Sí, marcar",
+      cancelButtonText: "Cancelar"
+    });
+
+    if (!result.isConfirmed) return;
+
     try {
       const token = localStorage.getItem("token");
       await cambiarEstadoCita({ cita_id: id, estado: "realizada", evento_google_id: null }, token);
       setCitasNormales(prev => prev.filter(c => c.id !== id));
       setCitasSeguimiento(prev => prev.filter(c => c.id !== id));
+      toast.success("Cita marcada como realizada.");
     } catch (err) {
-      alert("❌ Error al marcar realizada.");
+      toast.error("❌ Error al marcar cita como realizada.");
+      console.error(err);
     }
   };
 
   const handleCancelar = async (id) => {
-    if (!window.confirm("¿Cancelar esta cita?")) return;
+    const result = await Swal.fire({
+      title: "¿Cancelar esta cita?",
+      text: "Esta acción no se puede deshacer.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "Sí, cancelar",
+      cancelButtonText: "No"
+    });
+
+    if (!result.isConfirmed) return;
+
     try {
       const token = localStorage.getItem("token");
       await cancelarCitaAceptada(token, id);
       setCitasNormales(prev => prev.filter(c => c.id !== id));
       setCitasSeguimiento(prev => prev.filter(c => c.id !== id));
+      toast.success("❌ Cita cancelada correctamente.");
     } catch (err) {
-      alert("❌ Error al cancelar.");
+      toast.error("⚠️ Error al cancelar la cita.");
+      console.error(err);
     }
   };
 
