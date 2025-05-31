@@ -17,6 +17,7 @@ import {
   crearDisponibilidadPsicologo,
   actualizarDisponibilidad,
   eliminarDisponibilidadPorTurno,
+  verificarConexionCalendar,
 } from "../Api/api_psicologo";
 
 export default function Dashboard() {
@@ -27,6 +28,7 @@ export default function Dashboard() {
   const [disponibilidades, setDisponibilidades] = useState([]);
   const [mostrarDisponibilidades, setMostrarDisponibilidades] = useState(false);
   const [showModalDisponibilidad, setShowModalDisponibilidad] = useState(false);
+  const [calendarConectado, setCalendarConectado] = useState(false);
   const abrirModalDisponibilidad = () => setShowModalDisponibilidad(true);
   const cerrarModalDisponibilidad = () => {
     setShowModalDisponibilidad(false);
@@ -78,19 +80,39 @@ export default function Dashboard() {
       return;
     }
 
+    // 🔔 Función definida FUERA del if
+    const handleCalendarConnected = async () => {
+      try {
+        const usuario = JSON.parse(localStorage.getItem("usuario"));
+        const { psicologo_id } = await buscarPsicologoPorUsuarioId(usuario.id);
+        const conectado = await verificarConexionCalendar(psicologo_id);
+        setCalendarConectado(conectado);
+        toast.success("✅ Conexión con Google Calendar completada");
+      } catch (err) {
+        console.error("Error actualizando conexión calendar:", err);
+      }
+    };
+
+    window.addEventListener("calendar-connected", handleCalendarConnected);
+
     const storedUser = localStorage.getItem("usuario");
     if (storedUser) {
       const usuario = JSON.parse(storedUser);
       setUsuario(usuario);
 
+      const verificarConectado = async () => {
+        const { psicologo_id } = await buscarPsicologoPorUsuarioId(usuario.id);
+        const conectado = await verificarConexionCalendar(psicologo_id);
+        setCalendarConectado(conectado);
+      };
+
+      verificarConectado();
+
+      // 🔐 Obtener token FCM
       getToken(messaging, {
         vapidKey: "BB0WPjs9OnfG0bpHdwi-2nc9Y91T3eOSLSBZKpmubcH1DFeIkuu8yqV6M7d3WE30A856MGYmbsYpcGUJV2QMI0I"
       })
         .then(async (currentToken) => {
-
-          const token = localStorage.getItem("token");
-          const tokenGuardado = localStorage.getItem("token_fcm");
-
           try {
             await guardarTokenFCM(
               {
@@ -105,13 +127,12 @@ export default function Dashboard() {
             console.error("Error al guardar/verificar token FCM:", error.message);
           }
         })
-
         .catch((err) => console.error("Error al obtener token FCM:", err));
     }
 
     fetchCitas();
 
-    // Escuchar notificaciones
+    // Escuchar notificaciones FCM
     const unsubscribe = onMessage(messaging, (payload) => {
       const { title, body } = payload.notification;
 
@@ -123,7 +144,11 @@ export default function Dashboard() {
       });
     });
 
-    return () => unsubscribe();
+    // 🧹 Limpieza: remover listener
+    return () => {
+      unsubscribe();
+      window.removeEventListener("calendar-connected", handleCalendarConnected);
+    };
   }, [navigate]);
 
   const abrirModal = () => setShowModal(true);
@@ -292,8 +317,14 @@ export default function Dashboard() {
               <Button variant="primary" onClick={abrirModalDisponibilidad}>
                 <i className="bi bi-plus-circle me-1"></i> Agregar Hora
               </Button>
-              <Button variant="success" onClick={abrirModal}>
-                <i className="bi bi-calendar-check me-1"></i> Conectar Google Calendar
+              <Button
+                variant="success"
+                onClick={abrirModal}
+                disabled={calendarConectado}
+                title={calendarConectado ? "Ya conectado con Google Calendar" : ""}
+              >
+                <i className="bi bi-calendar-check me-1"></i>
+                {calendarConectado ? "Conectado ✅" : "Conectar Google Calendar"}
               </Button>
             </div>
           </div>

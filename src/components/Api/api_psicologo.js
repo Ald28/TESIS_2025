@@ -132,3 +132,14 @@ export const eliminarDisponibilidadPorTurno = async (dia, turno, token) => {
     throw error;
   }
 };
+
+export const verificarConexionCalendar = async (psicologo_id) => {
+  try {
+    const res = await fetch(`${API}/calendar-verificar/${psicologo_id}`);
+    const data = await res.json();
+    return data.conectado;
+  } catch (error) {
+    console.error("Error al verificar conexión con Google Calendar:", error.message);
+    return false;
+  }
+};
