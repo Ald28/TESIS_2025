@@ -12,7 +12,8 @@ router.post('/google/psicologo', psicologoController.loginGooglePsicologo);
 router.get('/google/calendar-login', psicologoController.iniciarOAuthGoogleCalendar);
 // Ruta para llamar a google calendar
 router.get('/google/calendar-callback', psicologoController.googleCalendarCallback);
-
+// Ruta para verificar si el psicólogo ya está vinculado a Google Calendar
+router.get('/calendar-verificar/:psicologo_id', psicologoController.verificarConexionCalendarController);
 
 // Ruta para listar a psicologos
 router.get('/listar-psicologo', psicologoController.listarPsicologos);

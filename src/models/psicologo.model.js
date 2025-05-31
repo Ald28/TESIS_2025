@@ -133,6 +133,17 @@ const obtenerHistorial = async (estudiante_id) => {
   return await query(sql, [estudiante_id]);
 };
 
+// buscar si el psicologo ya se conecto al google calendar
+const verificarConexionGoogleCalendar = async (psicologo_id) => {
+  const sql = `
+    SELECT COUNT(*) AS conectado
+    FROM google_tokens
+    WHERE psicologo_id = ?
+  `;
+  const resultado = await query(sql, [psicologo_id]);
+  return resultado[0].conectado > 0;
+};
+
 module.exports = {
   crearPsicologo,
   listarPsicologos,
@@ -144,4 +155,5 @@ module.exports = {
   obtenerPsicologoConUsuario,
   obtenerPerfilPsicologo,
   obtenerHistorial,
+  verificarConexionGoogleCalendar,
 };

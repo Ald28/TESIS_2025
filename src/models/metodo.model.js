@@ -27,9 +27,13 @@ const listarMetodosPrivadosPorEstudiante = async (estudiante_id) => {
       m.titulo,
       m.descripcion,
       m.tipo,
-      ma.url AS multimedia_url
+      ma.url AS multimedia_url,
+      u.nombre AS nombre_psicologo,
+      u.apellido AS apellido_psicologo
     FROM metodos m
     INNER JOIN multimedia_actividad ma ON m.multimedia_actividad_id = ma.id
+    INNER JOIN psicologo p ON m.psicologo_id = p.id
+    INNER JOIN usuario u ON p.usuario_id = u.id
     WHERE m.tipo = 'privado' AND m.estudiante_id = ?
   `;
   const resultado = await query(sql, [estudiante_id]);
@@ -43,9 +47,13 @@ const listarMetodosRecomendados = async () => {
       m.titulo,
       m.descripcion,
       m.tipo,
-      ma.url AS multimedia_url
+      ma.url AS multimedia_url,
+      u.nombre AS nombre_psicologo,
+      u.apellido AS apellido_psicologo
     FROM metodos m
     INNER JOIN multimedia_actividad ma ON m.multimedia_actividad_id = ma.id
+    INNER JOIN psicologo p ON m.psicologo_id = p.id
+    INNER JOIN usuario u ON p.usuario_id = u.id
     WHERE m.tipo = 'recomendado'
   `;
   const resultado = await query(sql);

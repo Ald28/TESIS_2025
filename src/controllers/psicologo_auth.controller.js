@@ -514,6 +514,17 @@ const obtenerHistorial = async (req, res) => {
     }
 };
 
+const verificarConexionCalendarController = async (req, res) => {
+  try {
+    const { psicologo_id } = req.params;
+    const conectado = await psicologoModel.verificarConexionGoogleCalendar(psicologo_id);
+    res.json({ conectado });
+  } catch (error) {
+    console.error("Error al verificar conexión:", error);
+    res.status(500).json({ mensaje: "Error del servidor" });
+  }
+};
+
 module.exports = {
     loginGooglePsicologo,
     iniciarOAuthGoogleCalendar,
@@ -530,4 +541,5 @@ module.exports = {
     estudiantePorPsicologo,
     obtenerPerfilPsicologo,
     obtenerHistorial,
+    verificarConexionCalendarController,
 };
