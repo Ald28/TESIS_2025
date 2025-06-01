@@ -173,21 +173,18 @@ const crearCita = async (req, res) => {
 
     // ENVIAR NOTIFICACIÓN AL PSICÓLOGO
     const usuarioPsicologo = await usuarioModel.obtenerUsuarioPorPsicologoId(psicologo_id);
-    if (usuarioPsicologo?.id) {
-      try {
-        const nombreEstudiante = `${estudiante.nombre} ${estudiante.apellido}`;
-        await enviarNotificacionWeb({
-          usuario_id: usuarioPsicologo.id,
-          titulo: 'Nueva cita pendiente',
-          mensaje: `Tienes una nueva cita pendiente con ${nombreEstudiante}.`,
-          tipo: 'sistema',
-        });
-      } catch (error) {
-        console.error('Error al enviar notificación al psicólogo:', error.message || error);
-      }
+    console.log("linea 176", usuarioPsicologo)
+    if (usuarioPsicologo) {
+      await enviarNotificacionWeb({
+        usuario_id: usuarioPsicologo.id,
+        titulo: 'Nueva cita asignada',
+        mensaje: `Un estudiante ha solicitado una cita para el ${fecha} a las ${hora_inicio}.`,
+        tipo: 'sistema'
+      });
     }
 
     return res.status(201).json({ message: 'Cita registrada', id });
+    
   } catch (error) {
     console.error('Error al crear cita:', error);
     res.status(500).json({ message: error.message || 'Error interno del servidor' });
