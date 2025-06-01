@@ -46,6 +46,18 @@ Estructura :
 ├── index.js
 ├── .env
 
+EMAIL_SENDER = 'calmatec.salud@gmail.com'
+SENDGRID_API_KEY = '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'
+
+381550545275-5tpiplc997lutpiurrs9fro9u090lc7f.apps.googleusercontent.com - ORIGINAL
+381550545275-npvfm9sf70jomqsum8fm1dvde05j8qks.apps.googleusercontent.com - WEB
+381550545275-0b9h60bgi2gbp3taqm8bh5o0po02gd74.apps.googleusercontent.com - login_google
+381550545275-eamd3ue9pl1ces1fbhg5ldercf7dio9e.apps.googleusercontent.com - tesis_2
+
+GOOGLE_CLIENT_ID_MOBILE=381550545275-eamd3ue9pl1ces1fbhg5ldercf7dio9e.apps.googleusercontent.com
+GOOGLE_CLIENT_ID_WEB=381550545275-npvfm9sf70jomqsum8fm1dvde05j8qks.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=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
+
 RESULTADOS
 +--------------+---------------+------------+
 | Campo        | Tipo         | Nulo       |
