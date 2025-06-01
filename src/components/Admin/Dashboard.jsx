@@ -5,9 +5,7 @@ import { FiRefreshCw } from "react-icons/fi";
 import { Container, Row, Col, Card, Button, Table, Modal, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { FaUsers, FaCalendarCheck, FaTasks, FaClock, FaGoogle } from "react-icons/fa";
-import { getToken, onMessage, deleteToken } from 'firebase/messaging';
-import { messaging } from '../services/firebase';
-import { guardarTokenFCM } from "../Api/api_notificaciones";
+import { io } from "socket.io-client";
 import {
   obtenerCitasDelPsicologo,
   conectarGoogleCalendar,
@@ -19,6 +17,8 @@ import {
   eliminarDisponibilidadPorTurno,
   verificarConexionCalendar,
 } from "../Api/api_psicologo";
+
+const socket = io(import.meta.env.VITE_SOCKET_URL);
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -80,7 +80,6 @@ export default function Dashboard() {
       return;
     }
 
-    // 🔔 Función definida FUERA del if
     const handleCalendarConnected = async () => {
       try {
         const usuario = JSON.parse(localStorage.getItem("usuario"));
@@ -108,48 +107,28 @@ export default function Dashboard() {
 
       verificarConectado();
 
-      // 🔐 Obtener token FCM
-      getToken(messaging, {
-        vapidKey: "BB0WPjs9OnfG0bpHdwi-2nc9Y91T3eOSLSBZKpmubcH1DFeIkuu8yqV6M7d3WE30A856MGYmbsYpcGUJV2QMI0I"
-      })
-        .then(async (currentToken) => {
-          try {
-            await guardarTokenFCM(
-              {
-                token: currentToken,
-                plataforma: "web",
-                usuario_id: usuario.id,
-              },
-              token
-            );
-            localStorage.setItem("token_fcm", currentToken);
-          } catch (error) {
-            console.error("Error al guardar/verificar token FCM:", error.message);
-          }
-        })
-        .catch((err) => console.error("Error al obtener token FCM:", err));
+      // 🔌 Unirse a sala con socket.io
+      socket.emit("join", usuario.id);
+
+      socket.on("nuevaNotificacion", (data) => {
+        console.log("📨 Notificación web recibida:", data);
+        toast.info(`${data.titulo}: ${data.mensaje}`, {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+        });
+      });
     }
 
     fetchCitas();
 
-    // Escuchar notificaciones FCM
-    const unsubscribe = onMessage(messaging, (payload) => {
-      const { title, body } = payload.notification;
-
-      toast.info(`${title}: ${body}`, {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-      });
-    });
-
-    // 🧹 Limpieza: remover listener
     return () => {
-      unsubscribe();
+      socket.off("nuevaNotificacion");
       window.removeEventListener("calendar-connected", handleCalendarConnected);
     };
   }, [navigate]);
+
 
   const abrirModal = () => setShowModal(true);
   const cerrarModal = () => setShowModal(false);
