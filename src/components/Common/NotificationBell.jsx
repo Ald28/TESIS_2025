@@ -95,23 +95,30 @@ const NotificationBell = () => {
           ) : (
             <>
               {notificaciones.map((n, index) => (
-                <div
+                <Link
+                  to="/admin/dashboard"
                   key={n.id}
-                  className={`notif-item ${index < nuevas ? "new" : ""}`}
+                  style={{ textDecoration: "none", color: "inherit" }}
+                  onClick={() => setMostrar(false)} // cerrar dropdown al hacer clic
                 >
-                  {getIconByTipo(n.tipo)}
-                  <div className="notif-content">
-                    <strong>{n.titulo}</strong>
-                    <div>{n.mensaje}</div>
-                    <span className="notif-time">
-                      {new Date(n.fecha_envio).toLocaleString()}
-                    </span>
+                  <div className={`notif-item ${index < nuevas ? "new" : ""}`}>
+                    {getIconByTipo(n.tipo)}
+                    <div className="notif-content">
+                      <strong>{n.titulo}</strong>
+                      <div>{n.mensaje}</div>
+                      <span className="notif-time">
+                        {new Date(n.fecha_envio).toLocaleString()}
+                      </span>
+                    </div>
+                    <FaTimes
+                      className="notif-delete"
+                      onClick={(e) => {
+                        e.preventDefault(); // evita que el Link se ejecute al hacer clic en la X
+                        handleEliminar(n.id);
+                      }}
+                    />
                   </div>
-                  <FaTimes
-                    className="notif-delete"
-                    onClick={() => handleEliminar(n.id)}
-                  />
-                </div>
+                </Link>
               ))}
 
               <div className="notif-footer">

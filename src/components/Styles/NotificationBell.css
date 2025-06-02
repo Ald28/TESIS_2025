@@ -131,3 +131,21 @@
   border-left: 4px solid #4aa6ff;
   transition: background-color 0.3s ease;
 }
+
+.notif-dropdown {
+  scrollbar-width: thin;
+  scrollbar-color: #ccc transparent;
+}
+
+.notif-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notif-dropdown::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 4px;
+}
+
+.notif-dropdown::-webkit-scrollbar-track {
+  background: transparent;
+}
