@@ -90,6 +90,7 @@ const obtenerPerfilPsicologo = async (usuario_id) => {
       u.apellido,
       u.correo,
       u.fecha_registro,
+      u.estado,
       u.multimedia_id,
       m.url AS foto_url,
       p.id AS psicologo_id,
