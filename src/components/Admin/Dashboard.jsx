@@ -270,7 +270,7 @@ export default function Dashboard() {
                 <h6 className="fw-semibold">Actividades</h6>
                 <h4>23</h4>
               </div>
-              <FaTasks size={30} className="text-warning" />
+              <FaTasks size={30} className="text-success" />
             </div>
           </Card>
         </Col>
@@ -282,7 +282,7 @@ export default function Dashboard() {
                 <h6 className="fw-semibold">Horas Programadas</h6>
                 <h4>86</h4>
               </div>
-              <FaClock size={30} className="text-danger" />
+              <FaClock size={30} className="text-primary" />
             </div>
           </Card>
         </Col>
@@ -328,7 +328,7 @@ export default function Dashboard() {
                     <td>{disp.hora_fin}</td>
                     <td className="d-flex gap-2">
                       <Button
-                        variant="warning"
+                        variant="success"
                         size="sm"
                         className="d-flex align-items-center gap-1"
                         onClick={() => handleEditarDisponibilidad(disp)}
