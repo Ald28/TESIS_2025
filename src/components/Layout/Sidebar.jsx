@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   FaArrowLeft,
   FaArrowRight,
@@ -16,36 +16,25 @@ import {
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const Sidebar = ({ collapsed, setCollapsed }) => {
-  const toggleSidebar = () => {
-    setCollapsed(!collapsed);
-  };
+  const toggleSidebar = () => setCollapsed(!collapsed);
+  const location = useLocation();
 
   return (
     <div
       className="d-flex flex-column bg-primary text-white"
       style={{
         minHeight: "100vh",
-        height: "100%",
         width: collapsed ? "80px" : "250px",
-        position: "fixed",
-        top: 0,
-        left: 0,
         transition: "width 0.3s ease",
         overflowX: "hidden",
         alignItems: "center",
         paddingTop: "1rem",
+        position: "fixed",
+        top: 0,
+        left: 0,
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "100%",
-          paddingBottom: "1rem",
-        }}
-      >
+      <div className="d-flex flex-column align-items-center w-100 pb-3">
         <img
           src="/src/assets/images/icon.png"
           alt="Icono"
@@ -57,9 +46,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
             marginBottom: "10px",
           }}
         />
-        {!collapsed && (
-          <h5 className="mb-0 text-center">Psicólogo</h5>
-        )}
+        {!collapsed && <h5 className="mb-0 text-center">Psicólogo</h5>}
       </div>
 
       <ul className="nav flex-column mt-2 w-100">
@@ -71,22 +58,29 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
           { to: "/admin/citas", icon: <FaCalendarAlt />, label: "Citas" },
           { to: "/admin/notificaciones", icon: <FaBell />, label: "Notificaciones" },
           { to: "/", icon: <FaSignOutAlt />, label: "Cerrar Sesión" },
-        ].map((item, idx) => (
-          <li key={idx} className="nav-item mb-3">
-            <Link
-              to={item.to}
-              className="nav-link text-white d-flex align-items-center"
-              style={{
-                justifyContent: collapsed ? "center" : "flex-start",
-                gap: "8px",
-                paddingLeft: collapsed ? "0" : "1rem",
-              }}
-            >
-              {item.icon}
-              {!collapsed && <span>{item.label}</span>}
-            </Link>
-          </li>
-        ))}
+        ].map((item, idx) => {
+          const isActive = location.pathname === item.to;
+
+          return (
+            <li key={idx} className="nav-item mb-3">
+              <Link
+                to={item.to}
+                className={`nav-link d-flex align-items-center ${isActive ? "bg-light text-primary fw-bold rounded-start" : "text-white"
+                  }`}
+                style={{
+                  justifyContent: collapsed ? "center" : "flex-start",
+                  gap: "8px",
+                  paddingLeft: collapsed ? "0" : "1rem",
+                  paddingTop: "0.5rem",
+                  paddingBottom: "0.5rem",
+                }}
+              >
+                {item.icon}
+                {!collapsed && <span>{item.label}</span>}
+              </Link>
+            </li>
+          );
+        })}
       </ul>
 
       <div

@@ -144,7 +144,7 @@ const PerfilSidebar = ({ show, onHide }) => {
               <span style={{ fontWeight: 500 }}>● {perfil.estado}</span>
             </Badge>
 
-            <div className="bg-white rounded-4 shadow-sm p-3 text-start border">
+            <div className="bg-white rounded-4 text-start border">
               {
                 modoEdicion ? (
                   <Form>
