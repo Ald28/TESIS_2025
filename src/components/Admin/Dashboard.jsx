@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FiRefreshCw } from "react-icons/fi";
-import { Container, Row, Col, Card, Button, Table, Modal, Form } from "react-bootstrap";
+import { Container, Row, Col, Card, Button, Table, Modal, Form, Accordion } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { FaUsers, FaCalendarCheck, FaTasks, FaClock, FaGoogle } from "react-icons/fa";
 import { io } from "socket.io-client";
@@ -86,7 +86,7 @@ export default function Dashboard() {
         const { psicologo_id } = await buscarPsicologoPorUsuarioId(usuario.id);
         const conectado = await verificarConexionCalendar(psicologo_id);
         setCalendarConectado(conectado);
-        toast.success("✅ Conexión con Google Calendar completada");
+        toast.success("Conexión con Google Calendar completada");
       } catch (err) {
         console.error("Error actualizando conexión calendar:", err);
       }
@@ -288,11 +288,14 @@ export default function Dashboard() {
         </Col>
       </Row>
 
-      <Card className="border-0 shadow-sm mt-4">
-        <Card.Body>
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <h5 className="fw-semibold mb-0">Horas Disponibles</h5>
-            <div className="d-flex gap-2">
+      <Accordion defaultActiveKey="0" className="mt-4 shadow-sm border-0">
+        <Accordion.Item eventKey="0">
+          <Accordion.Header>
+            <div className="fw-semibold">Horas Disponibles</div>
+          </Accordion.Header>
+
+          <Accordion.Body>
+            <div className="d-flex justify-content-end mb-3 gap-2">
               <Button variant="primary" onClick={abrirModalDisponibilidad}>
                 <i className="bi bi-plus-circle me-1"></i> Agregar Hora
               </Button>
@@ -306,108 +309,107 @@ export default function Dashboard() {
                 {calendarConectado ? "Conectado ✅" : "Conectar Google Calendar"}
               </Button>
             </div>
-          </div>
 
-          <Table hover responsive borderless className="mb-0">
-            <thead className="table-light">
-              <tr>
-                <th>Día</th>
-                <th>Turno</th>
-                <th>Hora Inicio</th>
-                <th>Hora Fin</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {disponibilidades.length > 0 ? (
-                disponibilidades.map((disp, index) => (
-                  <tr key={index} className="align-middle">
-                    <td className="fw-medium text-capitalize">{disp.dia}</td>
-                    <td className="text-capitalize">{disp.turno}</td>
-                    <td>{disp.hora_inicio}</td>
-                    <td>{disp.hora_fin}</td>
-                    <td className="d-flex gap-2">
-                      <Button
-                        variant="success"
-                        size="sm"
-                        className="d-flex align-items-center gap-1"
-                        onClick={() => handleEditarDisponibilidad(disp)}
-                      >
-                        <i className="bi bi-pencil-fill"></i>
-                        Editar
-                      </Button>
-
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        className="d-flex align-items-center gap-1"
-                        onClick={() => handleEliminarDisponibilidad(disp.dia, disp.turno)}
-                      >
-                        <i className="bi bi-trash-fill"></i>
-                        Eliminar
-                      </Button>
-                    </td>
-
-                  </tr>
-                ))
-              ) : (
+            <Table hover responsive borderless className="mb-0">
+              <thead className="table-light">
                 <tr>
-                  <td colSpan="5" className="text-center text-muted fst-italic">
-                    No tienes disponibilidad registrada.
-                  </td>
+                  <th>Día</th>
+                  <th>Turno</th>
+                  <th>Hora Inicio</th>
+                  <th>Hora Fin</th>
+                  <th>Acciones</th>
                 </tr>
-              )}
-            </tbody>
-          </Table>
-        </Card.Body>
-      </Card>
-
-      <Card className="border-0 shadow-sm">
-        <Card.Body>
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <h5 className="fw-semibold mb-0">Citas Pendientes</h5>
-            <Button variant="outline-primary" size="sm" onClick={fetchCitas} className="d-flex align-items-center gap-2">
-              <FiRefreshCw size={18} />
-              <span className="d-none d-md-inline">Refrescar</span>
-            </Button>
-          </div>
-
-          <Table hover responsive borderless>
-            <thead className="table-light">
-              <tr>
-                <th>Paciente</th>
-                <th>Fecha</th>
-                <th>Hora</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {citas.filter(c => c.estado === "pendiente").length > 0 ? (
-                citas.filter(c => c.estado === "pendiente").map((cita, index) => (
-                  <tr key={index}>
-                    <td>
-                      <strong>{cita.estudiante_nombre}</strong><br />
-                      <small className="text-muted">Estudiante</small>
-                    </td>
-                    <td>{new Date(cita.fecha_inicio).toLocaleDateString()}</td>
-                    <td>{new Date(cita.fecha_inicio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
-                    <td><span className="badge bg-warning text-dark">Pendiente</span></td>
-                    <td>
-                      <Button size="sm" variant="success" onClick={() => handleAceptarCita(cita.id)}>Aceptar</Button>{" "}
-                      <Button size="sm" variant="outline-danger" onClick={() => handleRechazarCita(cita.id)}>Rechazar</Button>
+              </thead>
+              <tbody>
+                {disponibilidades.length > 0 ? (
+                  disponibilidades.map((disp, index) => (
+                    <tr key={index} className="align-middle">
+                      <td className="fw-medium text-capitalize">{disp.dia}</td>
+                      <td className="text-capitalize">{disp.turno}</td>
+                      <td>{disp.hora_inicio}</td>
+                      <td>{disp.hora_fin}</td>
+                      <td className="d-flex gap-2">
+                        <Button
+                          variant="success"
+                          size="sm"
+                          onClick={() => handleEditarDisponibilidad(disp)}
+                        >
+                          <i className="bi bi-pencil-fill"></i> Editar
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleEliminarDisponibilidad(disp.dia, disp.turno)}
+                        >
+                          <i className="bi bi-trash-fill"></i> Eliminar
+                        </Button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="text-center text-muted fst-italic">
+                      No tienes disponibilidad registrada.
                     </td>
                   </tr>
-                ))
-              ) : (
+                )}
+              </tbody>
+            </Table>
+          </Accordion.Body>
+        </Accordion.Item>
+      </Accordion>
+
+      <Accordion defaultActiveKey="0" className="mt-4 shadow-sm border-0">
+        <Accordion.Item eventKey="0">
+          <Accordion.Header>
+            <div className="fw-semibold">Citas Pendientes</div>
+          </Accordion.Header>
+
+          <Accordion.Body>
+            <div className="d-flex justify-content-end mb-3">
+              <Button variant="outline-primary" size="sm" onClick={fetchCitas} className="d-flex align-items-center gap-2">
+                <FiRefreshCw size={18} />
+                <span className="d-none d-md-inline">Refrescar</span>
+              </Button>
+            </div>
+
+            <Table hover responsive borderless>
+              <thead className="table-light">
                 <tr>
-                  <td colSpan="5" className="text-center text-muted">No hay citas pendientes.</td>
+                  <th>Paciente</th>
+                  <th>Fecha</th>
+                  <th>Hora</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
                 </tr>
-              )}
-            </tbody>
-          </Table>
-        </Card.Body>
-      </Card>
+              </thead>
+              <tbody>
+                {citas.filter(c => c.estado === "pendiente").length > 0 ? (
+                  citas.filter(c => c.estado === "pendiente").map((cita, index) => (
+                    <tr key={index}>
+                      <td>
+                        <strong>{cita.estudiante_nombre}</strong><br />
+                        <small className="text-muted">Estudiante</small>
+                      </td>
+                      <td>{new Date(cita.fecha_inicio).toLocaleDateString()}</td>
+                      <td>{new Date(cita.fecha_inicio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+                      <td><span className="badge bg-warning text-dark">Pendiente</span></td>
+                      <td>
+                        <Button size="sm" variant="success" onClick={() => handleAceptarCita(cita.id)}>Aceptar</Button>{" "}
+                        <Button size="sm" variant="outline-danger" onClick={() => handleRechazarCita(cita.id)}>Rechazar</Button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="text-center text-muted">No hay citas pendientes.</td>
+                  </tr>
+                )}
+              </tbody>
+            </Table>
+          </Accordion.Body>
+        </Accordion.Item>
+      </Accordion>
 
       <Modal show={showModal} onHide={cerrarModal} centered>
         <Modal.Header closeButton>
@@ -437,14 +439,19 @@ export default function Dashboard() {
             <Row className="align-items-end g-3">
               <Col md={12}>
                 <Form.Label>Día</Form.Label>
-                <Form.Control
-                  type="text"
+                <Form.Select
                   name="dia"
-                  placeholder="ej. lunes"
                   value={formData.dia || ""}
                   onChange={handleFormChange}
                   disabled={!!disponibilidadEditando}
-                />
+                >
+                  <option value="">Selecciona un día</option>
+                  <option value="lunes">Lunes</option>
+                  <option value="martes">Martes</option>
+                  <option value="miércoles">Miércoles</option>
+                  <option value="jueves">Jueves</option>
+                  <option value="viernes">Viernes</option>
+                </Form.Select>
               </Col>
 
               {/* Si se está editando una disponibilidad */}
@@ -493,6 +500,9 @@ export default function Dashboard() {
                         />
                       </Col>
                     </Row>
+                    <Form.Text className="text-muted" style={{ fontSize: "0.8rem" }}>
+                      Horario permitido: 08:00 am – 11:59 am
+                    </Form.Text>
                   </Col>
 
                   <Col md={12}>
@@ -515,6 +525,9 @@ export default function Dashboard() {
                         />
                       </Col>
                     </Row>
+                    <Form.Text className="text-muted" style={{ fontSize: "0.8rem" }}>
+                      Horario permitido: 12:00 pm – 18:00 pm
+                    </Form.Text>
                   </Col>
                 </>
               )}

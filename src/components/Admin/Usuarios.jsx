@@ -145,10 +145,10 @@ export default function Usuarios() {
   return (
     <div className="estudiantes-container">
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
-      <div className="header">
-        <h2 className="title">Estudiantes</h2>
-        <p className="subtitle">Gestiona a los estudiantes registrados en el sistema</p>
-      </div>
+      <h1 className="mb-4 fw-bold text-primary d-flex align-items-center justify-content-center gap-2">
+        <FaUserGraduate size={28} />
+        Panel de Estudiantes
+      </h1>
 
       <div className="students-table-wrapper">
         <table className="students-table">

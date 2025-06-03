@@ -3,6 +3,7 @@ import { Modal, Button } from 'react-bootstrap';
 import { ClipboardList, ShieldCheck } from "lucide-react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
+import { FaTasks } from "react-icons/fa";
 import {
   subirMetodo,
   listarEstudiantes,
@@ -132,8 +133,9 @@ export default function Metodos() {
 
   return (
     <div className="container py-3">
-      <h1 className="mb-4 fw-bold text-primary">
-        📋 Panel de Administración de Actividades
+      <h1 className="mb-4 fw-bold text-primary d-flex align-items-center justify-content-center gap-2">
+        <FaTasks size={28} />
+        <span>Panel de Administración de Actividades</span>
       </h1>
 
       <style>{`

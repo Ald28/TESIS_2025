@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Table, Button, Modal, Form } from "react-bootstrap";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
+import { FaCalendarCheck } from "react-icons/fa";
 import {
   obtenerCitasAceptadas,
   cancelarCitaAceptada,
@@ -105,27 +106,32 @@ export default function Citas() {
 
   return (
     <div className="citas-container">
-      <div className="header">
-        <div className="title-tabs">
-          <h2 className="title">Citas Aceptadas</h2>
-          <div className="tabs">
-            <Button
-              variant={vistaActual === "comunes" ? "dark" : "outline-dark"}
-              onClick={() => setVistaActual("comunes")}
-            >
-              Citas Comunes
-            </Button>
-            <Button
-              variant={vistaActual === "seguimiento" ? "dark" : "outline-dark"}
-              className="ms-2"
-              onClick={() => setVistaActual("seguimiento")}
-            >
-              Citas de Seguimiento
-            </Button>
-          </div>
-        </div>
-        <Button variant="primary" onClick={() => setShowModal(true)}>
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-5">
+        {/* Título del panel con más margen y padding derecho */}
+        <h1 className="fw-bold text-primary d-flex align-items-center gap-4 m-0 me-lg-7 pe-lg-5">
+          <FaCalendarCheck size={28} />
+          <span>Panel de Citas</span>
+        </h1>
+
+        {/* Botón Crear Seguimiento más separado aún */}
+        <Button variant="primary" className="ps-md-3" onClick={() => setShowModal(true)}>
           Crear Seguimiento
+        </Button>
+      </div>
+
+      {/* Botones de tabs debajo del título */}
+      <div className="d-flex flex-wrap gap-4 mb-4">
+        <Button
+          variant={vistaActual === "comunes" ? "dark" : "outline-dark"}
+          onClick={() => setVistaActual("comunes")}
+        >
+          Citas Comunes
+        </Button>
+        <Button
+          variant={vistaActual === "seguimiento" ? "dark" : "outline-dark"}
+          onClick={() => setVistaActual("seguimiento")}
+        >
+          Citas de Seguimiento
         </Button>
       </div>
 

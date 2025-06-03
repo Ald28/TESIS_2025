@@ -14,10 +14,20 @@ import {
   FaBell,
 } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { logout } from "../../utils/logout";
 
 const Sidebar = ({ collapsed, setCollapsed }) => {
   const toggleSidebar = () => setCollapsed(!collapsed);
   const location = useLocation();
+
+  const menuItems = [
+    { to: "/admin/dashboard", icon: <FaTachometerAlt />, label: "Dashboard" },
+    { to: "/admin/usuarios", icon: <FaUsers />, label: "Estudiantes" },
+    { to: "/admin/cuestionarios", icon: <FaTasks />, label: "Cuestionarios" },
+    { to: "/admin/metodos", icon: <FaClipboardList />, label: "Actividades" },
+    { to: "/admin/citas", icon: <FaCalendarAlt />, label: "Citas" },
+    { to: "/admin/notificaciones", icon: <FaBell />, label: "Notificaciones" },
+  ];
 
   return (
     <div
@@ -50,23 +60,14 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
       </div>
 
       <ul className="nav flex-column mt-2 w-100">
-        {[
-          { to: "/admin/dashboard", icon: <FaTachometerAlt />, label: "Dashboard" },
-          { to: "/admin/usuarios", icon: <FaUsers />, label: "Estudiantes" },
-          { to: "/admin/cuestionarios", icon: <FaTasks />, label: "Cuestionarios" },
-          { to: "/admin/metodos", icon: <FaClipboardList />, label: "Actividades" },
-          { to: "/admin/citas", icon: <FaCalendarAlt />, label: "Citas" },
-          { to: "/admin/notificaciones", icon: <FaBell />, label: "Notificaciones" },
-          { to: "/", icon: <FaSignOutAlt />, label: "Cerrar Sesión" },
-        ].map((item, idx) => {
+        {menuItems.map((item, idx) => {
           const isActive = location.pathname === item.to;
 
           return (
             <li key={idx} className="nav-item mb-3">
               <Link
                 to={item.to}
-                className={`nav-link d-flex align-items-center ${isActive ? "bg-light text-primary fw-bold rounded-start" : "text-white"
-                  }`}
+                className={`nav-link d-flex align-items-center ${isActive ? "bg-light text-primary fw-bold rounded-start" : "text-white"}`}
                 style={{
                   justifyContent: collapsed ? "center" : "flex-start",
                   gap: "8px",
@@ -81,6 +82,24 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
             </li>
           );
         })}
+
+        <li className="nav-item mb-3">
+          <button
+            onClick={logout}
+            className="nav-link d-flex align-items-center text-white w-100 border-0 bg-transparent"
+            style={{
+              justifyContent: collapsed ? "center" : "flex-start",
+              gap: "8px",
+              paddingLeft: collapsed ? "0" : "1rem",
+              paddingTop: "0.5rem",
+              paddingBottom: "0.5rem",
+              cursor: "pointer",
+            }}
+          >
+            <FaSignOutAlt />
+            {!collapsed && <span>Cerrar Sesión</span>}
+          </button>
+        </li>
       </ul>
 
       <div

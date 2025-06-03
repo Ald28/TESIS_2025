@@ -14,9 +14,11 @@ import Citas from "./components/Admin/Citas";
 import "./index.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { AuthProvider } from "./context/AuthContext";
 
 const App = () => {
   return (
+    <AuthProvider>
     <Router>
         <ToastContainer position="top-right" autoClose={3000} />
       <Routes>
@@ -40,6 +42,7 @@ const App = () => {
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
+    </AuthProvider>
   );
 };
 

@@ -200,6 +200,21 @@ const PerfilSidebar = ({ show, onHide }) => {
             >
               <i className="bi bi-pencil-square"></i> {modoEdicion ? "Guardar Cambios" : "Editar Perfil"}
             </Button>
+            {modoEdicion && (
+              <Button
+                variant="secondary"
+                className="mt-2 w-100 py-2 rounded-pill fw-semibold d-flex align-items-center justify-content-center gap-2"
+                onClick={() => {
+                  setModoEdicion(false);
+                  setFormData({
+                    especialidad: perfil.especialidad || "",
+                    descripcion: perfil.descripcion || ""
+                  });
+                }}
+              >
+                <i className="bi bi-x-circle"></i> Cancelar
+              </Button>
+            )}
           </>
         )}
       </Offcanvas.Body>

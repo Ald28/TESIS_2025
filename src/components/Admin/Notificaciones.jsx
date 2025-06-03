@@ -74,9 +74,10 @@ export default function Notificaciones() {
   return (
     <div className="container mt-4" style={{ maxWidth: '800px' }}>
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
-      <h2 className="text-center mb-4 d-flex align-items-center justify-content-center gap-2">
-        <FaBell /> Notificaciones
-      </h2>
+      <h1 className="mb-4 fw-bold text-primary d-flex align-items-center justify-content-center gap-2">
+        <FaBell size={28} />
+        <span>Notificaciones</span>
+      </h1>
 
       {loading ? (
         <p className="text-center">Cargando...</p>
