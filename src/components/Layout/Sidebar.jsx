@@ -86,7 +86,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
         <li className="nav-item mb-3">
           <button
             onClick={logout}
-            className="nav-link d-flex align-items-center text-white w-100 border-0 bg-transparent"
+            className="nav-link d-flex align-items-center text-danger fw-bold w-100 border-0 bg-transparent"
             style={{
               justifyContent: collapsed ? "center" : "flex-start",
               gap: "8px",
