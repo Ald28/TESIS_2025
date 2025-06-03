@@ -58,59 +58,36 @@ GOOGLE_CLIENT_ID_MOBILE=381550545275-eamd3ue9pl1ces1fbhg5ldercf7dio9e.apps.googl
 GOOGLE_CLIENT_ID_WEB=381550545275-npvfm9sf70jomqsum8fm1dvde05j8qks.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=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
 
-RESULTADOS
-+--------------+---------------+------------+
-| Campo        | Tipo         | Nulo       |
-+--------------+---------------+------------+
-| id          | INT          | NO (PK)    |
-| fecha       | TIMESTAMP    | SÍ         |
-| puntaje     | VARCHAR(45)  | SÍ         |
-| estado_animo| VARCHAR(45)  | SÍ         |
-| estudiante_id  | INT       | SÍ (FK)    |
-| cuestionario_id | INT      | SÍ (FK)    |
-| psicologo_id  | INT        | SÍ (FK)    |
-+--------------+---------------+------------+
+docker-compose.yml
+services:
+  backend:
+    build: .
+    container_name: calmatec_backend
+    ports:
+      - "${PORT}:${PORT}"
+    env_file:
+      - .env
+    depends_on:
+      mysql:
+        condition: service_healthy
 
-PREGUNTAS
-+---------------+---------------+------------+
-| Campo         | Tipo          | Nulo       |
-+---------------+---------------+------------+
-| id           | INT           | NO (PK)    |
-| txt_pregunta | VARCHAR(45)   | SÍ         |
-| tipo_pregunta| VARCHAR(45)   | SÍ         |
-| cuestionario_id | INT        | SÍ (FK)    |
-| psicologo_id  | INT          | SÍ (FK)    |
-+---------------+---------------+------------+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-OPCIONES
-+---------------+---------------+------------+
-| Campo         | Tipo          | Nulo       |
-+---------------+---------------+------------+
-| id           | INT           | NO (PK)    |
-| txt_opcion   | VARCHAR(45)   | SÍ         |
-| puntaje      | VARCHAR(45)   | SÍ         |
-| pregunta_id  | INT           | SÍ (FK)    |
-| psicologo_id | INT           | SÍ (FK)    |
-+---------------+---------------+------------+
-
-CUESTIONARIO
-+---------------+---------------+------------+
-| Campo         | Tipo          | Nulo       |
-+---------------+---------------+------------+
-| id           | INT           | NO (PK)    |
-| titulo       | VARCHAR(45)   | SÍ         |
-| descripcion  | VARCHAR(45)   | SÍ         |
-| fecha        | TIMESTAMP     | SÍ         |
-| psicologo_id | INT           | SÍ (FK)    |
-+---------------+---------------+------------+
-
-RESPUESTAS
-+--------------+---------------+------------+
-| Campo        | Tipo          | Nulo       |
-+--------------+---------------+------------+
-| id           | INT           | NO (PK)    |
-| fecha        | TIMESTAMP     | SÍ         |
-| pregunta_id  | INT           | SÍ (FK)    |
-| estudiante_id| INT           | SÍ (FK)    |
-| opciones_id  | INT           | SÍ (FK)    |
-+--------------+---------------+------------+
+volumes:
+  mysql_data:
