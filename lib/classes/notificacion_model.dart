@@ -3,23 +3,23 @@ class Notificacion {
   final String titulo;
   final String mensaje;
   final String tipo;
-  final String fechaEnvio;
+  final String fechaenvio;
 
   Notificacion({
     required this.id,
     required this.titulo,
     required this.mensaje,
     required this.tipo,
-    required this.fechaEnvio,
+    required this.fechaenvio,
   });
 
   factory Notificacion.fromJson(Map<String, dynamic> json) {
-    return Notificacion(
-      id: json['id'],
-      titulo: json['titulo'],
-      mensaje: json['mensaje'],
-      tipo: json['tipo'],
-      fechaEnvio: json['fecha_envio'],
-    );
-  }
+  return Notificacion(
+    id: json['id'],
+    titulo: json['titulo'],
+    mensaje: json['mensaje'],
+    tipo: json['tipo'],
+    fechaenvio: json['fecha_envio'],
+  );
+}
 }

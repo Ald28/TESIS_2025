@@ -11,6 +11,8 @@ import 'dart:io';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 import 'package:frondend/classes/notificacion_model.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
 
 
 
@@ -19,25 +21,80 @@ class ApiService {
 
 
 ///notificaciones
-Future<List<Notificacion>> fetchNotificaciones(int usuarioId) async {
-    final response = await http.get(Uri.parse('$baseUrl/api/notificaciones/listar/$usuarioId'));
-    print('Status: ${response.statusCode}');
-    print('Response body: ${response.body}');
+static Future<List<Notificacion>> listarNotificacionesGuardadas() async {
+  print("⏳ Iniciando llamada a listarNotificacionesGuardadas");
 
-    if (response.statusCode == 200) {
-      List<dynamic> data = json.decode(response.body);
-      return data.map((n) => Notificacion.fromJson(n)).toList();
-    } else {
-      throw Exception('Error al cargar notificaciones');
-    }
+  final prefs = await SharedPreferences.getInstance();
+  final usuarioId = prefs.getInt('usuario_id');
+  final token = prefs.getString('token');
+
+  if (usuarioId == null || token == null) {
+    throw Exception("No se encontró usuario_id o token");
   }
 
-  Future<void> eliminarNotificacion(int id) async {
+  final response = await http.get(
+    Uri.parse('$baseUrl/api/notificaciones/listar/$usuarioId'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+  );
+
+  if (response.statusCode == 200) {
+    print("✅ Notificaciones recibidas: ${response.body}");
+
+    final data = json.decode(response.body);
+    final List<dynamic> lista = data['notificaciones'];
+    return lista.map((n) => Notificacion.fromJson(n)).toList();
+  } else {
+    print("⚠️ Código: ${response.statusCode}");
+  print("⚠️ Cuerpo: ${response.body}");
+    throw Exception('Error al obtener notificaciones');
+  }
+}
+
+static Future<void> eliminarNotificacion(int id) async {
     final response = await http.delete(Uri.parse('$baseUrl/api/notificaciones/eliminar/$id'));
     if (response.statusCode != 200) {
       throw Exception('Error al eliminar notificación');
     }
   }
+
+Future<void> obtenerYGuardarFCMTokenDesdeStorage() async {
+  final prefs = await SharedPreferences.getInstance();
+  final usuarioId = prefs.getInt('usuario_id');
+  final tokenJWT = prefs.getString('token');
+
+  if (usuarioId == null || tokenJWT == null) {
+    print(" No se encontró usuario_id o token en SharedPreferences");
+    return;
+  }
+
+  String? tokenFCM = await FirebaseMessaging.instance.getToken();
+
+  if (tokenFCM != null) {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/notificaciones/guardar-token-fcm'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $tokenJWT',
+      },
+      body: json.encode({
+        'usuario_id': usuarioId,
+        'token': tokenFCM,
+        'plataforma': 'android',
+      }),
+    );
+
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      print("Token FCM guardado en backend");
+    } else {
+      print("Error al guardar token FCM: ${response.body}");
+    }
+  }
+}
+
+
 ///cahtbot
 static Future<String> enviarMensajeAlChatbot(String mensaje) async {
     final url = Uri.parse('$baseUrl/api/chat-estudiante');

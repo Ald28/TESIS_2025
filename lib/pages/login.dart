@@ -23,6 +23,7 @@ class _LoginState extends State<Login> {
   Future<void> guardarTokenFCMEnBackend() async {
     final prefs = await SharedPreferences.getInstance();
     final usuarioId = prefs.getInt('usuario_id');
+    print("🧾 Usuario ID guardado: $usuarioId");
     final token = await FirebaseMessaging.instance.getToken();
 
     if (usuarioId != null && token != null) {
@@ -48,9 +49,16 @@ class _LoginState extends State<Login> {
 
   Future<void> loginWithGoogle() async {
     setState(() => isLoading = true);
+    
 
     try {
-      await _googleSignIn.signOut(); // fuerza selector de cuenta
+      await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+      await _googleSignIn.signOut(); 
       final GoogleSignInAccount? user = await _googleSignIn.signIn();
 
       if (user == null) {

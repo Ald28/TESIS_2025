@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frondend/classes/notificacion_model.dart';
 import '../services/api_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 class PaginaEdit extends StatefulWidget {
@@ -12,47 +11,61 @@ class PaginaEdit extends StatefulWidget {
 }
 
 class _PaginaEditState extends State<PaginaEdit> {
-  late Future<List<Notificacion>> _notificacionesFuture;
+  List<Notificacion> _notificacionesGuardadas = [];
 
   @override
   void initState() {
     super.initState();
-    _cargarNotificaciones();
 
-    // Escuchar notificaciones en primer plano
+  
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Notificación recibida: ${message.notification?.title}');
-      _cargarNotificaciones(); // actualiza la lista al recibir
+      if (message.notification != null) {
+        final title = message.notification!.title ?? 'Notificación';
+        final body = message.notification!.body ?? '';
+        print('📲 Notificación recibida: $title - $body');
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("$title: $body")),
+        );
+
+        _cargarNotificaciones();
+      }
     });
+
+    _cargarNotificaciones(); 
   }
 
   void _cargarNotificaciones() async {
-    final prefs = await SharedPreferences.getInstance();
-    final usuarioId = prefs.getInt('usuario_id');
-
-    if (usuarioId != null) {
+    try {
+      final data = await ApiService.listarNotificacionesGuardadas();
       setState(() {
-        _notificacionesFuture = ApiService().fetchNotificaciones(usuarioId);
+        _notificacionesGuardadas = data;
       });
-    } else {
-      print("usuario_id no encontrado en SharedPreferences");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No se encontró el ID del usuario.")),
-      );
+    } catch (e) {
+      print("❌ Error al cargar notificaciones: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error al cargar notificaciones: $e")),
+        );
+      }
     }
   }
 
   void _eliminarNotificacion(int id) async {
     try {
-      await ApiService().eliminarNotificacion(id);
-      _cargarNotificaciones(); // actualiza la lista
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Notificación eliminada")),
-      );
+      await ApiService.eliminarNotificacion(id);
+      _cargarNotificaciones();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Notificación eliminada")),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error al eliminar: $e")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error al eliminar: $e")),
+        );
+      }
     }
   }
 
@@ -64,21 +77,12 @@ class _PaginaEditState extends State<PaginaEdit> {
         centerTitle: true,
         automaticallyImplyLeading: false,
       ),
-      body: FutureBuilder<List<Notificacion>>(
-        future: _notificacionesFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("No hay notificaciones"));
-          } else {
-            final notificaciones = snapshot.data!;
-            return ListView.builder(
-              itemCount: notificaciones.length,
+      body: _notificacionesGuardadas.isEmpty
+          ? const Center(child: Text("No hay notificaciones"))
+          : ListView.builder(
+              itemCount: _notificacionesGuardadas.length,
               itemBuilder: (context, index) {
-                final notif = notificaciones[index];
+                final notif = _notificacionesGuardadas[index];
                 return Dismissible(
                   key: Key(notif.id.toString()),
                   direction: DismissDirection.endToStart,
@@ -88,27 +92,29 @@ class _PaginaEditState extends State<PaginaEdit> {
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: const Icon(Icons.delete, color: Colors.white),
                   ),
-                  onDismissed: (direction) {
-                    _eliminarNotificacion(notif.id);
-                  },
+                  onDismissed: (_) => _eliminarNotificacion(notif.id),
                   child: Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: ListTile(
                       leading: const Icon(Icons.notifications),
                       title: Text(notif.titulo),
-                      subtitle: Text(notif.mensaje),
-                      trailing: Text(
-                        notif.fechaEnvio.split("T").first,
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(notif.mensaje),
+                          Text(
+                            "📅 ${notif.fechaenvio.split("T").first}",
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.grey),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 );
               },
-            );
-          }
-        },
-      ),
+            ),
     );
   }
 }

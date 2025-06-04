@@ -1,17 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:frondend/pages/login.dart';
 import 'package:frondend/pages/quiz_page.dart';
 import 'package:frondend/pages/home_page.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    await Firebase.initializeApp(); // ⬅️ Inicialización obligatoria
+    await Firebase.initializeApp(); 
   } catch (e) {
-    print("Firebase init error: $e"); // para debug
+    print("Firebase init error: $e");
   }
+
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+  if (message.notification != null) {
+    final context = navigatorKey.currentContext!;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          "${message.notification!.title}: ${message.notification!.body}",
+        ),
+      ),
+    );
+  }
+});
+
 
   runApp(const MyApp());
 }
@@ -22,6 +39,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey, 
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
