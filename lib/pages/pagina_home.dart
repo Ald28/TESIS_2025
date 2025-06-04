@@ -23,9 +23,7 @@ class _PaginaHomeState extends State<PaginaHome> {
   late Future<List<Psicologo>> _psicologosFuture;
 
   List<MetodoRelajacion> _todosLosMetodos = [];
-  List<String> _categorias = [];
 
-  String? _categoriaSeleccionada;
   bool mostrarPrivados = false;
   bool _datosCargados = false;
 
@@ -41,7 +39,7 @@ void _cargarDatos() async {
   final prefs = await SharedPreferences.getInstance();
   final estudianteId = prefs.getInt('estudiante_id');
   if (estudianteId == null) {
-    print("❌ No se encontró el ID del estudiante");
+    print("No se encontró el ID del estudiante");
     return;
   }
 
@@ -54,7 +52,6 @@ void _cargarDatos() async {
 
   _metodosFuture = futureMetodos.then((metodos)  {
     _todosLosMetodos = metodos;
-    _categorias = metodos.map((m) => m.categoria.trim().toLowerCase()).toSet().toList();
     return metodos;
   });
 
@@ -173,40 +170,7 @@ void _cargarDatos() async {
             ),
           ),
           const SizedBox(height: 10),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Row(
-              children: [
-                const Text("Métodos de relajación:"),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: DropdownButton<String>(
-                    isExpanded: true,
-                    hint: const Text("Categorías de estrés"),
-                    value: _categoriaSeleccionada,
-                    items: _categorias.map((cat) {
-                      return DropdownMenuItem<String>(
-                        value: cat,
-                        child: Text(cat[0].toUpperCase() + cat.substring(1)),
-                      );
-                    }).toList()
-                      ..insert(
-                        0,
-                        const DropdownMenuItem<String>(
-                          value: null,
-                          child: Text("Todas las categorías"),
-                        ),
-                      ),
-                    onChanged: (value) {
-                      setState(() {
-                        _categoriaSeleccionada = value;
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
+
         const SizedBox(height: 10),
         Expanded(
           child: FutureBuilder<List<MetodoRelajacion>>(
@@ -220,11 +184,8 @@ void _cargarDatos() async {
                 return const Center(child: Text('No hay métodos de relajación disponibles.'));
               }
 
-              final metodosFiltrados = _categoriaSeleccionada == null
-                  ? _todosLosMetodos
-                  : _todosLosMetodos
-                      .where((m) => m.categoria.trim().toLowerCase() == _categoriaSeleccionada)
-                      .toList();
+              final metodosFiltrados = _todosLosMetodos;
+
 
               return ListView.builder(
                 itemCount: metodosFiltrados.length,

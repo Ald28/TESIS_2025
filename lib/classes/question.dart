@@ -1,9 +1,11 @@
 class Answer {
+  final int id;
   final String texto;
   final int puntaje;
   final int preguntaId;
 
   Answer({
+    required this.id,
     required this.texto,
     required this.puntaje,
     required this.preguntaId,
@@ -11,15 +13,16 @@ class Answer {
 
   factory Answer.fromJson(Map<String, dynamic> json) {
     return Answer(
+      id: int.tryParse(json['id']?.toString() ?? "0") ?? 0,
       texto: json['txt_opcion'] ?? "",
       puntaje: int.tryParse(json['puntaje']?.toString() ?? "0") ?? 0,
       preguntaId: int.tryParse(json['pregunta_id']?.toString() ?? "0") ?? 0,
     );
   }
 
-
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'txt_opcion': texto,
       'puntaje': puntaje,
       'pregunta_id': preguntaId,

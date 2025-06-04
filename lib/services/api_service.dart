@@ -10,11 +10,34 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
+import 'package:frondend/classes/notificacion_model.dart';
 
 
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.1.102:8080';////cambiar qui para todo y tambien en el login buscar lo de pi
+  static const String baseUrl = 'http://192.168.177.181:8080';////cambiar qui para todo y tambien en el login buscar lo de pi
+
+
+///notificaciones
+Future<List<Notificacion>> fetchNotificaciones(int usuarioId) async {
+    final response = await http.get(Uri.parse('$baseUrl/api/notificaciones/listar/$usuarioId'));
+    print('Status: ${response.statusCode}');
+    print('Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      return data.map((n) => Notificacion.fromJson(n)).toList();
+    } else {
+      throw Exception('Error al cargar notificaciones');
+    }
+  }
+
+  Future<void> eliminarNotificacion(int id) async {
+    final response = await http.delete(Uri.parse('$baseUrl/api/notificaciones/eliminar/$id'));
+    if (response.statusCode != 200) {
+      throw Exception('Error al eliminar notificación');
+    }
+  }
 ///cahtbot
 static Future<String> enviarMensajeAlChatbot(String mensaje) async {
     final url = Uri.parse('$baseUrl/api/chat-estudiante');
@@ -298,6 +321,7 @@ static Future<void> crearCita({
   static Future<List<MetodoRelajacion>> fetchMetodosRecomendados() async {
   try {
     final response = await http.get(Uri.parse('$baseUrl/api/recomendados'));
+    print("📦 Backend: ${response.body}");
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);
       final data = body['metodos']; 
@@ -315,9 +339,12 @@ static Future<void> crearCita({
 static Future<List<MetodoRelajacion>> fetchMetodosPrivados(int estudianteId) async {
   try {
     final response = await http.get(Uri.parse('$baseUrl/api/privados/$estudianteId'));
+    print('🔍 DATA JSON: ${response.body}');
+    print("📦 Parsed metodo: $json");
+
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);
-      final data = body['metodos']; // ✅ accede al array interno
+      final data = body['metodos']; 
       return (data as List)
           .map((json) => MetodoRelajacion.fromJson(json))
           .toList();
@@ -357,42 +384,110 @@ static Future<List<MetodoRelajacion>> fetchMetodosPrivados(int estudianteId) asy
     }
   }
 
+  ///enviar respeustas
+  static Future<void> enviarRespuestaIndividual({
+  required int preguntaId,
+  required int estudianteId,
+  int? opcionesId,
+  String? respuestaTexto,
+}) async {
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('token');
+
+  final url = Uri.parse('$baseUrl/api/crear-respuesta');
+
+  final response = await http.post(
+    url,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+    body: jsonEncode({
+      'pregunta_id': preguntaId,
+      'estudiante_id': estudianteId,
+      'opciones_id': opcionesId,
+      'respuesta_texto': respuestaTexto,
+    }),
+  );
+
+  if (response.statusCode != 201) {
+    throw Exception(' Error al enviar respuesta: ${response.body}');
+  }
+}
+
+
+
   /// Enviar resultados del usuario (quiz completo)
   static Future<void> sendResults(Quiz quiz) async {
-    try {
-      List<Map<String, dynamic>> respuestas = quiz.questions.map((q) {
-        final selectedAnswer = q.tipo == 'abierto'
-            ? Answer(
-                texto: q.selected ?? "",
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final estudianteId = prefs.getInt('estudiante_id');
+
+    if (estudianteId == null) {
+      throw Exception("Estudiante no autenticado.");
+    }
+
+    List<Map<String, dynamic>> respuestas = quiz.questions.map((q) {
+      final selectedAnswer = q.tipo == 'abierto'
+          ? Answer(
+              id: 0,
+              texto: q.selected ?? "",
+              puntaje: 0,
+              preguntaId: q.id,
+            )
+          : q.respuestas.firstWhere(
+              (r) => r.texto == q.selected,
+              orElse: () => Answer(
+                id: 0,
+                texto: "",
                 puntaje: 0,
                 preguntaId: q.id,
-              )
-            : q.respuestas.firstWhere(
-                (r) => r.texto == q.selected,
-                orElse: () => Answer(texto: "", puntaje: 0, preguntaId: q.id),
-              );
+              ),
+            );
 
-        return {
-          "pregunta_id": q.id,
-          "estudiante_id": 1,
-          "opciones_id": q.tipo == 'abierto' ? null : selectedAnswer.preguntaId,
-          "respuesta_texto": q.tipo == 'abierto' ? selectedAnswer.texto : null,
-        };
-      }).toList();
+      return {
+        "pregunta_id": q.id,
+        "estudiante_id": estudianteId, 
+        "opciones_id": q.tipo == 'abierto' ? null : selectedAnswer.id, 
+        "respuesta_texto": q.tipo == 'abierto' ? selectedAnswer.texto : null,
+      };
+    }).toList();
 
-      final response = await http.post(
-        Uri.parse('$baseUrl/resultado/resultado'),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"respuestas": respuestas}),
-      );
+    final response = await http.post(
+      Uri.parse('$baseUrl/resultado/resultado'),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"respuestas": respuestas}),
+    );
 
-      if (response.statusCode != 201) {
-        throw Exception('Error al enviar resultados');
-      }
-    } catch (e) {
-      throw Exception("Error al enviar respuestas: $e");
+    if (response.statusCode != 201) {
+      throw Exception('Error al enviar resultados');
     }
+  } catch (e) {
+    throw Exception("Error al enviar respuestas: $e");
   }
+}
+
+  // Obtener todas las respuestas del estudiante
+static Future<List<dynamic>> obtenerRespuestasEstudiante() async {
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('token');
+
+  final response = await http.get(
+    Uri.parse('$baseUrl/api/respuestas'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+  );
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    return data['respuestas'];
+  } else {
+    throw Exception('Error al cargar respuestas: ${response.body}');
+  }
+}
+
   
   /// Iniciar sesión con Google
 static Future<Map<String, dynamic>> loginConGoogle(String credential) async {

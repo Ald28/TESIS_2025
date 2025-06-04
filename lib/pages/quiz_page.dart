@@ -3,6 +3,8 @@ import 'package:frondend/classes/question.dart';
 import 'package:frondend/classes/quiz.dart';
 import 'package:frondend/services/api_service.dart';
 import 'package:frondend/pages/navigation_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class QuizPage extends StatefulWidget {
   const QuizPage({super.key});
@@ -26,59 +28,99 @@ class _QuizPageState extends State<QuizPage> {
   }
 
   Future<void> _loadQuestions() async {
-    try {
-      setState(() {
-        _isLoading = true;
-      });
-      
-      List<Question> allQuestions = await ApiService.fetchAllQuestions();
+  try {
+    setState(() {
+      _isLoading = true;
+    });
 
-      allQuestions = allQuestions.where((q) {
-        return q.tipo == 'abierto' || q.respuestas.isNotEmpty;
-      }).toList();
+    List<Question> allQuestions = await ApiService.fetchAllQuestions();
+    final respuestasEstudiante = await ApiService.obtenerRespuestasEstudiante();
 
-      allQuestions.shuffle();
+    allQuestions = allQuestions.where((q) {
+      return q.tipo == 'abierto' || q.respuestas.isNotEmpty;
+    }).toList();
 
-      setState(() {
-        quiz.questions.clear();
-        quiz.questions.addAll(allQuestions.take(4));
-        totalQuestions = quiz.questions.length;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      print("Error al cargar preguntas: $e");
-    }
-  }
-
-  void _optionSelected(Answer selected) {
-    quiz.questions[questionIndex].selected = selected.texto;
-    bool isCorrect = selected.puntaje > 0;
-
-    if (isCorrect) {
-      quiz.questions[questionIndex].correct = true;
-      quiz.right += selected.puntaje;
-    }
-
-    progressIndex += 1;
-
-    if (questionIndex < totalQuestions - 1) {
-      setState(() {
-        questionIndex += 1;
-        _controller.clear();
-      });
-    } else {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const NavigationScreen(paginaInicial: 0),
-        ),
-        (route) => false,
+    for (var pregunta in allQuestions) {
+      final respuestaGuardada = respuestasEstudiante.firstWhere(
+        (r) => r['pregunta_id'] == pregunta.id,
+        orElse: () => null,
       );
+
+      if (respuestaGuardada != null) {
+        if (pregunta.tipo == 'abierto') {
+          pregunta.selected = respuestaGuardada['respuesta_texto'];
+        } else {
+          final idSeleccionado = respuestaGuardada['opciones_id'];
+          final opcionSeleccionada = pregunta.respuestas.firstWhere(
+            (op) => op.id == idSeleccionado,
+            orElse: () => Answer(id: 0, texto: "", puntaje: 0, preguntaId: pregunta.id),
+          );
+          pregunta.selected = opcionSeleccionada.texto;
+        }
+      }
+    }
+
+    allQuestions.shuffle();
+
+    setState(() {
+      quiz.questions.clear();
+      quiz.questions.addAll(allQuestions.take(4));
+      totalQuestions = quiz.questions.length;
+      _isLoading = false;
+    });
+  } catch (e) {
+    setState(() {
+      _isLoading = false;
+    });
+    print("Error al cargar preguntas: $e");
+  }
+}
+
+
+  void _optionSelected(Answer selected) async {
+  quiz.questions[questionIndex].selected = selected.texto;
+  bool isCorrect = selected.puntaje > 0;
+
+  if (isCorrect) {
+    quiz.questions[questionIndex].correct = true;
+    quiz.right += selected.puntaje;
+  }
+
+  final prefs = await SharedPreferences.getInstance();
+  final estudianteId = prefs.getInt('estudiante_id');
+
+  if (estudianteId != null) {
+    try {
+      await ApiService.enviarRespuestaIndividual(
+        preguntaId: quiz.questions[questionIndex].id,
+        estudianteId: estudianteId,
+        opcionesId: quiz.questions[questionIndex].tipo == 'abierto' ? null : selected.id, 
+        respuestaTexto: quiz.questions[questionIndex].tipo == 'abierto' ? selected.texto : null,
+      );
+
+    } catch (e) {
+      print(" Error al enviar respuesta: $e");
     }
   }
+
+  progressIndex += 1;
+
+  if (questionIndex < totalQuestions - 1) {
+    setState(() {
+      questionIndex += 1;
+      _controller.clear();
+    });
+  } else {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const NavigationScreen(paginaInicial: 0),
+      ),
+      (route) => false,
+    );
+  }
+}
+
   
   void _nextQuestion() {
     final tipo = quiz.questions[questionIndex].tipo;
@@ -95,6 +137,7 @@ class _QuizPageState extends State<QuizPage> {
       }
 
       final respuesta = Answer(
+        id: 0,
         texto: _controller.text.trim(),
         puntaje: 0,
         preguntaId: quiz.questions[questionIndex].id,
@@ -228,13 +271,15 @@ class _QuizPageState extends State<QuizPage> {
                                 
                                 // Respuestas
                                 Expanded(
-                                  child: quiz.questions[questionIndex].tipo == 'abierto'
+                                  child: quiz.questions.isEmpty
+                                  ? const Center(child: Text('No hay preguntas disponibles'))
+                                  : quiz.questions[questionIndex].tipo == 'abierto'
                                       ? Padding(
                                           padding: const EdgeInsets.all(20),
                                           child: Column(
                                             children: [
                                               TextField(
-                                                controller: _controller,
+                                                controller: _controller..text = quiz.questions[questionIndex].selected ?? '',
                                                 decoration: InputDecoration(
                                                   labelText: 'Tu respuesta',
                                                   border: OutlineInputBorder(
@@ -336,7 +381,8 @@ class _QuizPageState extends State<QuizPage> {
                 ),
                 
                 // Botón para continuar
-                Padding(
+                quiz.questions.isNotEmpty
+              ? Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 25),
                   child: quiz.questions[questionIndex].tipo == 'abierto'
                       ? ElevatedButton(
@@ -355,8 +401,10 @@ class _QuizPageState extends State<QuizPage> {
                             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                         )
-                      : const SizedBox.shrink(), 
-                ),
+                      : const SizedBox.shrink(),
+                )
+              : const SizedBox.shrink(),
+
               ],
             ),
     );

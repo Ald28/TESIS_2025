@@ -62,16 +62,7 @@ class PaginaDetalleMetodo extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          const Icon(Icons.category_outlined, color: Colors.indigo),
-                          const SizedBox(width: 8),
-                          Text(
-                            metodo.categoria,
-                            style: const TextStyle(fontSize: 15, color: Colors.black54),
-                          ),
-                        ],
-                      ),
+                      
                       const SizedBox(height: 16),
                       const Divider(thickness: 1, color: Colors.black12),
                       const SizedBox(height: 12),

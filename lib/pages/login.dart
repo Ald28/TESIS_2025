@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'dart:convert';
 
 class Login extends StatefulWidget {
@@ -16,18 +17,42 @@ class _LoginState extends State<Login> {
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: ['email'],
-    serverClientId:
-        '381550545275-npvfm9sf70jomqsum8fm1dvde05j8qks.apps.googleusercontent.com',
+    serverClientId: '381550545275-npvfm9sf70jomqsum8fm1dvde05j8qks.apps.googleusercontent.com',
   );
+
+  Future<void> guardarTokenFCMEnBackend() async {
+    final prefs = await SharedPreferences.getInstance();
+    final usuarioId = prefs.getInt('usuario_id');
+    final token = await FirebaseMessaging.instance.getToken();
+
+    if (usuarioId != null && token != null) {
+      final response = await http.post(
+        Uri.parse('http://192.168.177.181:8080/api/notificaciones/guardar-token-fcm'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'usuario_id': usuarioId,
+          'token': token,
+          'plataforma': 'android',
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print("Token FCM guardado correctamente");
+      } else {
+        print("Error al guardar token FCM: ${response.body}");
+      }
+    } else {
+      print("usuario_id o token FCM nulo");
+    }
+  }
 
   Future<void> loginWithGoogle() async {
     setState(() => isLoading = true);
 
     try {
-      // Cierra sesión antes de intentar iniciar nuevamente (fuerza el selector de cuentas)
-      await _googleSignIn.signOut();
-
+      await _googleSignIn.signOut(); // fuerza selector de cuenta
       final GoogleSignInAccount? user = await _googleSignIn.signIn();
+
       if (user == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Inicio de sesión cancelado')),
@@ -39,7 +64,7 @@ class _LoginState extends State<Login> {
       final GoogleSignInAuthentication auth = await user.authentication;
 
       final response = await http.post(
-        Uri.parse('http://192.168.1.102:8080/auth/google/estudiante'),////cambiar aqui
+        Uri.parse('http://192.168.177.181:8080/auth/google/estudiante'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'credential': auth.idToken}),
       );
@@ -49,7 +74,7 @@ class _LoginState extends State<Login> {
         final token = data['token'];
 
         final perfilResponse = await http.get(
-          Uri.parse('http://192.168.1.102:8080/auth/perfil'),////cambiar aqui segun la ip
+          Uri.parse('http://192.168.177.181:8080/auth/perfil'),
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer $token',
@@ -65,6 +90,9 @@ class _LoginState extends State<Login> {
           await prefs.setString('token', token);
           await prefs.setInt('estudiante_id', estudianteId);
           await prefs.setInt('usuario_id', usuarioId);
+
+          // ✅ Guardar token FCM en backend
+          await guardarTokenFCMEnBackend();
 
           Navigator.pushReplacementNamed(context, '/quiz-page');
         } else {

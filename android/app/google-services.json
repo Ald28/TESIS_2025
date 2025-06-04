@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "63628570352",
+    "project_id": "frond-c6a7c",
+    "storage_bucket": "frond-c6a7c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:63628570352:android:93e0ea8b513e8ec8551c35",
+        "android_client_info": {
+          "package_name": "com.example.frondend"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDy7TYBb2dty0XPjCG4o4Twp9umoZoaAOw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
