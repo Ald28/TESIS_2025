@@ -13,7 +13,9 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer
+  ResponsiveContainer,
+  BarChart,
+  Bar
 } from "recharts";
 import {
   obtenerCitasDelPsicologo,
@@ -26,6 +28,10 @@ import {
   eliminarDisponibilidadPorTurno,
   verificarConexionCalendar,
 } from "../Api/api_psicologo";
+import {
+  listarMetodosRecomendados,
+  listarTodosMetodosPrivados,
+} from "../Api/api_metodos";
 
 const socket = io(import.meta.env.VITE_SOCKET_URL);
 
@@ -41,6 +47,8 @@ export default function Dashboard() {
   const abrirModalDisponibilidad = () => setShowModalDisponibilidad(true);
   const [totalHorasDisponibles, setTotalHorasDisponibles] = useState(0);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null);
+  const [actividadesSubidasData, setActividadesSubidasData] = useState([]);
+  const [totalActividades, setTotalActividades] = useState(0);
   const cerrarModalDisponibilidad = () => {
     setShowModalDisponibilidad(false);
     setDisponibilidadEditando(null);
@@ -151,6 +159,7 @@ export default function Dashboard() {
     }
 
     fetchCitas();
+    fetchActividadesSubidas();
 
     return () => {
       socket.off("nuevaNotificacion");
@@ -310,6 +319,55 @@ export default function Dashboard() {
       return acc;
     }, []);
 
+  const aceptadasConLinea = [...aceptadasData];
+  if (aceptadasConLinea.length === 1) {
+    aceptadasConLinea.unshift({ fecha: "sin datos", pacientes: 0 });
+  }
+
+  const pendientesConLinea = [...pendientesData];
+  if (pendientesConLinea.length === 1) {
+    pendientesConLinea.unshift({ fecha: "sin datos", citasPendientes: 0 });
+  }
+
+
+  const fetchActividadesSubidas = async () => {
+    try {
+      const recomendados = await listarMetodosRecomendados();
+      const privados = await listarTodosMetodosPrivados();
+      const todos = [...recomendados, ...privados];
+
+      // Agrupar por fecha
+      const agrupados = todos.reduce((acc, metodo) => {
+        const rawFecha = metodo.createdAt || metodo.fecha_creacion || metodo.fecha || new Date().toISOString();
+        const fechaObj = new Date(rawFecha);
+        if (isNaN(fechaObj)) return acc;
+
+        const fecha = fechaObj.toLocaleDateString("es-PE");
+        const encontrado = acc.find(item => item.fecha === fecha);
+
+        if (encontrado) {
+          encontrado.actividades += 1;
+        } else {
+          acc.push({ fecha, actividades: 1 });
+        }
+        return acc;
+      }, []);
+
+      setActividadesSubidasData(agrupados);
+      setTotalActividades(todos.length);
+    } catch (error) {
+      console.error("Error al obtener actividades:", error);
+    }
+  };
+
+  const actividadesConLinea = [...actividadesSubidasData];
+  if (actividadesConLinea.length === 1) {
+    actividadesConLinea.unshift({
+      fecha: "sin datos",
+      actividades: 0
+    });
+  }
+
   return (
     <Container fluid>
       <div className="mb-4">
@@ -349,7 +407,7 @@ export default function Dashboard() {
             <div className="d-flex justify-content-between align-items-center">
               <div>
                 <h6 className="fw-semibold">Actividades</h6>
-                <h4>23</h4>
+                <h4>{totalActividades}</h4>
               </div>
               <FaTasks size={30} className="text-success" />
             </div>
@@ -372,15 +430,15 @@ export default function Dashboard() {
       {categoriaSeleccionada === "aceptada" && (
         <>
           <h5 className="mt-4">Gráfico de Pacientes Activos por Fecha</h5>
-          {aceptadasData.length > 0 ? (
+          {aceptadasConLinea.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={aceptadasData}>
+              <BarChart data={aceptadasConLinea} barSize={40}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="fecha" />
-                <YAxis />
+                <YAxis label={{ angle: -90, position: "insideLeft" }} allowDecimals={false} />
                 <Tooltip />
-                <Line type="monotone" dataKey="pacientes" stroke="#007bff" strokeWidth={2} />
-              </LineChart>
+                <Bar dataKey="pacientes" fill="#007bff" />
+              </BarChart>
             </ResponsiveContainer>
           ) : (
             <p>No hay citas aceptadas registradas.</p>
@@ -391,15 +449,15 @@ export default function Dashboard() {
       {categoriaSeleccionada === "pendiente" && (
         <>
           <h5 className="mt-4">Gráfico de Citas Pendientes por Fecha</h5>
-          {pendientesData.length > 0 ? (
+          {pendientesConLinea.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={pendientesData}>
+              <BarChart data={pendientesConLinea} barSize={40}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="fecha" />
-                <YAxis />
+                <YAxis label={{ angle: -90, position: "insideLeft" }} allowDecimals={false} />
                 <Tooltip />
-                <Line type="monotone" dataKey="citasPendientes" stroke="#ffc107" strokeWidth={2} />
-              </LineChart>
+                <Bar dataKey="citasPendientes" fill="#ffc107" />
+              </BarChart>
             </ResponsiveContainer>
           ) : (
             <p>No hay citas pendientes registradas.</p>
@@ -409,16 +467,16 @@ export default function Dashboard() {
 
       {categoriaSeleccionada === "actividades" && (
         <>
-          <h5 className="mt-4">Gráfico de Actividades por Fecha</h5>
-          {actividadesData.length > 0 ? (
+          <h5 className="mt-4">Gráfico de Actividades Subidas por Fecha</h5>
+          {actividadesConLinea.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={actividadesData}>
+              <BarChart data={actividadesConLinea} barSize={40}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="fecha" />
-                <YAxis />
+                <YAxis label={{ angle: -90, position: "insideLeft" }} allowDecimals={false} />
                 <Tooltip />
-                <Line type="monotone" dataKey="actividades" stroke="#28a745" strokeWidth={2} />
-              </LineChart>
+                <Bar dataKey="actividades" fill="#28a745" />
+              </BarChart>
             </ResponsiveContainer>
           ) : (
             <p>No hay actividades registradas para mostrar.</p>
@@ -431,13 +489,13 @@ export default function Dashboard() {
           <h5 className="mt-4">Gráfico de Disponibilidad por Día</h5>
           {disponibilidadData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={disponibilidadData}>
+              <BarChart data={disponibilidadData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="dia" />
                 <YAxis />
                 <Tooltip />
-                <Line type="monotone" dataKey="horas" stroke="#17a2b8" strokeWidth={2} />
-              </LineChart>
+                <Bar dataKey="horas" fill="#17a2b8" />
+              </BarChart>
             </ResponsiveContainer>
           ) : (
             <p>No hay disponibilidad registrada para mostrar.</p>
