@@ -11,7 +11,7 @@ import {
   listarPreguntasConOpciones,
   editarPreguntaYOpciones,
   eliminarPreguntaYOpciones,
-} from "../api/api_cuestionarios";
+} from "../Api/api_cuestionarios";
 import { buscarPsicologoPorUsuarioId } from "../Api/api_psicologo";
 
 export default function Cuestionario() {

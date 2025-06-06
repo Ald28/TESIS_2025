@@ -34,3 +34,16 @@ src/
 AGERGAR PERFIL
 EDITAR PERFIL
 CERRAR SESSION
+
+EJECUTAR:
+docker run -d -p 5173:80 --name frontend-tesis frontend-tesis
+docker start frontend-tesis
+
+RECONSTRUIR:
+docker stop frontend-tesis
+docker rm frontend-tesis
+docker build -t frontend-tesis .
+docker run -d -p 5173:80 --name frontend-tesis frontend-tesis
+
+SE HICIERON CAMBIOS Y QUIERES DOCKERIZARLO:
+docker build -t frontend-tesis .

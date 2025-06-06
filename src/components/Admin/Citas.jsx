@@ -10,7 +10,7 @@ import {
   listarEstudiantes,
 } from "../Api/api_citas";
 import { cambiarEstadoCita } from "../Api/api_psicologo";
-import "../styles/Citas.css";
+import "../Styles/Citas.css";
 
 export default function Citas() {
   const [citasNormales, setCitasNormales] = useState([]);

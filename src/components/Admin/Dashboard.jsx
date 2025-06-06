@@ -7,6 +7,15 @@ import { useNavigate } from "react-router-dom";
 import { FaUsers, FaCalendarCheck, FaTasks, FaClock, FaGoogle } from "react-icons/fa";
 import { io } from "socket.io-client";
 import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
+} from "recharts";
+import {
   obtenerCitasDelPsicologo,
   conectarGoogleCalendar,
   cambiarEstadoCita,
@@ -30,6 +39,8 @@ export default function Dashboard() {
   const [showModalDisponibilidad, setShowModalDisponibilidad] = useState(false);
   const [calendarConectado, setCalendarConectado] = useState(false);
   const abrirModalDisponibilidad = () => setShowModalDisponibilidad(true);
+  const [totalHorasDisponibles, setTotalHorasDisponibles] = useState(0);
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null);
   const cerrarModalDisponibilidad = () => {
     setShowModalDisponibilidad(false);
     setDisponibilidadEditando(null);
@@ -53,6 +64,23 @@ export default function Dashboard() {
     tarde_fin: ""
   });
 
+  const calcularTotalHoras = (bloques) => {
+    let totalHoras = 0;
+
+    bloques.forEach((bloque) => {
+      const inicio = new Date(`2000-01-01T${bloque.hora_inicio}`);
+      const fin = new Date(`2000-01-01T${bloque.hora_fin}`);
+      const horas = (fin - inicio) / (1000 * 60 * 60); // ms → h
+      totalHoras += horas;
+    });
+
+    return totalHoras;
+  };
+
+  const manejarSeleccion = (categoria) => {
+    setCategoriaSeleccionada(categoria);
+  };
+
   const fetchCitas = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -66,6 +94,7 @@ export default function Dashboard() {
 
         const disponibilidadData = await obtenerDisponibilidadPorTurno(psicologoId);
         setDisponibilidades(disponibilidadData.disponibilidad || []);
+        setTotalHorasDisponibles(calcularTotalHoras(disponibilidadData.disponibilidad || []));
       }
 
     } catch (error) {
@@ -229,6 +258,58 @@ export default function Dashboard() {
     }
   };
 
+  const actividadesData = citas.reduce((acc, cita) => {
+    const fecha = new Date(cita.fecha).toLocaleDateString(); // agrupar por fecha legible
+    const existente = acc.find(item => item.fecha === fecha);
+
+    if (existente) {
+      existente.actividades += 1;
+    } else {
+      acc.push({ fecha, actividades: 1 });
+    }
+
+    return acc;
+  }, []);
+
+  const disponibilidadData = disponibilidades.map(bloque => {
+    const horas =
+      (new Date(`2000-01-01T${bloque.hora_fin}`) - new Date(`2000-01-01T${bloque.hora_inicio}`)) /
+      3600000;
+
+    return {
+      dia: bloque.dia,
+      horas,
+    };
+  });
+
+  // Agrupamos las citas aceptadas por fecha
+  const aceptadasData = citas
+    .filter(cita => cita.estado === "aceptada")
+    .reduce((acc, cita) => {
+      const fecha = new Date(cita.fecha).toLocaleDateString();
+      const existente = acc.find(item => item.fecha === fecha);
+      if (existente) {
+        existente.pacientes += 1;
+      } else {
+        acc.push({ fecha, pacientes: 1 });
+      }
+      return acc;
+    }, []);
+
+  // Agrupamos las citas pendientes por fecha
+  const pendientesData = citas
+    .filter(cita => cita.estado === "pendiente")
+    .reduce((acc, cita) => {
+      const fecha = new Date(cita.fecha).toLocaleDateString();
+      const existente = acc.find(item => item.fecha === fecha);
+      if (existente) {
+        existente.citasPendientes += 1;
+      } else {
+        acc.push({ fecha, citasPendientes: 1 });
+      }
+      return acc;
+    }, []);
+
   return (
     <Container fluid>
       <div className="mb-4">
@@ -240,11 +321,11 @@ export default function Dashboard() {
 
       <Row className="g-4 mb-4">
         <Col xs={12} md={6} lg={3}>
-          <Card className="p-3 h-100 glass-card">
+          <Card onClick={() => manejarSeleccion("aceptada")} className="p-3 h-100 glass-card" style={{ cursor: "pointer" }}>
             <div className="d-flex justify-content-between align-items-center">
               <div>
                 <h6 className="fw-semibold">Pacientes Activos</h6>
-                <h4>{citas.filter(c => c.estado === 'aceptada').length}</h4>
+                <h4>{citas.filter(c => c.estado === "aceptada").length}</h4>
               </div>
               <FaUsers size={30} className="text-primary" />
             </div>
@@ -252,19 +333,19 @@ export default function Dashboard() {
         </Col>
 
         <Col xs={12} md={6} lg={3}>
-          <Card className="p-3 h-100 glass-card">
+          <Card onClick={() => manejarSeleccion("pendiente")} className="p-3 h-100 glass-card" style={{ cursor: "pointer" }}>
             <div className="d-flex justify-content-between align-items-center">
               <div>
-                <h6 className="fw-semibold">Sesiones</h6>
-                <h4>{citas.length}</h4>
+                <h6 className="fw-semibold">Citas Pendientes</h6>
+                <h4>{citas.filter(c => c.estado === "pendiente").length}</h4>
               </div>
-              <FaCalendarCheck size={30} className="text-success" />
+              <FaCalendarCheck size={30} className="text-warning" />
             </div>
           </Card>
         </Col>
 
         <Col xs={12} md={6} lg={3}>
-          <Card className="p-3 h-100 glass-card">
+          <Card onClick={() => manejarSeleccion("actividades")} className="p-3 h-100 glass-card" style={{ cursor: "pointer" }}>
             <div className="d-flex justify-content-between align-items-center">
               <div>
                 <h6 className="fw-semibold">Actividades</h6>
@@ -276,17 +357,93 @@ export default function Dashboard() {
         </Col>
 
         <Col xs={12} md={6} lg={3}>
-          <Card className="p-3 h-100 glass-card">
+          <Card onClick={() => manejarSeleccion("disponibilidad")} className="p-3 h-100 glass-card" style={{ cursor: "pointer" }}>
             <div className="d-flex justify-content-between align-items-center">
               <div>
-                <h6 className="fw-semibold">Horas Programadas</h6>
-                <h4>86</h4>
+                <h6 className="fw-semibold">Horas Disponibles</h6>
+                <h4>{totalHorasDisponibles.toFixed(1)}</h4>
               </div>
-              <FaClock size={30} className="text-primary" />
+              <FaClock size={30} className="text-info" />
             </div>
           </Card>
         </Col>
       </Row>
+
+      {categoriaSeleccionada === "aceptada" && (
+        <>
+          <h5 className="mt-4">Gráfico de Pacientes Activos por Fecha</h5>
+          {aceptadasData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={aceptadasData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="fecha" />
+                <YAxis />
+                <Tooltip />
+                <Line type="monotone" dataKey="pacientes" stroke="#007bff" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <p>No hay citas aceptadas registradas.</p>
+          )}
+        </>
+      )}
+
+      {categoriaSeleccionada === "pendiente" && (
+        <>
+          <h5 className="mt-4">Gráfico de Citas Pendientes por Fecha</h5>
+          {pendientesData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={pendientesData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="fecha" />
+                <YAxis />
+                <Tooltip />
+                <Line type="monotone" dataKey="citasPendientes" stroke="#ffc107" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <p>No hay citas pendientes registradas.</p>
+          )}
+        </>
+      )}
+
+      {categoriaSeleccionada === "actividades" && (
+        <>
+          <h5 className="mt-4">Gráfico de Actividades por Fecha</h5>
+          {actividadesData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={actividadesData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="fecha" />
+                <YAxis />
+                <Tooltip />
+                <Line type="monotone" dataKey="actividades" stroke="#28a745" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <p>No hay actividades registradas para mostrar.</p>
+          )}
+        </>
+      )}
+
+      {categoriaSeleccionada === "disponibilidad" && (
+        <>
+          <h5 className="mt-4">Gráfico de Disponibilidad por Día</h5>
+          {disponibilidadData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={disponibilidadData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="dia" />
+                <YAxis />
+                <Tooltip />
+                <Line type="monotone" dataKey="horas" stroke="#17a2b8" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <p>No hay disponibilidad registrada para mostrar.</p>
+          )}
+        </>
+      )}
 
       <Accordion defaultActiveKey="0" className="mt-4 shadow-sm border-0">
         <Accordion.Item eventKey="0">
