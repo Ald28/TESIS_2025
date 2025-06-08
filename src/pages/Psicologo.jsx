@@ -80,12 +80,12 @@ export default function Psicologo() {
   const onEliminar = async (usuario_id) => {
     const result = await Swal.fire({
       title: "¿Estás seguro?",
-      text: "Esta acción eliminará al psicólogo del sistema.",
+      text: "Esta acción desactivará al psicólogo del sistema.",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#6c757d",
-      confirmButtonText: "Sí, eliminar",
+      confirmButtonText: "Sí, desactivar",
       cancelButtonText: "Cancelar",
     });
 
@@ -93,7 +93,7 @@ export default function Psicologo() {
       try {
         await eliminarPsicologo(usuario_id);
         await fetchData(estadoFiltro);
-        toast.success("Psicólogo eliminado correctamente.");
+        toast.success("Psicólogo desactivado correctamente.");
       } catch (error) {
         console.error("Error al eliminar psicólogo:", error.message);
         toast.error("Error al eliminar psicólogo.");
