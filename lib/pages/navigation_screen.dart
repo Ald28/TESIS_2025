@@ -24,15 +24,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
   MetodoRelajacion? _metodoSeleccionado;
   late List<Widget> _paginas;
 
-  final List<String> _titulos = [
-    'Inicio',
-    'Chat',
-    'Historial',
-    'Editar',
-    'Usuario',
-    'Detalle Psicólogo',
-    'Detalle Método',
-  ];
 
   @override
   void initState() {
@@ -89,15 +80,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
                 height: 28,
               ),
               const SizedBox(width: 8),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Text(
-                    _titulos[_paginaActual],
-                    style: const TextStyle(fontSize: 20),
-                  ),
-                ),
-              ),
             ],
           ),
         ),

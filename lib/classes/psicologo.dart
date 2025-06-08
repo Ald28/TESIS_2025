@@ -14,10 +14,11 @@ class Psicologo {
   });
 
   factory Psicologo.fromJson(Map<String, dynamic> json) {
+    print(json);
     return Psicologo(
       id: json['psicologo_id'], 
       nombre: "${json['nombre']} ${json['apellido']}",
-      fotoUrl: json['imagen_url'],
+      fotoUrl: json['foto_url'],
       email: json['correo'],
       telefono: json['telefono'],
     );
