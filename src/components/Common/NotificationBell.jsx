@@ -10,6 +10,8 @@ import {
 import {
   listarNotificacionesPorUsuario,
   eliminarNotificacionPorId,
+  revisarInactividadEstudiantes,
+  notificarCitasProximas, // ✅ nuevo import
 } from "../Api/api_notificaciones";
 import "../Styles/NotificationBell.css";
 
@@ -58,7 +60,29 @@ const NotificationBell = () => {
 
   useEffect(() => {
     cargarNotificaciones();
-    const interval = setInterval(cargarNotificaciones, 10000);
+
+    const interval = setInterval(async () => {
+      await cargarNotificaciones();
+
+      try {
+        const inactividad = await revisarInactividadEstudiantes();
+        if (inactividad?.message) {
+          console.log("🔄 Inactividad revisada:", inactividad.message);
+        }
+      } catch (err) {
+        console.error("❌ Error al revisar inactividad:", err);
+      }
+
+      try {
+        const citas = await notificarCitasProximas();
+        if (citas?.message) {
+          console.log("⏰ Citas próximas notificadas:", citas.message);
+        }
+      } catch (err) {
+        console.error("❌ Error al notificar citas próximas:", err);
+      }
+    }, 10000);
+
     return () => clearInterval(interval);
   }, []);
 
@@ -79,9 +103,7 @@ const NotificationBell = () => {
 
       <div className="bell-wrapper" onClick={toggleDropdown}>
         <FaBell size={20} />
-        {nuevas > 0 && (
-          <span className="notif-badge">{nuevas}</span>
-        )}
+        {nuevas > 0 && <span className="notif-badge">{nuevas}</span>}
       </div>
 
       {mostrar && (
@@ -99,7 +121,7 @@ const NotificationBell = () => {
                   to="/admin/dashboard"
                   key={n.id}
                   style={{ textDecoration: "none", color: "inherit" }}
-                  onClick={() => setMostrar(false)} // cerrar dropdown al hacer clic
+                  onClick={() => setMostrar(false)}
                 >
                   <div className={`notif-item ${index < nuevas ? "new" : ""}`}>
                     {getIconByTipo(n.tipo)}
@@ -113,7 +135,7 @@ const NotificationBell = () => {
                     <FaTimes
                       className="notif-delete"
                       onClick={(e) => {
-                        e.preventDefault(); // evita que el Link se ejecute al hacer clic en la X
+                        e.preventDefault();
                         handleEliminar(n.id);
                       }}
                     />

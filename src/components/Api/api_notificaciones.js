@@ -48,3 +48,23 @@ export const eliminarNotificacionPorId = async (id) => {
     throw error;
   }
 };
+
+export const revisarInactividadEstudiantes = async () => {
+  try {
+    const res = await axios.get(`${API}/revisar-inactividad`);
+    return res.data;
+  } catch (error) {
+    console.error("❌ Error al revisar inactividad:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const notificarCitasProximas = async () => {
+  try {
+    const res = await axios.get(`${API}/notificar-citas-proximas`);
+    return res.data;
+  } catch (error) {
+    console.error("❌ Error al notificar citas próximas:", error.response?.data || error.message);
+    throw error;
+  }
+};
