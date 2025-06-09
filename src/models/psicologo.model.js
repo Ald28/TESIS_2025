@@ -22,11 +22,13 @@ const listarPsicologos = async () => {
             u.correo,
             u.fecha_registro,
             u.multimedia_id,
+            m.url AS foto_perfil,
             p.especialidad,
             p.descripcion
         FROM psicologo p
         JOIN usuario u ON p.usuario_id = u.id
-        WHERE u.estado = 'activo'
+        LEFT JOIN multimedia m ON u.multimedia_id = m.id
+        WHERE u.estado = 'activo';
     `;
   const resultados = await query(sql);
   return resultados;
