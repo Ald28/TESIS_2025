@@ -69,7 +69,7 @@ const loginGooglePsicologo = async (req, res) => {
 const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID_WEB,
     process.env.GOOGLE_CLIENT_SECRET,
-    'http://localhost:8080/auth/psicologo/google/calendar-callback'
+    'https://tesis-2025.onrender.com/auth/psicologo/google/calendar-callback'
 );
 const iniciarOAuthGoogleCalendar = (req, res) => {
     const url = oauth2Client.generateAuthUrl({
