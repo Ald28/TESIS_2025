@@ -167,7 +167,15 @@ export default function Usuarios() {
                 <tr key={est.estudiante_id}>
                   <td className="user-info">
                     <div className="avatar">
-                      <FaUserGraduate size={20} />
+                      {est.foto_estudiante ? (
+                        <img
+                          src={est.foto_estudiante}
+                          alt="Foto Estudiante"
+                          className="avatar-image"
+                        />
+                      ) : (
+                        <FaUserGraduate size={24} />
+                      )}
                     </div>
                     <div>
                       <div className="name">{est.nombre} {est.apellido}</div>
