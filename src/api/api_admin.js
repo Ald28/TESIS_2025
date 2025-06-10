@@ -27,8 +27,7 @@ export const getEstudiantes = async () => {
 export const getHistorialCanceladas = async (estudiante_id) => {
   try {
     const response = await axios.get(`${API_PSICO}/historial-canceladas/${estudiante_id}`);
-    console.log("Respuesta de API:", response.data);  // Verifica la respuesta de la API
-    return response.data;  // Asegúrate de que esto sea un array de objetos
+    return response.data; 
   } catch (error) {
     console.error("Error al obtener historial de cancelaciones:", error);
     throw error;

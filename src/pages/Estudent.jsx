@@ -7,7 +7,7 @@ import "../styles/Estudent.css";
 
 export default function Estudent() {
   const [estudiantes, setEstudiantes] = useState([]);
-  const [historiales, setHistoriales] = useState({});  // Estado para almacenar historiales por estudiante
+  const [historial, setHistorial] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedEstudiante, setSelectedEstudiante] = useState(null);
 
@@ -26,14 +26,9 @@ export default function Estudent() {
   // Función para obtener el historial de citas canceladas de un estudiante
   const verHistorialCitas = async (estudianteId) => {
     try {
-      // Verificar si ya tenemos el historial de este estudiante en el estado
-      if (!historiales[estudianteId]) {
-        const historialData = await getHistorialCanceladas(estudianteId);
-        setHistoriales((prevHistorial) => ({
-          ...prevHistorial,
-          [estudianteId]: historialData,  // Guardamos el historial por estudiante
-        }));
-      }
+      const historialData = await getHistorialCanceladas(estudianteId);
+      console.log("Historial recibido:", historialData);
+      setHistorial(historialData);
       setSelectedEstudiante(estudianteId);
       setShowModal(true);
     } catch (error) {
@@ -44,7 +39,7 @@ export default function Estudent() {
   // Función para cerrar el modal
   const handleCloseModal = () => {
     setShowModal(false);
-    setSelectedEstudiante(null);
+    setHistorial(null);
   };
 
   return (
@@ -108,6 +103,7 @@ export default function Estudent() {
                     <button
                       className="btn-more"
                       onClick={() => verHistorialCitas(est.usuario_id)}
+                      style={{ fontSize: "12px" }}
                     >
                       Ver Historial
                     </button>
@@ -124,10 +120,9 @@ export default function Estudent() {
             <Modal.Title>Historial de Citas Canceladas</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            {/* Verificar si el historial de este estudiante está disponible */}
-            {historiales[selectedEstudiante] ? (
+            {historial ? (
               <ul>
-                {historiales[selectedEstudiante].map((cita) => (
+                {historial.map((cita) => (
                   <li key={cita.cita_id}>
                     <p><strong>Cita:</strong> {cita.fecha_inicio} - {cita.fecha_fin}</p>
                     <p><strong>Psicólogo:</strong> {cita.nombre_psicologo} {cita.apellido_psicologo}</p>
