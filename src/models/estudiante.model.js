@@ -71,9 +71,11 @@ const listarPorPsicologo = async (psicologo_id) => {
       u.correo,
       e.ciclo,
       e.fecha_nacimiento,
-      e.carrera
+      e.carrera,
+      m.url AS foto_estudiante
     FROM estudiante e
     INNER JOIN usuario u ON u.id = e.usuario_id
+    LEFT JOIN multimedia m ON u.multimedia_id = m.id
     WHERE e.id IN (
       SELECT estudiante_id FROM cita WHERE psicologo_id = ?
       UNION
