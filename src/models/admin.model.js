@@ -18,9 +18,11 @@ const listarEstudiantes = async () => {
         e.id AS estudiante_id,
         e.ciclo,
         e.fecha_nacimiento,
-        e.carrera
+        e.carrera,
+        m.url AS imagen_url
       FROM usuario u
       INNER JOIN estudiante e ON u.id = e.usuario_id
+      LEFT JOIN multimedia m ON u.multimedia_id = m.id
       WHERE u.rol_id = 2
     `;
   const resultado = await query(sql);
