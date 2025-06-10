@@ -2,11 +2,14 @@ import React, { useEffect, useState } from "react";
 import MainLayout from "../layouts/MainLayout";
 import { getEstudiantes, getHistorialCanceladas } from "../api/api_admin";
 import { FaUserGraduate } from "react-icons/fa";
+import { Modal, Button } from "react-bootstrap";
 import "../styles/Estudent.css";
 
 export default function Estudent() {
   const [estudiantes, setEstudiantes] = useState([]);
   const [historial, setHistorial] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedEstudiante, setSelectedEstudiante] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,10 +28,17 @@ export default function Estudent() {
     try {
       const historialData = await getHistorialCanceladas(estudianteId);
       setHistorial(historialData);
-      console.log("Historial de citas canceladas:", historialData);
+      setSelectedEstudiante(estudianteId);
+      setShowModal(true);
     } catch (error) {
       console.error("Error al obtener historial de citas canceladas", error);
     }
+  };
+
+  // Función para cerrar el modal
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setHistorial(null);
   };
 
   return (
@@ -71,7 +81,11 @@ export default function Estudent() {
                   <td className="user-info">
                     <div className="avatar">
                       {est.imagen_url ? (
-                        <img src={est.imagen_url} alt="Avatar" />
+                        <img
+                          src={est.imagen_url}
+                          alt="Avatar"
+                          className="avatar-image"
+                        />
                       ) : (
                         <FaUserGraduate size={24} />
                       )}
@@ -98,20 +112,32 @@ export default function Estudent() {
           </table>
         </div>
 
-        {historial && (
-          <div className="historial-container">
-            <h3>Historial de Citas Canceladas</h3>
-            <ul>
-              {historial.map((cita) => (
-                <li key={cita.cita_id}>
-                  <p><strong>Cita:</strong> {cita.fecha_inicio} - {cita.fecha_fin}</p>
-                  <p><strong>Psicólogo:</strong> {cita.nombre_psicologo} {cita.apellido_psicologo}</p>
-                  <p><strong>Tipo de cita:</strong> {cita.tipo_cita}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        {/* Modal para mostrar el historial de citas */}
+        <Modal show={showModal} onHide={handleCloseModal}>
+          <Modal.Header closeButton>
+            <Modal.Title>Historial de Citas Canceladas</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {historial ? (
+              <ul>
+                {historial.map((cita) => (
+                  <li key={cita.cita_id}>
+                    <p><strong>Cita:</strong> {cita.fecha_inicio} - {cita.fecha_fin}</p>
+                    <p><strong>Psicólogo:</strong> {cita.nombre_psicologo} {cita.apellido_psicologo}</p>
+                    <p><strong>Tipo de cita:</strong> {cita.tipo_cita}</p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No se encontraron citas canceladas.</p>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCloseModal}>
+              Cerrar
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     </MainLayout>
   );
