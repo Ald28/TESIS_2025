@@ -174,7 +174,7 @@ export default function Usuarios() {
                           className="avatar-image"
                         />
                       ) : (
-                        <FaUserGraduate size={24} />
+                        <FaUserGraduate size={24} className="avatar-icon" />
                       )}
                     </div>
                     <div>

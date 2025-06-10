@@ -1,4 +1,4 @@
-import { HashRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Login from "./components/Auth/Login";
 import Register from "./components/Auth/Register";
@@ -19,29 +19,29 @@ import { AuthProvider } from "./context/AuthContext";
 const App = () => {
   return (
     <AuthProvider>
-      <Router>
+    <Router>
         <ToastContainer position="top-right" autoClose={3000} />
-        <Routes>
-          {/* Rutas públicas */}
-          <Route path="/" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+      <Routes>
+        {/* Rutas públicas */}
+        <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-          {/* Rutas privadas bajo Layout */}
-          <Route path="/admin" element={<Layout />}>
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="usuarios" element={<Usuarios />} />
-            <Route path="notificaciones" element={<Notificaciones />} />
-            <Route path="cuestionarios" element={<Cuestionario />} />
-            <Route path="metodos" element={<Metodos />} />
-            <Route path="citas" element={<Citas />} />
-            <Route path="perfil" element={<PerfilDoctor />} />
-            <Route path="*" element={<NotFound />} />
-          </Route>
-
-          {/* Ruta 404 general */}
+        {/* Rutas privadas bajo Layout */}
+        <Route path="/admin" element={<Layout />}>
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="usuarios" element={<Usuarios />} />
+          <Route path="notificaciones" element={<Notificaciones />} />
+          <Route path="cuestionarios" element={<Cuestionario />} />
+          <Route path="metodos" element={<Metodos />} />
+          <Route path="citas" element={<Citas />} />
+          <Route path="perfil" element={<PerfilDoctor />} />
           <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Router>
+        </Route>
+
+        {/* Ruta 404 general */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Router>
     </AuthProvider>
   );
 };
