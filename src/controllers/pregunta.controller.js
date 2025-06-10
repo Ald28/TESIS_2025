@@ -145,6 +145,29 @@ const eliminarPreguntaYOpciones = async (req, res) => {
   }
 };
 
+const verificarRespuestas = async (req, res) => {
+  const { estudiante_id } = req.params;
+
+  try {
+    // Verificar si el estudiante ha respondido a alguna pregunta
+    const respuestasExistentes = await respuestaModel.verificarRespuestaEstudiante(estudiante_id);
+
+    if (respuestasExistentes.length > 0) {
+      return res.status(200).json({
+        message: "Este estudiante ya ha respondido a las siguientes preguntas:",
+        respuestas: respuestasExistentes,
+      });
+    } else {
+      return res.status(200).json({
+        message: "Este estudiante no ha respondido a ninguna pregunta aún.",
+      });
+    }
+  } catch (error) {
+    console.error('Error al verificar respuestas:', error);
+    res.status(500).json({ message: 'Error al verificar las respuestas' });
+  }
+};
+
 module.exports = {
     crearPregunta,
     crearOpcion,
@@ -153,4 +176,5 @@ module.exports = {
     listarPreguntasConOpciones,
     actualizarPreguntaYOpciones,
     eliminarPreguntaYOpciones,
+    verificarRespuestas,
 };

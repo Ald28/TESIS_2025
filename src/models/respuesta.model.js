@@ -29,7 +29,18 @@ const listarTodasLasRespuestas = async () => {
   return await query(sql);
 };
 
+const verificarRespuestaEstudiante = async (estudiante_id) => {
+  const sql = `
+    SELECT r.pregunta_id
+    FROM respuestas r
+    WHERE r.estudiante_id = ?
+  `;
+  const result = await query(sql, [estudiante_id]);
+  return result;
+};
+
 module.exports = {
   crearRespuesta,
-  listarTodasLasRespuestas
+  listarTodasLasRespuestas,
+  verificarRespuestaEstudiante
 };

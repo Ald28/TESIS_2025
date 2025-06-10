@@ -26,4 +26,7 @@ router.put('/preguntas/:id', preguntaController.actualizarPreguntaYOpciones);
 // ELIMINAR PREGUNTA Y OPCION
 router.delete('/preguntas/:id', preguntaController.eliminarPreguntaYOpciones);
 
+// Ruta para verificar si el estudiante ya respondió a alguna pregunta
+router.get('/verificar-respuestas/:estudiante_id', preguntaController.verificarRespuestas);
+
 module.exports = router;
