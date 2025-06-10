@@ -2,6 +2,7 @@ import axios from "axios";
 
 const API = "https://tesis-2025.onrender.com/auth/admin";
 const API_PSICO = "https://tesis-2025.onrender.com/auth/psicologo";
+//const API_PSICO = "http://localhost:8080/auth/psicologo";
 
 export const login = async (correo, contrasena) => {
     try {
@@ -19,6 +20,16 @@ export const getEstudiantes = async () => {
         return response.data.datos;
     } catch (error) {
         console.error("Error al obtener estudiantes:", error);
+        throw error;
+    }
+};
+
+export const getHistorialCanceladas = async (estudiante_id) => {
+    try {
+        const response = await axios.get(`${API_PSICO}/historial-canceladas/${estudiante_id}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error al obtener historial de cancelaciones:", error);
         throw error;
     }
 };
