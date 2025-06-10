@@ -18,6 +18,7 @@ const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
 
   const handleLogout = () => {
+    localStorage.clear();
     logout();
     navigate("/");
   };
