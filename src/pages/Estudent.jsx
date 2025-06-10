@@ -28,7 +28,7 @@ export default function Estudent() {
   try {
     const historialData = await getHistorialCanceladas(estudianteId);
     console.log("Historial recibido:", historialData);
-    setHistorial(historialData);
+    setHistorial(historialData.historial);
     setSelectedEstudiante(estudianteId);
     setShowModal(true);
   } catch (error) {
