@@ -25,15 +25,16 @@ export default function Estudent() {
 
   // Función para obtener el historial de citas canceladas de un estudiante
   const verHistorialCitas = async (estudianteId) => {
-    try {
-      const historialData = await getHistorialCanceladas(estudianteId);
-      setHistorial(historialData);
-      setSelectedEstudiante(estudianteId);
-      setShowModal(true);
-    } catch (error) {
-      console.error("Error al obtener historial de citas canceladas", error);
-    }
-  };
+  try {
+    const historialData = await getHistorialCanceladas(estudianteId);
+    console.log("Historial recibido:", historialData);
+    setHistorial(historialData);
+    setSelectedEstudiante(estudianteId);
+    setShowModal(true);
+  } catch (error) {
+    console.error("Error al obtener historial de citas canceladas", error);
+  }
+};
 
   // Función para cerrar el modal
   const handleCloseModal = () => {
