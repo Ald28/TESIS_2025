@@ -84,7 +84,7 @@ export default function Notificaciones() {
       ) : notificaciones.length === 0 ? (
         <div className="d-flex justify-content-center align-items-center flex-column">
           <img
-            src="/src/assets/images/icon.png"
+            src="/icon.png"
             alt="Icono"
             style={{
               width: '100px',

@@ -46,7 +46,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
     >
       <div className="d-flex flex-column align-items-center w-100 pb-3">
         <img
-          src="/src/assets/images/icon.png"
+          src="/icon.png"
           alt="Icono"
           style={{
             width: collapsed ? "40px" : "60px",
