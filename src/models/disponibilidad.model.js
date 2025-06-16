@@ -14,18 +14,36 @@ const crearDisponibilidad = async (dia, mañana_inicio, mañana_fin, tarde_inici
     const tardeInicio = padHora(tarde_inicio);
     const tardeFin = padHora(tarde_fin);
 
-    if (mañanaInicio < '08:00:00' || mañanaFin > '11:59:59') {
-        throw new Error("Horario de mañana inválido: 08:00 - 11:59.");
+    // Validación de rangos permitidos
+    if (mañanaInicio < '08:30:00' || mañanaFin > '12:31:59') {
+        throw new Error("Horario de mañana inválido: debe estar entre 08:30 y 12:30.");
+    }
+    if (tardeInicio < '13:30:00' || tardeFin > '17:30:00') {
+        throw new Error("Horario de tarde inválido: debe estar entre 13:30 y 17:30.");
     }
 
-    if (tardeInicio < '12:00:00' || tardeFin > '18:00:00') {
-        throw new Error("Horario de tarde inválido: 12:00 - 18:00.");
+    // Validación de duración mínima de 4 horas (14400 segundos)
+    const duracionHoras = (horaFin, horaInicio) => {
+        const [h1, m1, s1] = horaFin.split(':').map(Number);
+        const [h2, m2, s2] = horaInicio.split(':').map(Number);
+        return (h1 * 3600 + m1 * 60 + s1) - (h2 * 3600 + m2 * 60 + s2);
+    };
+
+    const duracionMañana = duracionHoras(mañanaFin, mañanaInicio);
+    const duracionTarde = duracionHoras(tardeFin, tardeInicio);
+
+    if (duracionMañana < 14400) {
+        throw new Error("El horario de mañana debe tener al menos 4 horas.");
+    }
+    if (duracionTarde < 14400) {
+        throw new Error("El horario de tarde debe tener al menos 4 horas.");
     }
 
+    // Verificar si ya existe disponibilidad
     const verificarSql = `
-    SELECT turno FROM disponibilidad
-    WHERE dia = ? AND psicologo_id = ?
-  `;
+        SELECT turno FROM disponibilidad
+        WHERE dia = ? AND psicologo_id = ?
+    `;
     const existentes = await query(verificarSql, [dia, psicologo_id]);
     const turnosExistentes = existentes.map(e => e.turno);
 
@@ -37,11 +55,11 @@ const crearDisponibilidad = async (dia, mañana_inicio, mañana_fin, tarde_inici
     }
 
     const insertarSql = `
-    INSERT INTO disponibilidad (dia, hora_inicio, hora_fin, turno, psicologo_id)
-    VALUES 
-      (?, ?, ?, 'temprano', ?),
-      (?, ?, ?, 'tarde', ?)
-  `;
+        INSERT INTO disponibilidad (dia, hora_inicio, hora_fin, turno, psicologo_id)
+        VALUES 
+          (?, ?, ?, 'temprano', ?),
+          (?, ?, ?, 'tarde', ?)
+    `;
 
     await query(insertarSql, [
         dia, mañanaInicio, mañanaFin, psicologo_id,
@@ -65,13 +83,28 @@ const editarDisponibilidad = async (id, psicologo_id, hora_inicio, hora_fin) => 
     const inicio = padHora(hora_inicio);
     const fin = padHora(hora_fin);
 
+    // Función para calcular la duración en segundos
+    const duracionHoras = (horaFin, horaInicio) => {
+        const [h1, m1, s1] = horaFin.split(':').map(Number);
+        const [h2, m2, s2] = horaInicio.split(':').map(Number);
+        return (h1 * 3600 + m1 * 60 + s1) - (h2 * 3600 + m2 * 60 + s2);
+    };
+
+    const duracion = duracionHoras(fin, inicio);
+
     if (turno === "temprano") {
-        if (inicio < "08:00:00" || fin > "11:59:59") {
-            throw new Error("El turno temprano debe estar entre 08:00 y 11:59.");
+        if (inicio < "08:30:00" || fin > "12:31:59") {
+            throw new Error("El turno temprano debe estar entre 08:30 y 12:30.");
+        }
+        if (duracion < 14400) {
+            throw new Error("El turno temprano debe durar al menos 4 horas.");
         }
     } else if (turno === "tarde") {
-        if (inicio < "12:00:00" || fin > "18:00:00") {
-            throw new Error("El turno tarde debe estar entre 12:00 y 18:00.");
+        if (inicio < "13:30:00" || fin > "17:30:00") {
+            throw new Error("El turno tarde debe estar entre 13:30 y 17:30.");
+        }
+        if (duracion < 14400) {
+            throw new Error("El turno tarde debe durar al menos 4 horas.");
         }
     }
 
@@ -82,17 +115,17 @@ const editarDisponibilidad = async (id, psicologo_id, hora_inicio, hora_fin) => 
 };
 
 const eliminarDisponibilidad = async (dia, turno, psicologo_id) => {
-  const sql = `
+    const sql = `
     DELETE FROM disponibilidad
     WHERE dia = ? AND turno = ? AND psicologo_id = ?
   `;
-  const result = await query(sql, [dia, turno, psicologo_id]);
+    const result = await query(sql, [dia, turno, psicologo_id]);
 
-  if (result.affectedRows === 0) {
-    throw new Error("No se encontró la disponibilidad para eliminar.");
-  }
+    if (result.affectedRows === 0) {
+        throw new Error("No se encontró la disponibilidad para eliminar.");
+    }
 
-  return result;
+    return result;
 };
 
 module.exports = {

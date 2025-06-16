@@ -4,7 +4,7 @@ const { query } = require('../config/conexion');
 const oAuth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID_WEB,
   process.env.GOOGLE_CLIENT_SECRET,
-  'https://tesis-2025.onrender.com/auth/psicologo/google/calendar-callback'
+  'http://localhost:8080/auth/psicologo/google/calendar-callback'
 );
 
 const guardarTokensPsicologo = async (correo, tokens) => {
@@ -133,10 +133,10 @@ const verificarEventosGoogleCalendar = async (correo, fechaInicio, fechaFin) => 
   const auth = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID_WEB,
     process.env.GOOGLE_CLIENT_SECRET,
-    'https://tesis-2025.onrender.com/auth/google/calendar-callback'
+    'http://localhost:8080/auth/google/calendar-callback'
   );
   auth.setCredentials(tokens);
-  
+
 
   const calendar = google.calendar({ version: 'v3', auth });
 
@@ -163,7 +163,7 @@ const eliminarEventoGoogleCalendar = async (correo, eventoId) => {
   const auth = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID_WEB,
     process.env.GOOGLE_CLIENT_SECRET,
-    'https://tesis-2025.onrender.com/auth/google/calendar-callback'
+    'http://localhost:8080/auth/google/calendar-callback'
   );
 
   auth.setCredentials(tokens);
