@@ -1,8 +1,9 @@
 import axios from "axios";
 
-const API = "https://tesis-2025.onrender.com/auth/admin";
-const API_PSICO = "https://tesis-2025.onrender.com/auth/psicologo";
+const API = "http://localhost:8080/auth/admin";
+const API_PSICO = "http://localhost:8080/auth/psicologo";
 //const API_PSICO = "http://localhost:8080/auth/psicologo";
+//const API_PSICO = "https://tesis-2025.onrender.com/auth/psicologo";
 
 export const login = async (correo, contrasena) => {
     try {
