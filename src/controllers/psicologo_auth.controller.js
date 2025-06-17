@@ -468,7 +468,29 @@ const crearCitaSeguimiento = async (req, res) => {
             evento_google_id: eventoGoogle.id
         });
 
+        const usuarioId = psicologo.usuario_id || decoded.id;
+        const infoPsicologo = await psicologoModel.obtenerNombreCompletoPsicologo(usuarioId);
+        const nombrePsicologo = infoPsicologo?.nombre_completo || `${psicologo.nombre} ${psicologo.apellido}`;
+
+        const estudianteInfo = await estudianteModel.obtenerUsuarioPorEstudianteId(estudiante_id);
+        if (!estudianteInfo || !estudianteInfo.usuario_id) {
+            console.error('⚠️ Estudiante sin usuario válido:', estudianteInfo);
+        } else {
+            try {
+                await enviarNotificacionSistema({
+                    usuario_id: estudianteInfo.usuario_id,
+                    titulo: 'Nueva Cita Asignada',
+                    mensaje: `Has sido asignado a una cita de seguimiento con ${nombrePsicologo}.`,
+                    tipo: 'recordatorio',
+                });
+                console.log('Notificación de seguimiento enviada al estudiante:', estudianteInfo.usuario_id);
+            } catch (error) {
+                console.error('Error al enviar notificación push:', error.message || error);
+            }
+        }
+
         return res.status(201).json({ message: 'Cita de seguimiento creada y sincronizada con Google Calendar', cita_id });
+
     } catch (error) {
         console.error('❌ Error al crear cita de seguimiento:', error);
         res.status(500).json({ message: error.message || 'Error interno del servidor' });
@@ -515,14 +537,14 @@ const obtenerHistorial = async (req, res) => {
 };
 
 const verificarConexionCalendarController = async (req, res) => {
-  try {
-    const { psicologo_id } = req.params;
-    const conectado = await psicologoModel.verificarConexionGoogleCalendar(psicologo_id);
-    res.json({ conectado });
-  } catch (error) {
-    console.error("Error al verificar conexión:", error);
-    res.status(500).json({ mensaje: "Error del servidor" });
-  }
+    try {
+        const { psicologo_id } = req.params;
+        const conectado = await psicologoModel.verificarConexionGoogleCalendar(psicologo_id);
+        res.json({ conectado });
+    } catch (error) {
+        console.error("Error al verificar conexión:", error);
+        res.status(500).json({ mensaje: "Error del servidor" });
+    }
 };
 
 module.exports = {
