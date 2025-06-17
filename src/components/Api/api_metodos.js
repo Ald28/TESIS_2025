@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const API_URL = 'https://tesis-2025.onrender.com/api';
-const API_ESTUDIANTE = 'https://tesis-2025.onrender.com/auth';
+const API_URL = 'http://localhost:8080/api';
+const API_ESTUDIANTE = 'http://localhost:8080/auth';
 
 export const subirMetodo = async (formData) => {
   try {

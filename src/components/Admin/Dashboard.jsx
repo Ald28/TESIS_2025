@@ -716,7 +716,7 @@ export default function Dashboard() {
                       </Col>
                     </Row>
                     <Form.Text className="text-muted" style={{ fontSize: "0.8rem" }}>
-                      Horario permitido: 08:00 am – 11:59 am
+                      Horario permitido: 08:30 am – 12:30 am
                     </Form.Text>
                   </Col>
 
@@ -741,7 +741,7 @@ export default function Dashboard() {
                       </Col>
                     </Row>
                     <Form.Text className="text-muted" style={{ fontSize: "0.8rem" }}>
-                      Horario permitido: 12:00 pm – 18:00 pm
+                      Horario permitido: 13:30 pm – 17:30 pm
                     </Form.Text>
                   </Col>
                 </>

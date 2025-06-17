@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "https://tesis-2025.onrender.com/api/opcion";
+const API_URL = "http://localhost:8080/api/opcion";
 
 export const crearOpcion = async (opcionData) => {
   try {

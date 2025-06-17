@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const API = "https://tesis-2025.onrender.com/auth/psicologo";
-const API_ADMIN = "https://tesis-2025.onrender.com/auth/admin";
+const API = "http://localhost:8080/auth/psicologo";
+const API_ADMIN = "http://localhost:8080/auth/admin";
 
 export const loginPsicologo = async (credential) => {
   try {
@@ -76,7 +76,14 @@ export const obtenerDisponibilidadPorTurno = async (psicologo_id) => {
 
 export const obtenerPerfilPsicologo = async (usuario_id) => {
   try {
-    const response = await axios.get(`${API}/perfil/${usuario_id}`);
+    const token = localStorage.getItem("token");
+
+    const response = await axios.get(`${API}/perfil/${usuario_id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
     return response.data.perfil;
   } catch (error) {
     console.error("Error al obtener perfil del psicólogo:", error);
@@ -86,7 +93,14 @@ export const obtenerPerfilPsicologo = async (usuario_id) => {
 
 export const obtenerHistorial = async (estudiante_id) => {
   try {
-    const response = await axios.get(`${API}/historial-canceladas/${estudiante_id}`);
+    const token = localStorage.getItem("token");
+
+    const response = await axios.get(`${API}/historial-canceladas/${estudiante_id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
     return response.data;
   } catch (error) {
     console.error("Error al obtener el historial del estudiante:", error);

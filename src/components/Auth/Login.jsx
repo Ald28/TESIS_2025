@@ -23,6 +23,7 @@ const Login = () => {
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("usuario", JSON.stringify(data.usuario));
+      localStorage.setItem("isAuthenticated", "true");
 
       navigate("/admin/dashboard");
     } catch (error) {
