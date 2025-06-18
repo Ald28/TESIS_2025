@@ -225,7 +225,9 @@ class _VideoDetalleState extends State<VideoDetalle> {
     _controller = VideoPlayerController.networkUrl(Uri.parse(widget.url))
       ..initialize().then((_) {
         setState(() {});
-        _controller.setLooping(false);
+        _controller.setLooping(true);
+        _controller.play();
+
       });
   }
 
@@ -243,22 +245,15 @@ class _VideoDetalleState extends State<VideoDetalle> {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                SizedBox.expand(
-                  child: FittedBox(
-                    fit: BoxFit.cover,
-                    child: SizedBox(
-                      width: _controller.value.size.width,
-                      height: _controller.value.size.height,
-                      child: VideoPlayer(_controller),
-                    ),
-                  ),
+                AspectRatio(
+                  aspectRatio: _controller.value.aspectRatio,
+                  child: VideoPlayer(_controller),
                 ),
+
                 if (_showControls) ...[
-                  // Overlay semi-transparente
                   Container(
                     color: Colors.black.withOpacity(0.3),
                   ),
-                  // Controles mejorados
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -267,11 +262,11 @@ class _VideoDetalleState extends State<VideoDetalle> {
                           color: Colors.black.withOpacity(0.7),
                           borderRadius: BorderRadius.circular(50),
                         ),
-                        child: IconButton(
+                          child: IconButton(
                           icon: Icon(
-                            _controller.value.isPlaying 
-                                ? Icons.pause_circle_filled 
-                                : Icons.play_circle_filled,
+                            _controller.value.isPlaying
+                                ? Icons.pause_circle_filled
+                                : Icons.play_circle_fill,
                             size: 70,
                             color: Colors.white,
                           ),
@@ -281,18 +276,13 @@ class _VideoDetalleState extends State<VideoDetalle> {
                                 _controller.pause();
                               } else {
                                 _controller.play();
-                                Future.delayed(const Duration(seconds: 2), () {
-                                  if (mounted) {
-                                    setState(() => _showControls = false);
-                                  }
-                                });
                               }
                             });
                           },
                         ),
+
                       ),
                       const SizedBox(height: 20),
-                      // Barra de progreso
                       Container(
                         margin: const EdgeInsets.symmetric(horizontal: 20),
                         child: VideoProgressIndicator(

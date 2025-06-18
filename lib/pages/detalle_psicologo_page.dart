@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../classes/psicologo.dart';
 import '../services/api_service.dart';
+import '../classes/disponibilidad.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 
@@ -22,13 +23,67 @@ void initState() {
   super.initState();
   _cargarEstudianteId();
 
-  Timer.periodic(const Duration(seconds: 40), (timer) {
+  Timer.periodic(const Duration(seconds: 90), (timer) {
     if (mounted && token != null) {
       setState(() {});
     }
   });
 }
 
+List<Map<String, String>> generarBloquesHorario(String horaInicio, String horaFin) {
+  List<Map<String, String>> bloques = [];
+
+  TimeOfDay inicio = TimeOfDay(
+    hour: int.parse(horaInicio.split(":")[0]),
+    minute: int.parse(horaInicio.split(":")[1]),
+  );
+  TimeOfDay fin = TimeOfDay(
+    hour: int.parse(horaFin.split(":")[0]),
+    minute: int.parse(horaFin.split(":")[1]),
+  );
+
+  while (inicio.hour < fin.hour || (inicio.hour == fin.hour && inicio.minute < fin.minute)) {
+    final siguiente = TimeOfDay(
+      hour: inicio.minute + 30 >= 60 ? inicio.hour + 1 : inicio.hour,
+      minute: (inicio.minute + 30) % 60,
+    );
+
+    if (siguiente.hour > fin.hour || (siguiente.hour == fin.hour && siguiente.minute > fin.minute)) {
+      break;
+    }
+
+    bloques.add({
+      'inicio': '${inicio.hour.toString().padLeft(2, '0')}:${inicio.minute.toString().padLeft(2, '0')}:00',
+      'fin': '${siguiente.hour.toString().padLeft(2, '0')}:${siguiente.minute.toString().padLeft(2, '0')}:00',
+    });
+
+    inicio = siguiente;
+  }
+
+  return bloques;
+}
+
+String determinarTurno(String horaInicio) {
+  final hora = int.parse(horaInicio.split(":")[0]);
+  return hora < 14 ? 'Mañana' : 'Tarde'; 
+}
+
+Map<String, List<Map<String, String>>> agruparPorTurno(List<Map<String, String>> bloques) {
+  Map<String, List<Map<String, String>>> turnosAgrupados = {
+    'Mañana': [],
+    'Tarde': [],
+  };
+
+  for (var bloque in bloques) {
+    final turno = determinarTurno(bloque['inicio']!);
+    turnosAgrupados[turno]!.add(bloque);
+  }
+
+  // Remover turnos vacíos
+  turnosAgrupados.removeWhere((key, value) => value.isEmpty);
+  
+  return turnosAgrupados;
+}
 
   Future<void> _cargarEstudianteId() async {
     final prefs = await SharedPreferences.getInstance();
@@ -41,6 +96,26 @@ void initState() {
   String formatHora(TimeOfDay hora) {
     return '${hora.hour.toString().padLeft(2, '0')}:${hora.minute.toString().padLeft(2, '0')}:00';
   }
+
+DateTime obtenerFechaProxima(String diaSemana) {
+  final diasSemana = {
+    'lunes': DateTime.monday,
+    'martes': DateTime.tuesday,
+    'miércoles': DateTime.wednesday,
+    'jueves': DateTime.thursday,
+    'viernes': DateTime.friday,
+    'sábado': DateTime.saturday,
+    'domingo': DateTime.sunday,
+  };
+
+  final hoy = DateTime.now();
+  final objetivo = diasSemana[diaSemana.toLowerCase()]!;
+  int diferencia = (objetivo - hoy.weekday + 7) % 7;
+  diferencia = diferencia == 0 ? 7 : diferencia; 
+
+  return hoy.add(Duration(days: diferencia));
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -172,170 +247,127 @@ void initState() {
                             style: theme.textTheme.bodyMedium,
                           ),
                           const SizedBox(height: 16),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: () async {
-                                if (estudianteId == null || token == null) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text("❌ No se encontró el estudiante o el token")),
-                                  );
-                                  return;
-                                }
+                          FutureBuilder<List<Disponibilidad>>(
+                          future: ApiService.fetchDisponibilidad(psicologo.id),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const Center(child: CircularProgressIndicator());
+                            }
+                            if (snapshot.hasError) {
+                              return const Text('❌ Error al cargar disponibilidad');
+                            }
 
-                                final DateTime? fecha = await showDatePicker(
-                                  context: context,
-                                  initialDate: DateTime.now().add(const Duration(days: 1)),
-                                  firstDate: DateTime.now(),
-                                  lastDate: DateTime.now().add(const Duration(days: 30)),
-                                  builder: (context, child) {
-                                    return Theme(
-                                      data: Theme.of(context).copyWith(
-                                        colorScheme: ColorScheme.light(
-                                          primary: theme.colorScheme.primary,
-                                          onPrimary: Colors.white,
-                                          surface: Colors.white,
-                                          onSurface: Colors.black,
-                                        ),
-                                      ),
-                                      child: child!,
-                                    );
-                                  },
-                                );
-                                if (fecha == null) return;
+                            final disponibilidades = snapshot.data!;
+                            final diasAgrupados = <String, List<Map<String, String>>>{};
 
-                                final TimeOfDay? horaInicio = await showTimePicker(
-                                  context: context,
-                                  initialTime: const TimeOfDay(hour: 9, minute: 0),
-                                  builder: (context, child) {
-                                    return Theme(
-                                      data: Theme.of(context).copyWith(
-                                        colorScheme: ColorScheme.light(
-                                          primary: theme.colorScheme.primary,
-                                        ),
-                                      ),
-                                      child: child!,
-                                    );
-                                  },
-                                );
-                                if (horaInicio == null) return;
+                            for (var disp in disponibilidades) {
+                              final bloques = generarBloquesHorario(disp.horaInicio, disp.horaFin);
+                              diasAgrupados.update(disp.dia, (list) => list + bloques, ifAbsent: () => bloques);
+                            }
 
-                                final TimeOfDay? horaFin = await showTimePicker(
-                                  context: context,
-                                  initialTime: horaInicio.replacing(
-                                    minute: (horaInicio.minute + 30) % 60,
-                                    hour: horaInicio.minute >= 30 ? horaInicio.hour + 1 : horaInicio.hour,
+                            return Column(
+                              children: diasAgrupados.entries.map((entry) {
+                                final turnosAgrupados = agruparPorTurno(entry.value);
+                                
+                                return ExpansionTile(
+                                  title: Text(
+                                    entry.key[0].toUpperCase() + entry.key.substring(1),
+                                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                                   ),
-                                  builder: (context, child) {
-                                    return Theme(
-                                      data: Theme.of(context).copyWith(
-                                        colorScheme: ColorScheme.light(
-                                          primary: theme.colorScheme.primary,
-                                        ),
+                                  children: turnosAgrupados.entries.map((turnoEntry) {
+                                    return ExpansionTile(
+                                      title: Row(
+                                        children: [
+                                          Icon(
+                                            turnoEntry.key == 'Mañana' ? Icons.wb_sunny : Icons.nights_stay,
+                                            color: turnoEntry.key == 'Mañana' ? Colors.orange : Colors.indigo,
+                                            size: 20,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            turnoEntry.key,
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: turnoEntry.key == 'Mañana' ? Colors.orange[700] : Colors.indigo[700],
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      child: child!,
+                                      children: turnoEntry.value.map((bloque) {
+                                        return Container(
+                                          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey[50],
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(color: Colors.grey[300]!),
+                                          ),
+                                          child: ListTile(
+                                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                            title: Text(
+                                              "${bloque['inicio']!.substring(0, 5)} - ${bloque['fin']!.substring(0, 5)}",
+                                              style: const TextStyle(fontSize: 16),
+                                            ),
+                                            trailing: ElevatedButton.icon(
+                                              onPressed: () async {
+                                                final fechaSeleccionada = obtenerFechaProxima(entry.key);
+                                                showDialog(
+                                                  context: context,
+                                                  barrierDismissible: false,
+                                                  builder: (BuildContext context) {
+                                                    return const Center(child: CircularProgressIndicator());
+                                                  },
+                                                );
+
+                                                try {
+                                                  await ApiService.crearCita(
+                                                    psicologoId: psicologo.id,
+                                                    estudianteId: estudianteId!,
+                                                    fecha: fechaSeleccionada,
+                                                    horaInicio: bloque['inicio']!,
+                                                    horaFin: bloque['fin']!,
+                                                    token: token!,
+                                                  );
+                                                  Navigator.of(context).pop();
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text("✅ Cita creada correctamente."),
+                                                      backgroundColor: Colors.green,
+                                                    ),
+                                                  );
+                                                  setState(() {});
+                                                } catch (e) {
+                                                  Navigator.of(context).pop();
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text("❌ $e"),
+                                                      backgroundColor: Colors.red,
+                                                    ),
+                                                  );
+                                                }
+                                              },
+                                              icon: const Icon(Icons.schedule, size: 16),
+                                              label: const Text("Agendar"),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: theme.colorScheme.primary,
+                                                foregroundColor: Colors.white,
+                                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
                                     );
-                                  },
+                                  }).toList(),
                                 );
-                                if (horaFin == null) return;
-
-                                final int inicioMin = horaInicio.hour * 60 + horaInicio.minute;
-                                final int finMin = horaFin.hour * 60 + horaFin.minute;
-                                final int duracion = finMin - inicioMin;
-
-                                if (duracion < 30 || duracion > 60) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text("La cita debe durar entre 30 minutos y 1 hora"),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                  return;
-                                }
-                                
-                                final DateTime fechaInicioCompleta = DateTime(
-                                  fecha.year,
-                                  fecha.month,
-                                  fecha.day,
-                                  horaInicio.hour,
-                                  horaInicio.minute,
-                                );
-
-                                final DateTime fechaFinCompleta = DateTime(
-                                  fecha.year,
-                                  fecha.month,
-                                  fecha.day,
-                                  horaFin.hour,
-                                  horaFin.minute,
-                                );
-                                
-                                print('📅 Enviando cita para fecha_inicio: ${fechaInicioCompleta.toIso8601String()}');
-                                print('🕒 Inicio: ${fechaInicioCompleta.toIso8601String()}');
-                                print('🕒 Fin: ${fechaFinCompleta.toIso8601String()}');
-                                print("⚠️ USANDO ApiService.crearCita");
-
-                                showDialog(
-                                  context: context,
-                                  barrierDismissible: false,
-                                  builder: (BuildContext context) {
-                                    return const Center(
-                                      child: CircularProgressIndicator(),
-                                    );
-                                  },
-                                );
-
-                                try {
-                                  await ApiService.crearCita(
-                                    psicologoId: psicologo.id,
-                                    estudianteId: estudianteId!,
-                                    fecha: fecha, 
-                                    horaInicio: formatHora(horaInicio), 
-                                    horaFin: formatHora(horaFin),       
-                                    token: token!,
-                                  );
-                                  
-                                  Navigator.of(context).pop(); // Cierra el diálogo de carga
-                                  
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text("✅ Cita creada correctamente."),
-                                      backgroundColor: Colors.green,
-                                    ),
-                                  );
-                                } catch (e) {
-                                  Navigator.of(context).pop(); // Cierra el diálogo de carga
-                                  
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text("❌ $e"),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                }
-                              },
-                              icon: const Icon(Icons.calendar_today),
-                              label: const Text("Agendar Cita"),
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 15),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                            ),
-                          ),
+                              }).toList(),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                                               
                           const SizedBox(height: 16),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text(
-                              "Las citas tienen una duración de entre 30 minutos y 1 hora",
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontStyle: FontStyle.italic,
-                                color: Colors.grey,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
+                    
                           (token == null)
                             ? const Center(child: CircularProgressIndicator())
                             : FutureBuilder<List<Map<String, dynamic>>>(

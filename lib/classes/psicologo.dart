@@ -18,7 +18,7 @@ class Psicologo {
     return Psicologo(
       id: json['psicologo_id'], 
       nombre: "${json['nombre']} ${json['apellido']}",
-      fotoUrl: json['foto_url'],
+      fotoUrl: json['foto_perfil'],
       email: json['correo'],
       telefono: json['telefono'],
     );

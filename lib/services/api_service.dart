@@ -17,7 +17,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.177.181:8080';////cambiar qui para todo y tambien en el login buscar lo de pi
+  static const String baseUrl ='http://10.200.174.75:8080';////cambiar qui para todo y tambien en el login buscar lo de pi
 
 
 ///notificaciones
@@ -313,7 +313,7 @@ static Future<List<Map<String, dynamic>>> fetchHorasOcupadas(int psicologoId, Da
 ////disponibilidad  para citas
   static Future<List<Disponibilidad>> fetchDisponibilidad(int psicologoId) async {
   final response = await http.get(
-    Uri.parse('$baseUrl/auth/disponibilidad/$psicologoId'),
+    Uri.parse('$baseUrl/auth/psicologo/disponibilidad/$psicologoId'),
   );
 
   if (response.statusCode == 200) {

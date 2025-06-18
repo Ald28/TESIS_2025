@@ -295,7 +295,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     _controller = VideoPlayerController.networkUrl(Uri.parse(widget.url))
       ..initialize().then((_) {
         setState(() {});
-        _controller.setLooping(true);///esto genera un bucle 
+        _controller.setLooping(true);
       });
   }
 
