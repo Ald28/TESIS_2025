@@ -53,7 +53,7 @@ class Question {
     return Question(
       id: int.tryParse(json['id'].toString()) ?? 0,
       pregunta: json['txt_pregunta'] ?? "",
-      tipo: json['tipo'] ?? "", // ✅ era 'tipo', no 'tipo_pregunta'
+      tipo: json['tipo'] ?? "",
       cuestionarioId: int.tryParse(json['cuestionario_id']?.toString() ?? "0") ?? 0,
     );
   }

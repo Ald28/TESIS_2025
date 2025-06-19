@@ -24,8 +24,30 @@ class _QuizPageState extends State<QuizPage> {
   @override
   void initState() {
     super.initState();
-    _loadQuestions();
+    _verificarYRedirigir();
   }
+  Future<void> _verificarYRedirigir() async {
+  final prefs = await SharedPreferences.getInstance();
+  final estudianteId = prefs.getInt('estudiante_id');
+
+  if (estudianteId != null) {
+    bool yaRespondio = await ApiService.verificarSiEstudianteYaRespondio(estudianteId);
+
+    if (yaRespondio) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const NavigationScreen(paginaInicial: 0),
+        ),
+      );
+    } else {
+      _loadQuestions();
+    }
+  } else {
+    print('No se encontró ID del estudiante.');
+  }
+}
+
 
   Future<void> _loadQuestions() async {
   try {

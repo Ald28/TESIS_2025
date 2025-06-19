@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../pages/navigation_screen.dart';
+import '../pages/navigation_screen.dart';
+import '../services/api_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'dart:convert';
 
@@ -28,7 +31,7 @@ class _LoginState extends State<Login> {
 
     if (usuarioId != null && token != null) {
       final response = await http.post(
-        Uri.parse('http://10.200.174.75:8080/api/notificaciones/guardar-token-fcm'),///cambiar tambien
+        Uri.parse('http://192.168.1.59:8080/api/notificaciones/guardar-token-fcm'),///cambiar tambien
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'usuario_id': usuarioId,
@@ -72,7 +75,7 @@ class _LoginState extends State<Login> {
       final GoogleSignInAuthentication auth = await user.authentication;
 
       final response = await http.post(
-        Uri.parse('http://10.200.174.75:8080/auth/google/estudiante'),
+        Uri.parse('http://192.168.1.59:8080/auth/google/estudiante'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'credential': auth.idToken}),
       );
@@ -82,7 +85,7 @@ class _LoginState extends State<Login> {
         final token = data['token'];
 
         final perfilResponse = await http.get(
-          Uri.parse('http://10.200.174.75:8080/auth/perfil'),
+          Uri.parse('http://192.168.1.59:8080/auth/perfil'),
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer $token',
@@ -99,10 +102,22 @@ class _LoginState extends State<Login> {
           await prefs.setInt('estudiante_id', estudianteId);
           await prefs.setInt('usuario_id', usuarioId);
 
-          // ✅ Guardar token FCM en backend
           await guardarTokenFCMEnBackend();
 
-          Navigator.pushReplacementNamed(context, '/quiz-page');
+          final yaRespondio = await ApiService.verificarSiEstudianteYaRespondio(estudianteId);
+
+          if (yaRespondio) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const NavigationScreen(paginaInicial: 0),
+              ),
+            );
+          } else {
+            Navigator.pushReplacementNamed(context, '/quiz-page');
+          }
+
+
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Error al obtener perfil: ${perfilResponse.body}')),

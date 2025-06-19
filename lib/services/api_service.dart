@@ -17,7 +17,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 
 
 class ApiService {
-  static const String baseUrl ='http://10.200.174.75:8080';////cambiar qui para todo y tambien en el login buscar lo de pi
+  static const String baseUrl ='http://192.168.1.59:8080';////cambiar qui para todo y tambien en el login buscar lo de pi
 
 
 ///notificaciones
@@ -412,6 +412,27 @@ static Future<List<MetodoRelajacion>> fetchMetodosPrivados(int estudianteId) asy
     return [];
   }
 }
+
+static Future<bool> verificarSiEstudianteYaRespondio(int estudianteId) async {
+  try {
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/verificar-respuestas/$estudianteId'),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['respuestas'] != null && (data['respuestas'] as List).isNotEmpty;
+    } else {
+      print('Error al verificar respuestas: ${response.statusCode}');
+      return false;
+    }
+  } catch (e) {
+    print('Excepción al verificar respuestas: $e');
+    return false;
+  }
+}
+
 
   /// Obtener preguntas por cuestionario 
     static Future<List<Question>> fetchAllQuestions() async {

@@ -7,7 +7,6 @@ class Quiz {
 
   Quiz({required this.name, required this.questions});
 
-  // Calcular el puntaje total
   int get totalPoints {
     int total = 0;
     for (var question in questions) {
