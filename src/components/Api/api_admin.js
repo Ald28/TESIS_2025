@@ -1,5 +1,5 @@
 import axios from "axios";
-const API = "https://tesis-2025.onrender.com/auth/admin";
+const API = "http://localhost:8080/auth/admin";
 
 export const editarPsicologo = async (usuario_id, psicologoData) => {
     try {

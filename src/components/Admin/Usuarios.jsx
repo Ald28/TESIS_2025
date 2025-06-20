@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { listarEstudiantesRelacionados } from "../Api/api_citas";
 import {
   buscarPsicologoPorUsuarioId,
@@ -28,6 +28,9 @@ export default function Usuarios() {
   const [modalHistorialEstudianteId, setModalHistorialEstudianteId] = useState(null);
   const [editandoComentarioId, setEditandoComentarioId] = useState(null);
   const [nuevoComentario, setNuevoComentario] = useState("");
+  const [filtroComentarios, setFiltroComentarios] = useState("todos");
+  const [filtroFecha, setFiltroFecha] = useState("");
+  const inputFechaRef = useRef(null);
 
   useEffect(() => {
     const cargarDatos = async () => {
@@ -142,6 +145,20 @@ export default function Usuarios() {
     }
   };
 
+  const observacionesFiltradas = (observaciones[modalEstudianteId] || [])
+    .filter((obs) => {
+      if (filtroComentarios === "mis") {
+        return parseInt(obs.psicologo_id) === parseInt(psicologoId);
+      }
+      return true;
+    })
+    .filter((obs) => {
+      if (!filtroFecha) return true;
+
+      const fechaObs = new Date(obs.fecha_creacion).toISOString().split("T")[0];
+      return fechaObs === filtroFecha;
+    });
+
   return (
     <div className="estudiantes-container">
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
@@ -216,62 +233,98 @@ export default function Usuarios() {
 
       {modalVisible && (
         <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <h5 className="modal-title">Observaciones del Estudiante</h5>
-              <button className="modal-close btn btn-sm btn-outline-secondary" onClick={cerrarModal}>✕</button>
+          <div className="modal-content shadow-lg rounded-3 p-4 bg-white" style={{ maxWidth: '700px', margin: 'auto' }}>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h4 className="fw-bold">
+                <i className="fas fa-comment-dots me-2 text-primary"></i> Observaciones del Estudiante
+              </h4>
+              <button className="btn btn-outline-secondary btn-sm" onClick={cerrarModal}>
+                ✕
+              </button>
             </div>
 
-            <div className="input-group mb-3">
-              <select className="form-select" aria-label="Filtro de comentarios">
-                <option value="todos">Todos los comentarios</option>
-                <option value="mis">Mis comentarios</option>
-              </select>
-              <input
-                type="text"
+            <div className="d-flex gap-3 flex-wrap mb-4">
+              <div style={{ maxWidth: "220px" }}>
+                <select
+                  className="form-select"
+                  value={filtroComentarios}
+                  onChange={(e) => setFiltroComentarios(e.target.value)}
+                >
+                  <option value="todos">Todos los comentarios</option>
+                  <option value="mis">Mis comentarios</option>
+                </select>
+              </div>
+
+              <div className="input-group" style={{ maxWidth: "200px" }}>
+                <span
+                  className="input-group-text bg-white"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => inputFechaRef.current?.showPicker?.()}
+                  title="Seleccionar fecha"
+                >
+                  <i className="fas fa-calendar-alt text-muted"></i>
+                </span>
+                <input
+                  ref={inputFechaRef}
+                  type="date"
+                  className="form-control"
+                  value={filtroFecha}
+                  onChange={(e) => setFiltroFecha(e.target.value)}
+                />
+              </div>
+
+            </div>
+
+            <div className="mb-3">
+              <textarea
                 className="form-control"
-                placeholder="Buscar en observaciones..."
+                placeholder="Escribe una nueva observación sobre el estudiante..."
+                rows={3}
+                maxLength={500}
+                value={comentarios[modalEstudianteId] || ""}
+                onChange={(e) => handleComentarioChange(modalEstudianteId, e.target.value)}
               />
+              <div className="d-flex justify-content-between mt-2">
+                <small className="text-muted">0/500 caracteres</small>
+                <button
+                  className="btn btn-success"
+                  onClick={() => handleEnviarComentario(modalEstudianteId)}
+                >
+                  <i className="fas fa-paper-plane me-1"></i> Enviar Comentario
+                </button>
+              </div>
             </div>
 
-            <textarea
-              className="form-control mb-2"
-              placeholder="Escribe un comentario"
-              value={comentarios[modalEstudianteId] || ""}
-              onChange={(e) => handleComentarioChange(modalEstudianteId, e.target.value)}
-            />
-
-            <button
-              className="btn btn-success btn-sm mb-3"
-              onClick={() => handleEnviarComentario(modalEstudianteId)}
-            >
-              Enviar Comentario
-            </button>
-
-            <ul className="list-unstyled small mt-2">
-              {(observaciones[modalEstudianteId] || []).map((obs, idx) => (
-                <li key={idx} className="mb-4 border-bottom pb-3">
-                  <div className="d-flex justify-content-between">
-                    <span className="fw-bold">
-                      {obs.psicologo_nombre} {obs.psicologo_apellido}
-                    </span>
-                    <span className="text-muted" style={{ fontSize: "0.75rem" }}>
-                      {new Date(obs.fecha_creacion).toLocaleString()}
-                    </span>
+            <ul className="list-unstyled mt-4">
+              {observacionesFiltradas.map((obs, idx) => (
+                <li key={idx} className="border rounded-3 p-3 mb-3 bg-light">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h6 className="mb-1 fw-bold">
+                        <i className="fas fa-user-graduate me-1 text-secondary"></i>
+                        {obs.psicologo_nombre} {obs.psicologo_apellido}
+                      </h6>
+                      <small className="text-muted">
+                        <i className="far fa-calendar-alt me-1"></i>
+                        {new Date(obs.fecha_creacion).toLocaleDateString()}{" "}
+                        <i className="far fa-clock ms-2 me-1"></i>
+                        {new Date(obs.fecha_creacion).toLocaleTimeString()}
+                      </small>
+                    </div>
+                    <span className="badge bg-primary">Observación</span>
                   </div>
+
                   {editandoComentarioId === obs.id ? (
                     <>
                       <textarea
-                        className="form-control form-control-sm mt-2 mb-2"
+                        className="form-control form-control-sm mt-3"
                         value={nuevoComentario}
                         onChange={(e) => setNuevoComentario(e.target.value)}
                       />
-                      <div className="d-flex justify-content-center gap-2 mb-2">
+                      <div className="d-flex justify-content-end gap-2 mt-2">
                         <button
                           className="btn btn-sm btn-success"
-                          onClick={() =>
-                            handleGuardarComentarioEditado(obs.id, modalEstudianteId)
-                          }
+                          onClick={() => handleGuardarComentarioEditado(obs.id, modalEstudianteId)}
                         >
                           Guardar
                         </button>
@@ -285,26 +338,21 @@ export default function Usuarios() {
                     </>
                   ) : (
                     <>
-                      <p className="mt-2 mb-3">{obs.comentario}</p>
-                      {parseInt(obs.psicologo_id) === parseInt(psicologoId) && (
-                        <div className="d-flex justify-content-center gap-2 mb-2">
+                      <p className="mt-3 mb-2 text-break" style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+                        {obs.comentario}
+                      </p>                      {parseInt(obs.psicologo_id) === parseInt(psicologoId) && (
+                        <div className="d-flex justify-content-end gap-2">
                           <button
                             className="btn btn-sm btn-outline-primary"
-                            onClick={() =>
-                              handleEditarComentario(obs.id, obs.comentario)
-                            }
-                            title="Editar comentario"
+                            onClick={() => handleEditarComentario(obs.id, obs.comentario)}
                           >
-                            <i className="me-1 fas fa-edit"></i> Editar
+                            <i className="fas fa-edit me-1"></i> Editar
                           </button>
                           <button
-                            className="btn btn-sm btn-danger"
-                            onClick={() =>
-                              handleEliminarComentario(obs.id, modalEstudianteId)
-                            }
-                            title="Eliminar comentario"
+                            className="btn btn-sm btn-outline-danger"
+                            onClick={() => handleEliminarComentario(obs.id, modalEstudianteId)}
                           >
-                            <i className="me-1 fas fa-trash-alt"></i> Eliminar
+                            <i className="fas fa-trash-alt me-1"></i> Eliminar
                           </button>
                         </div>
                       )}

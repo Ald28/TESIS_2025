@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API = 'https://tesis-2025.onrender.com/api/notificaciones';
+const API = 'http://localhost:8080/api/notificaciones';
 
 export const guardarTokenFCM = async (datos, token) => {
   try {

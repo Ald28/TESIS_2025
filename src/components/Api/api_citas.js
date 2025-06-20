@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const API = "https://tesis-2025.onrender.com/auth/psicologo";
-const API_ESTUDIANTE = 'https://tesis-2025.onrender.com/auth';
+const API = "http://localhost:8080/auth/psicologo";
+const API_ESTUDIANTE = 'http://localhost:8080/auth';
 
 export const obtenerCitasAceptadas = async (token) => {
     const response = await axios.get(`${API}/citas-aceptadas`, {
