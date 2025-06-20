@@ -15,6 +15,8 @@ import {
   Tooltip,
   ResponsiveContainer,
   BarChart,
+  AreaChart,
+  Area,
   Bar
 } from "recharts";
 import {
@@ -428,80 +430,81 @@ export default function Dashboard() {
       </Row>
 
       {categoriaSeleccionada === "aceptada" && (
-        <>
-          <h5 className="mt-4">Gráfico de Pacientes Activos por Fecha</h5>
-          {aceptadasConLinea.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={aceptadasConLinea} barSize={40}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="fecha" />
-                <YAxis label={{ angle: -90, position: "insideLeft" }} allowDecimals={false} />
-                <Tooltip />
-                <Bar dataKey="pacientes" fill="#007bff" />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <p>No hay citas aceptadas registradas.</p>
-          )}
-        </>
-      )}
+  <>
+    <h5 className="mt-4 text-center">Gráfico de Pacientes Activos por Fecha</h5>
+    {aceptadasConLinea.length > 0 ? (
+      <ResponsiveContainer width="100%" height={300}>
+        <AreaChart data={aceptadasConLinea}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="fecha" />
+          <YAxis label={{ angle: -90, position: "insideLeft" }} allowDecimals={false} />
+          <Tooltip />
+          <Area type="monotone" dataKey="pacientes" stroke="#007bff" fill="#007bff" fillOpacity={0.4} />
+        </AreaChart>
+      </ResponsiveContainer>
+    ) : (
+      <p>No hay citas aceptadas registradas.</p>
+    )}
+  </>
+)}
 
-      {categoriaSeleccionada === "pendiente" && (
-        <>
-          <h5 className="mt-4">Gráfico de Citas Pendientes por Fecha</h5>
-          {pendientesConLinea.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={pendientesConLinea} barSize={40}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="fecha" />
-                <YAxis label={{ angle: -90, position: "insideLeft" }} allowDecimals={false} />
-                <Tooltip />
-                <Bar dataKey="citasPendientes" fill="#ffc107" />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <p>No hay citas pendientes registradas.</p>
-          )}
-        </>
-      )}
+{categoriaSeleccionada === "pendiente" && (
+  <>
+    <h5 className="mt-4 text-center">Gráfico de Citas Pendientes por Fecha</h5>
+    {pendientesConLinea.length > 0 ? (
+      <ResponsiveContainer width="100%" height={300}>
+        <AreaChart data={pendientesConLinea}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="fecha" />
+          <YAxis label={{ angle: -90, position: "insideLeft" }} allowDecimals={false} />
+          <Tooltip />
+          <Area type="monotone" dataKey="citasPendientes" stroke="#ffc107" fill="#ffc107" fillOpacity={0.4} />
+        </AreaChart>
+      </ResponsiveContainer>
+    ) : (
+      <p>No hay citas pendientes registradas.</p>
+    )}
+  </>
+)}
 
-      {categoriaSeleccionada === "actividades" && (
-        <>
-          <h5 className="mt-4">Gráfico de Actividades Subidas por Fecha</h5>
-          {actividadesConLinea.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={actividadesConLinea} barSize={40}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="fecha" />
-                <YAxis label={{ angle: -90, position: "insideLeft" }} allowDecimals={false} />
-                <Tooltip />
-                <Bar dataKey="actividades" fill="#28a745" />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <p>No hay actividades registradas para mostrar.</p>
-          )}
-        </>
-      )}
+{categoriaSeleccionada === "actividades" && (
+  <>
+    <h5 className="mt-4 text-center">Gráfico de Actividades Subidas por Fecha</h5>
+    {actividadesConLinea.length > 0 ? (
+      <ResponsiveContainer width="100%" height={300}>
+        <AreaChart data={actividadesConLinea}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="fecha" />
+          <YAxis label={{ angle: -90, position: "insideLeft" }} allowDecimals={false} />
+          <Tooltip />
+          <Area type="monotone" dataKey="actividades" stroke="#28a745" fill="#28a745" fillOpacity={0.4} />
+        </AreaChart>
+      </ResponsiveContainer>
+    ) : (
+      <p>No hay actividades registradas para mostrar.</p>
+    )}
+  </>
+)}
 
-      {categoriaSeleccionada === "disponibilidad" && (
-        <>
-          <h5 className="mt-4">Gráfico de Disponibilidad por Día</h5>
-          {disponibilidadData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={disponibilidadData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="dia" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="horas" fill="#17a2b8" />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <p>No hay disponibilidad registrada para mostrar.</p>
-          )}
-        </>
-      )}
+{categoriaSeleccionada === "disponibilidad" && (
+  <>
+    <h5 className="mt-4 text-center">Gráfico de Disponibilidad por Día</h5>
+    {disponibilidadData.length > 0 ? (
+      <ResponsiveContainer width="100%" height={300}>
+        <AreaChart data={disponibilidadData}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="dia" />
+          <YAxis />
+          <Tooltip />
+          <Area type="monotone" dataKey="horas" stroke="#17a2b8" fill="#17a2b8" fillOpacity={0.4} />
+        </AreaChart>
+      </ResponsiveContainer>
+    ) : (
+      <p>No hay disponibilidad registrada para mostrar.</p>
+    )}
+  </>
+)}
+
 
       <Accordion defaultActiveKey="0" className="mt-4 shadow-sm border-0">
         <Accordion.Item eventKey="0">

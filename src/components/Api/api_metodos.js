@@ -10,7 +10,7 @@ export const subirMetodo = async (formData) => {
     const response = await axios.post(`${API_URL}/subir-metodo`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
-        'Authorization': token,
+        'Authorization': `Bearer ${token}`,
       },
     });
 

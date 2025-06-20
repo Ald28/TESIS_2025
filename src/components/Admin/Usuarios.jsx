@@ -217,27 +217,48 @@ export default function Usuarios() {
       {modalVisible && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h5 className="mb-3">Observaciones del estudiante</h5>
-            <button className="modal-close" onClick={cerrarModal}>✕</button>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h5 className="modal-title">Observaciones del Estudiante</h5>
+              <button className="modal-close btn btn-sm btn-outline-secondary" onClick={cerrarModal}>✕</button>
+            </div>
+
+            <div className="input-group mb-3">
+              <select className="form-select" aria-label="Filtro de comentarios">
+                <option value="todos">Todos los comentarios</option>
+                <option value="mis">Mis comentarios</option>
+              </select>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Buscar en observaciones..."
+              />
+            </div>
+
             <textarea
               className="form-control mb-2"
               placeholder="Escribe un comentario"
               value={comentarios[modalEstudianteId] || ""}
               onChange={(e) => handleComentarioChange(modalEstudianteId, e.target.value)}
             />
+
             <button
               className="btn btn-success btn-sm mb-3"
               onClick={() => handleEnviarComentario(modalEstudianteId)}
             >
               Enviar Comentario
             </button>
+
             <ul className="list-unstyled small mt-2">
               {(observaciones[modalEstudianteId] || []).map((obs, idx) => (
                 <li key={idx} className="mb-4 border-bottom pb-3">
-                  <span className="fw-bold">
-                    {obs.psicologo_nombre} {obs.psicologo_apellido}:
-                  </span>
-
+                  <div className="d-flex justify-content-between">
+                    <span className="fw-bold">
+                      {obs.psicologo_nombre} {obs.psicologo_apellido}
+                    </span>
+                    <span className="text-muted" style={{ fontSize: "0.75rem" }}>
+                      {new Date(obs.fecha_creacion).toLocaleString()}
+                    </span>
+                  </div>
                   {editandoComentarioId === obs.id ? (
                     <>
                       <textarea
@@ -289,17 +310,12 @@ export default function Usuarios() {
                       )}
                     </>
                   )}
-
-                  <span className="text-muted" style={{ fontSize: "0.75rem" }}>
-                    {new Date(obs.fecha_creacion).toLocaleString()}
-                  </span>
                 </li>
               ))}
             </ul>
           </div>
         </div>
-      )
-      }
+      )}
 
       {
         modalHistorialVisible && (

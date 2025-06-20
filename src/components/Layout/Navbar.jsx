@@ -22,8 +22,7 @@ const Navbar = ({ collapsed }) => {
           alignItems: "center",
         }}
       >
-        <a className="navbar-brand text-primary mb-0 h5" href="/">
-          AdminPanel
+        <a className="navbar-brand text-black mb-0 h5" href="/">
         </a>
         <div className="d-flex align-items-center gap-3">
           <NotificationBell />

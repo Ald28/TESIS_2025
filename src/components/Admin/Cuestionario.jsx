@@ -214,7 +214,7 @@ export default function Cuestionario() {
     <div className="container py-3">
       <h1 className="mb-4 fw-bold text-primary d-flex align-items-center justify-content-center gap-2">
         <FaWpforms size={28} />
-        <span>Panel de Administración de Encuestas</span>
+        <span>Panel de Cuestionario Incial</span>
       </h1>
 
       {/* Tabs */}
