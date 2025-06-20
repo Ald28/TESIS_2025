@@ -159,6 +159,22 @@ export default function Usuarios() {
       return fechaObs === filtroFecha;
     });
 
+  const formatearFechaYEdad = (fechaStr) => {
+    if (!fechaStr) return "-";
+
+    const fecha = new Date(fechaStr);
+    const hoy = new Date();
+
+    const edad = hoy.getFullYear() - fecha.getFullYear();
+    const mes = fecha.getMonth() + 1;
+    const dia = fecha.getDate();
+    const ajuste =
+      hoy.getMonth() < fecha.getMonth() ||
+      (hoy.getMonth() === fecha.getMonth() && hoy.getDate() < fecha.getDate());
+
+    return `${fecha.getFullYear()}-${String(mes).padStart(2, "0")}-${String(dia).padStart(2, "0")} (${edad - (ajuste ? 1 : 0)} años)`;
+  };
+
   return (
     <div className="estudiantes-container">
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
@@ -200,7 +216,7 @@ export default function Usuarios() {
                     </div>
                   </td>
                   <td>{est.ciclo || "-"}</td>
-                  <td>{est.fecha_nacimiento || "-"}</td>
+                  <td>{formatearFechaYEdad(est.fecha_nacimiento)}</td>
                   <td>{est.carrera || "-"}</td>
                   <td>
                     <div className="comentario-container d-flex gap-2">
