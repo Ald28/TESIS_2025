@@ -368,25 +368,60 @@ export default function Usuarios() {
       {
         modalHistorialVisible && (
           <div className="modal-overlay">
-            <div className="modal-content">
-              <h5 className="mb-3">Historial de citas</h5>
-              <button className="modal-close" onClick={cerrarModalHistorial}>✕</button>
-              <ul className="list-unstyled small mt-3">
-                {(historiales[modalHistorialEstudianteId] || []).map((h, idx) => (
-                  <li key={idx} className="mb-3 border-bottom pb-2">
-                    <strong>{h.tipo_cita.toUpperCase()}</strong> — {new Date(h.fecha_inicio).toLocaleString()}
-                    <br />
-                    <span className="text-muted">Estado: {h.estado}</span>
-                  </li>
-                ))}
+            <div className="modal-content p-4 rounded-3 bg-white shadow" style={{ maxWidth: "700px", margin: "auto" }}>
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <h4 className="fw-bold">
+                  <i className="fas fa-calendar-alt me-2 text-primary"></i> Historial de Citas
+                </h4>
+                <button className="btn btn-outline-secondary btn-sm" onClick={cerrarModalHistorial}>
+                  ✕
+                </button>
+              </div>
+
+              <ul className="list-unstyled">
+                {(historiales[modalHistorialEstudianteId] || []).map((h, idx) => {
+                  const fecha = new Date(h.fecha_inicio);
+                  const fechaTexto = fecha.toLocaleDateString();
+                  const horaTexto = fecha.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                  return (
+                    <li key={idx} className="border rounded-3 p-3 mb-3 bg-light position-relative">
+                      <div className="d-flex justify-content-between align-items-start mb-2">
+                        <div className="d-flex align-items-center gap-2">
+                          <div>
+                            <h6 className="mb-1 fw-bold">{h.tipo_cita.charAt(0).toUpperCase() + h.tipo_cita.slice(1)}</h6>
+                            <div className="text-muted">
+                              <i className="far fa-calendar-alt me-1"></i> {fechaTexto} &nbsp;
+                              <i className="far fa-clock me-1"></i> {horaTexto}
+                            </div>
+                          </div>
+                        </div>
+
+                        <span className="badge bg-success align-self-start">
+                          <i className="fas fa-check-circle me-1"></i> Realizada
+                        </span>
+                      </div>
+
+                      <div className="mt-2">
+                        <small className="text-muted d-block">Psicólogo</small>
+                        <strong>
+                          <i className="fas fa-user me-1"></i>
+                          Dr. {h.nombre_psicologo} {h.apellido_psicologo}
+                        </strong>
+                      </div>
+                    </li>
+                  );
+                })}
+
                 {(!historiales[modalHistorialEstudianteId] || historiales[modalHistorialEstudianteId].length === 0) && (
-                  <li className="text-muted">Sin historial de citas</li>
+                  <li className="text-muted text-center mt-4">Sin historial de citas</li>
                 )}
               </ul>
             </div>
           </div>
         )
       }
+
     </div >
   );
 }
