@@ -164,8 +164,21 @@ export default function Citas() {
                       <td>{new Date(cita.fecha_inicio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
                       <td><span className="badge bg-success">Aceptada</span></td>
                       <td>
-                        <Button size="sm" variant="outline-danger" onClick={() => handleCancelar(cita.id)}>Cancelar</Button>
-                        <Button size="sm" variant="outline-danger" onClick={() => handleRealizarCita(cita.id)}>Realizada</Button>
+                        <Button
+                          size="sm"
+                          variant="outline-success"
+                          className="me-2"
+                          onClick={() => handleCancelar(cita.id)}
+                        >
+                          Cancelar
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline-danger"
+                          onClick={() => handleRealizarCita(cita.id)}
+                        >
+                          Realizada
+                        </Button>
                       </td>
                     </tr>
                   ))
@@ -210,8 +223,21 @@ export default function Citas() {
                         </span>
                       </td>
                       <td>
-                        <Button size="sm" variant="outline-danger" onClick={() => handleCancelar(cita.id)}>Cancelar</Button>
-                        <Button size="sm" variant="outline-danger" onClick={() => handleRealizarCita(cita.id)}>Realizada</Button>
+                        <Button
+                          size="sm"
+                          variant="outline-success"
+                          className="me-2"
+                          onClick={() => handleCancelar(cita.id)}
+                        >
+                          Cancelar
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline-danger"
+                          onClick={() => handleRealizarCita(cita.id)}
+                        >
+                          Realizada
+                        </Button>
                       </td>
                     </tr>
                   ))

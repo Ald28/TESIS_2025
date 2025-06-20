@@ -144,50 +144,60 @@ const PerfilSidebar = ({ show, onHide }) => {
               <span style={{ fontWeight: 500 }}>● {perfil.estado}</span>
             </Badge>
 
-            <div className="bg-white rounded-4 text-start border">
+            <div className="bg-white rounded-4 text-start border p-4">
               {
                 modoEdicion ? (
                   <Form>
-                    <Form.Group className="mb-3" controlId="formEspecialidad">
-                      <Form.Label>Especialidad</Form.Label>
+                    <Form.Group className="mb-4" controlId="formEspecialidad">
+                      <Form.Label className="fw-semibold">Especialidad</Form.Label>
                       <Form.Control
                         type="text"
                         name="especialidad"
                         value={formData.especialidad}
                         onChange={handleChange}
+                        className="rounded-3 px-3 py-2"
                       />
                     </Form.Group>
-                    <Form.Group className="mb-3" controlId="formDescripcion">
-                      <Form.Label>Descripción</Form.Label>
+                    <Form.Group className="mb-4" controlId="formDescripcion">
+                      <Form.Label className="fw-semibold">Descripción</Form.Label>
                       <Form.Control
                         as="textarea"
-                        rows={3}
+                        rows={4}
                         name="descripcion"
                         value={formData.descripcion}
                         onChange={handleChange}
+                        className="rounded-3 px-3 py-2"
                       />
                     </Form.Group>
                   </Form>
                 ) : (
-                  <div className="bg-white rounded-4 shadow-sm p-3 text-start border">
-                    {[
-                      { label: "Especialidad", value: perfil.especialidad || "No especificada" },
-                      { label: "Descripción", value: perfil.descripcion || "Sin descripción" },
-                      { label: "Fecha de Registro", value: new Date(perfil.fecha_registro).toLocaleDateString() },
-                      { label: "Pacientes Activos", value: pacientesActivos },
-                      { label: "Sesiones Realizadas", value: sesionesRealizadas }
-                    ].map((item, index, arr) => (
-                      <div
-                        key={index}
-                        className="d-flex justify-content-between align-items-center py-2"
-                        style={{
-                          borderBottom: index < arr.length - 1 ? "1px solid #eee" : "none"
-                        }}
-                      >
-                        <span className="fw-semibold">{item.label}:</span>
-                        <span className="text-muted">{item.value}</span>
-                      </div>
-                    ))}
+                  <div className="p-1 text-start">
+                    <div className="d-flex justify-content-between align-items-center py-2" style={{ borderBottom: "1px solid #eee" }}>
+                      <span className="fw-semibold">Especialidad:</span>
+                      <span className="text-muted">{perfil.especialidad || "No especificada"}</span>
+                    </div>
+
+                    <div className="py-2" style={{ borderBottom: "1px solid #eee" }}>
+                      <span className="fw-semibold">Descripción:</span>
+                      <p className="text-muted mb-0 mt-1" style={{ whiteSpace: "pre-line" }}>
+                        {perfil.descripcion || "Sin descripción"}
+                      </p>
+                    </div>
+
+                    <div className="d-flex justify-content-between align-items-center py-2" style={{ borderBottom: "1px solid #eee" }}>
+                      <span className="fw-semibold">Fecha de Registro:</span>
+                      <span className="text-muted">{new Date(perfil.fecha_registro).toLocaleDateString()}</span>
+                    </div>
+
+                    <div className="d-flex justify-content-between align-items-center py-2" style={{ borderBottom: "1px solid #eee" }}>
+                      <span className="fw-semibold">Pacientes Activos:</span>
+                      <span className="text-muted">{pacientesActivos}</span>
+                    </div>
+
+                    <div className="d-flex justify-content-between align-items-center py-2">
+                      <span className="fw-semibold">Sesiones Realizadas:</span>
+                      <span className="text-muted">{sesionesRealizadas}</span>
+                    </div>
                   </div>
                 )
               }
