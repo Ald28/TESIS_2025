@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { Table, Button, Modal, Form } from "react-bootstrap";
+import React, { useEffect, useState, useRef } from "react";
+import { Table, Button, Modal, Form, InputGroup } from "react-bootstrap";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
-import { FaCalendarCheck } from "react-icons/fa";
+import { FaCalendarAlt, FaCalendarCheck } from "react-icons/fa";
 import {
   obtenerCitasAceptadas,
   cancelarCitaAceptada,
@@ -18,6 +18,7 @@ export default function Citas() {
   const [estudiantes, setEstudiantes] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [vistaActual, setVistaActual] = useState("comunes");
+  const fechaRef = useRef(null);
   const [nuevoCita, setNuevoCita] = useState({
     estudiante_id: "",
     fecha: "",
@@ -122,13 +123,13 @@ export default function Citas() {
       {/* Botones de tabs debajo del título */}
       <div className="d-flex flex-wrap gap-4 mb-4">
         <Button
-          variant={vistaActual === "comunes" ? "dark" : "outline-dark"}
+          variant={vistaActual === "comunes" ? "primary" : "outline-dark"}
           onClick={() => setVistaActual("comunes")}
         >
           Citas Comunes
         </Button>
         <Button
-          variant={vistaActual === "seguimiento" ? "dark" : "outline-dark"}
+          variant={vistaActual === "seguimiento" ? "primary" : "outline-dark"}
           onClick={() => setVistaActual("seguimiento")}
         >
           Citas de Seguimiento
@@ -245,11 +246,21 @@ export default function Citas() {
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Fecha</Form.Label>
-              <Form.Control
-                type="date"
-                value={nuevoCita.fecha}
-                onChange={(e) => setNuevoCita({ ...nuevoCita, fecha: e.target.value })}
-              />
+              <InputGroup>
+                <InputGroup.Text
+                  style={{ cursor: "pointer" }}
+                  onClick={() => fechaRef.current && fechaRef.current.showPicker?.()}
+                >
+                  <FaCalendarAlt />
+                </InputGroup.Text>
+                <Form.Control
+                  ref={fechaRef}
+                  type="date"
+                  min={new Date().toISOString().split("T")[0]}
+                  value={nuevoCita.fecha}
+                  onChange={(e) => setNuevoCita({ ...nuevoCita, fecha: e.target.value })}
+                />
+              </InputGroup>
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Hora Inicio</Form.Label>
