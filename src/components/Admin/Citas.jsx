@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { Table, Button, Modal, Form, InputGroup } from "react-bootstrap";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
-import { FaCalendarAlt, FaCalendarCheck } from "react-icons/fa";
+import { FaClock, FaCalendarAlt, FaCalendarCheck } from "react-icons/fa";
 import {
   obtenerCitasAceptadas,
   cancelarCitaAceptada,
@@ -19,6 +19,8 @@ export default function Citas() {
   const [showModal, setShowModal] = useState(false);
   const [vistaActual, setVistaActual] = useState("comunes");
   const fechaRef = useRef(null);
+  const horaInicioRef = useRef(null);
+  const horaFinRef = useRef(null);
   const [nuevoCita, setNuevoCita] = useState({
     estudiante_id: "",
     fecha: "",
@@ -264,19 +266,37 @@ export default function Citas() {
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Hora Inicio</Form.Label>
-              <Form.Control
-                type="time"
-                value={nuevoCita.hora_inicio}
-                onChange={(e) => setNuevoCita({ ...nuevoCita, hora_inicio: e.target.value })}
-              />
+              <InputGroup>
+                <InputGroup.Text
+                  style={{ cursor: "pointer" }}
+                  onClick={() => horaInicioRef.current?.showPicker?.() || horaInicioRef.current?.focus()}
+                >
+                  <FaClock />
+                </InputGroup.Text>
+                <Form.Control
+                  ref={horaInicioRef}
+                  type="time"
+                  value={nuevoCita.hora_inicio}
+                  onChange={(e) => setNuevoCita({ ...nuevoCita, hora_inicio: e.target.value })}
+                />
+              </InputGroup>
             </Form.Group>
             <Form.Group>
               <Form.Label>Hora Fin</Form.Label>
-              <Form.Control
-                type="time"
-                value={nuevoCita.hora_fin}
-                onChange={(e) => setNuevoCita({ ...nuevoCita, hora_fin: e.target.value })}
-              />
+              <InputGroup>
+                <InputGroup.Text
+                  style={{ cursor: "pointer" }}
+                  onClick={() => horaFinRef.current?.showPicker?.() || horaFinRef.current?.focus()}
+                >
+                  <FaClock />
+                </InputGroup.Text>
+                <Form.Control
+                  ref={horaFinRef}
+                  type="time"
+                  value={nuevoCita.hora_fin}
+                  onChange={(e) => setNuevoCita({ ...nuevoCita, hora_fin: e.target.value })}
+                />
+              </InputGroup>
             </Form.Group>
           </Form>
         </Modal.Body>
