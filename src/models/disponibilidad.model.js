@@ -88,7 +88,6 @@ const editarDisponibilidad = async (id, psicologo_id, hora_inicio, hora_fin) => 
     const inicio = padHora(hora_inicio);
     const fin = padHora(hora_fin);
 
-    // Función para calcular la duración en segundos
     const duracionHoras = (horaFin, horaInicio) => {
         const [h1, m1, s1] = horaFin.split(':').map(Number);
         const [h2, m2, s2] = horaInicio.split(':').map(Number);
@@ -108,8 +107,8 @@ const editarDisponibilidad = async (id, psicologo_id, hora_inicio, hora_fin) => 
         if (inicio < "13:30:00" || fin > "17:30:00") {
             throw new Error("El turno tarde debe estar entre 13:30 y 17:30.");
         }
-        if (duracion < 14400) {
-            throw new Error("El turno tarde debe durar al menos 4 horas.");
+        if (duracion < 12600 || duracion > 14400) {
+            throw new Error("El turno tarde debe durar entre 3 horas y 30 minutos y 4 horas como máximo.");
         }
     }
 
