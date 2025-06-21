@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FiRefreshCw } from "react-icons/fi";
-import { Container, Row, Col, Card, Button, Table, Modal, Form, Accordion } from "react-bootstrap";
+import { Container, Row, Col, Card, Button, Table, Modal, Form, Accordion, InputGroup } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { FaUsers, FaCalendarCheck, FaTasks, FaClock, FaGoogle } from "react-icons/fa";
 import { io } from "socket.io-client";
@@ -50,6 +50,14 @@ export default function Dashboard() {
   const [totalHorasDisponibles, setTotalHorasDisponibles] = useState(0);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null);
   const [actividadesSubidasData, setActividadesSubidasData] = useState([]);
+  const inputHoraInicioRef = useRef();
+  const inputHoraFinRef = useRef();
+  const refMañanaInicio = useRef();
+  const refMañanaFin = useRef();
+  const refTardeInicio = useRef();
+  const refTardeFin = useRef();
+  const refHoraInicio = useRef();
+  const refHoraFin = useRef();
   const [totalActividades, setTotalActividades] = useState(0);
   const cerrarModalDisponibilidad = () => {
     setShowModalDisponibilidad(false);
@@ -430,81 +438,89 @@ export default function Dashboard() {
       </Row>
 
       {categoriaSeleccionada === "aceptada" && (
-  <>
-    <h5 className="mt-4 text-center">Gráfico de Pacientes Activos por Fecha</h5>
-    {aceptadasConLinea.length > 0 ? (
-      <ResponsiveContainer width="100%" height={300}>
-        <AreaChart data={aceptadasConLinea}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="fecha" />
-          <YAxis label={{ angle: -90, position: "insideLeft" }} allowDecimals={false} />
-          <Tooltip />
-          <Area type="monotone" dataKey="pacientes" stroke="#007bff" fill="#007bff" fillOpacity={0.4} />
-        </AreaChart>
-      </ResponsiveContainer>
-    ) : (
-      <p>No hay citas aceptadas registradas.</p>
-    )}
-  </>
-)}
+        <>
+          <h5 className="mt-4 text-center">Gráfico de Pacientes Activos por Fecha</h5>
+          {aceptadasConLinea.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={aceptadasConLinea}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="fecha" />
+                <YAxis label={{ angle: -90, position: "insideLeft" }} allowDecimals={false} />
+                <Tooltip />
+                <Area type="monotone" dataKey="pacientes" stroke="#007bff" fill="#007bff" fillOpacity={0.4} />
+              </AreaChart>
+            </ResponsiveContainer>
+          ) : (
+            <p>No hay citas aceptadas registradas.</p>
+          )}
+        </>
+      )}
 
-{categoriaSeleccionada === "pendiente" && (
-  <>
-    <h5 className="mt-4 text-center">Gráfico de Citas Pendientes por Fecha</h5>
-    {pendientesConLinea.length > 0 ? (
-      <ResponsiveContainer width="100%" height={300}>
-        <AreaChart data={pendientesConLinea}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="fecha" />
-          <YAxis label={{ angle: -90, position: "insideLeft" }} allowDecimals={false} />
-          <Tooltip />
-          <Area type="monotone" dataKey="citasPendientes" stroke="#ffc107" fill="#ffc107" fillOpacity={0.4} />
-        </AreaChart>
-      </ResponsiveContainer>
-    ) : (
-      <p>No hay citas pendientes registradas.</p>
-    )}
-  </>
-)}
+      {categoriaSeleccionada === "pendiente" && (
+        <>
+          <h5 className="mt-4 text-center">Gráfico de Citas Pendientes por Fecha</h5>
+          {pendientesConLinea.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={pendientesConLinea}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="fecha" />
+                <YAxis label={{ angle: -90, position: "insideLeft" }} allowDecimals={false} />
+                <Tooltip />
+                <Area type="monotone" dataKey="citasPendientes" stroke="#ffc107" fill="#ffc107" fillOpacity={0.4} />
+              </AreaChart>
+            </ResponsiveContainer>
+          ) : (
+            <p>No hay citas pendientes registradas.</p>
+          )}
+        </>
+      )}
 
-{categoriaSeleccionada === "actividades" && (
-  <>
-    <h5 className="mt-4 text-center">Gráfico de Actividades Subidas por Fecha</h5>
-    {actividadesConLinea.length > 0 ? (
-      <ResponsiveContainer width="100%" height={300}>
-        <AreaChart data={actividadesConLinea}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="fecha" />
-          <YAxis label={{ angle: -90, position: "insideLeft" }} allowDecimals={false} />
-          <Tooltip />
-          <Area type="monotone" dataKey="actividades" stroke="#28a745" fill="#28a745" fillOpacity={0.4} />
-        </AreaChart>
-      </ResponsiveContainer>
-    ) : (
-      <p>No hay actividades registradas para mostrar.</p>
-    )}
-  </>
-)}
+      {categoriaSeleccionada === "actividades" && (
+        <>
+          <h5 className="mt-4 text-center">Gráfico de Actividades por Día</h5>
+          {actividadesConLinea.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart
+                data={actividadesConLinea}
+                margin={{ top: 10, right: 30, left: 30, bottom: 40 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="fecha" angle={-45} textAnchor="end" interval={0} />
+                <YAxis allowDecimals={false} />
+                <Tooltip />
+                <Area
+                  type="monotone"
+                  dataKey="actividades"
+                  stroke="#28a745"
+                  fill="#28a745"
+                  fillOpacity={0.4}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          ) : (
+            <p>No hay actividades registradas para mostrar.</p>
+          )}
+        </>
+      )}
 
-{categoriaSeleccionada === "disponibilidad" && (
-  <>
-    <h5 className="mt-4 text-center">Gráfico de Disponibilidad por Día</h5>
-    {disponibilidadData.length > 0 ? (
-      <ResponsiveContainer width="100%" height={300}>
-        <AreaChart data={disponibilidadData}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="dia" />
-          <YAxis />
-          <Tooltip />
-          <Area type="monotone" dataKey="horas" stroke="#17a2b8" fill="#17a2b8" fillOpacity={0.4} />
-        </AreaChart>
-      </ResponsiveContainer>
-    ) : (
-      <p>No hay disponibilidad registrada para mostrar.</p>
-    )}
-  </>
-)}
-
+      {categoriaSeleccionada === "disponibilidad" && (
+        <>
+          <h5 className="mt-4 text-center">Gráfico de Disponibilidad por Día</h5>
+          {disponibilidadData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={disponibilidadData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="dia" />
+                <YAxis />
+                <Tooltip />
+                <Area type="monotone" dataKey="horas" stroke="#17a2b8" fill="#17a2b8" fillOpacity={0.4} />
+              </AreaChart>
+            </ResponsiveContainer>
+          ) : (
+            <p>No hay disponibilidad registrada para mostrar.</p>
+          )}
+        </>
+      )}
 
       <Accordion defaultActiveKey="0" className="mt-4 shadow-sm border-0">
         <Accordion.Item eventKey="0">
@@ -677,22 +693,40 @@ export default function Dashboard() {
                 <>
                   <Col md={12}>
                     <Form.Label>Hora Inicio</Form.Label>
-                    <Form.Control
-                      type="time"
-                      name="hora_inicio"
-                      value={formData.hora_inicio || ""}
-                      onChange={handleFormChange}
-                    />
+                    <InputGroup>
+                      <InputGroup.Text
+                        style={{ cursor: "pointer" }}
+                        onClick={() => refHoraInicio.current?.showPicker?.() || refHoraInicio.current?.focus()}
+                      >
+                        <FaClock />
+                      </InputGroup.Text>
+                      <Form.Control
+                        type="time"
+                        ref={refHoraInicio}
+                        name="hora_inicio"
+                        value={formData.hora_inicio || ""}
+                        onChange={handleFormChange}
+                      />
+                    </InputGroup>
                   </Col>
 
                   <Col md={12}>
                     <Form.Label>Hora Fin</Form.Label>
-                    <Form.Control
-                      type="time"
-                      name="hora_fin"
-                      value={formData.hora_fin || ""}
-                      onChange={handleFormChange}
-                    />
+                    <InputGroup>
+                      <InputGroup.Text
+                        style={{ cursor: "pointer" }}
+                        onClick={() => refHoraFin.current?.showPicker?.() || refHoraFin.current?.focus()}
+                      >
+                        <FaClock />
+                      </InputGroup.Text>
+                      <Form.Control
+                        type="time"
+                        ref={refHoraFin}
+                        name="hora_fin"
+                        value={formData.hora_fin || ""}
+                        onChange={handleFormChange}
+                      />
+                    </InputGroup>
                   </Col>
                 </>
               ) : (
@@ -702,24 +736,36 @@ export default function Dashboard() {
                     <Form.Label>Turno Mañana</Form.Label>
                     <Row>
                       <Col>
-                        <Form.Control
-                          type="time"
-                          name="mañana_inicio"
-                          value={formData.mañana_inicio || ""}
-                          onChange={handleFormChange}
-                        />
+                        <InputGroup>
+                          <InputGroup.Text onClick={() => refMañanaInicio.current?.showPicker?.() || refMañanaInicio.current?.focus()}>
+                            <FaClock />
+                          </InputGroup.Text>
+                          <Form.Control
+                            type="time"
+                            ref={refMañanaInicio}
+                            name="mañana_inicio"
+                            value={formData.mañana_inicio || ""}
+                            onChange={handleFormChange}
+                          />
+                        </InputGroup>
                       </Col>
                       <Col>
-                        <Form.Control
-                          type="time"
-                          name="mañana_fin"
-                          value={formData.mañana_fin || ""}
-                          onChange={handleFormChange}
-                        />
+                        <InputGroup>
+                          <InputGroup.Text onClick={() => refMañanaFin.current?.showPicker?.() || refMañanaFin.current?.focus()}>
+                            <FaClock />
+                          </InputGroup.Text>
+                          <Form.Control
+                            type="time"
+                            ref={refMañanaFin}
+                            name="mañana_fin"
+                            value={formData.mañana_fin || ""}
+                            onChange={handleFormChange}
+                          />
+                        </InputGroup>
                       </Col>
                     </Row>
                     <Form.Text className="text-muted" style={{ fontSize: "0.8rem" }}>
-                      Horario permitido: 08:30 am – 12:30 am
+                      Horario permitido: 08:30 am – 12:30 pm
                     </Form.Text>
                   </Col>
 
@@ -727,20 +773,32 @@ export default function Dashboard() {
                     <Form.Label>Turno Tarde</Form.Label>
                     <Row>
                       <Col>
-                        <Form.Control
-                          type="time"
-                          name="tarde_inicio"
-                          value={formData.tarde_inicio || ""}
-                          onChange={handleFormChange}
-                        />
+                        <InputGroup>
+                          <InputGroup.Text onClick={() => refTardeInicio.current?.showPicker?.() || refTardeInicio.current?.focus()}>
+                            <FaClock />
+                          </InputGroup.Text>
+                          <Form.Control
+                            type="time"
+                            ref={refTardeInicio}
+                            name="tarde_inicio"
+                            value={formData.tarde_inicio || ""}
+                            onChange={handleFormChange}
+                          />
+                        </InputGroup>
                       </Col>
                       <Col>
-                        <Form.Control
-                          type="time"
-                          name="tarde_fin"
-                          value={formData.tarde_fin || ""}
-                          onChange={handleFormChange}
-                        />
+                        <InputGroup>
+                          <InputGroup.Text onClick={() => refTardeFin.current?.showPicker?.() || refTardeFin.current?.focus()}>
+                            <FaClock />
+                          </InputGroup.Text>
+                          <Form.Control
+                            type="time"
+                            ref={refTardeFin}
+                            name="tarde_fin"
+                            value={formData.tarde_fin || ""}
+                            onChange={handleFormChange}
+                          />
+                        </InputGroup>
                       </Col>
                     </Row>
                     <Form.Text className="text-muted" style={{ fontSize: "0.8rem" }}>
