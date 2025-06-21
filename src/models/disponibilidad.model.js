@@ -32,11 +32,16 @@ const crearDisponibilidad = async (dia, mañana_inicio, mañana_fin, tarde_inici
     const duracionMañana = duracionHoras(mañanaFin, mañanaInicio);
     const duracionTarde = duracionHoras(tardeFin, tardeInicio);
 
-    if (duracionMañana < 14400) {
+    const DURACION_MIN_MAÑANA = 14400;
+    const DURACION_MIN_TARDE = 12600;
+    const DURACION_MAX_TARDE = 14400;
+
+    if (duracionMañana < DURACION_MIN_MAÑANA) {
         throw new Error("El horario de mañana debe tener al menos 4 horas.");
     }
-    if (duracionTarde < 14400) {
-        throw new Error("El horario de tarde debe tener al menos 4 horas.");
+
+    if (duracionTarde < DURACION_MIN_TARDE || duracionTarde > DURACION_MAX_TARDE) {
+        throw new Error("El horario de tarde debe durar entre 3 horas y 30 minutos y 4 horas como máximo.");
     }
 
     // Verificar si ya existe disponibilidad
