@@ -12,6 +12,7 @@ export default function Estudent() {
   const [showModal, setShowModal] = useState(false);
   const [selectedEstudiante, setSelectedEstudiante] = useState(null);
   const [filtroPsicologo, setFiltroPsicologo] = useState("");
+  const [filtroCiclo, setFiltroCiclo] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,6 +56,15 @@ export default function Estudent() {
     setHistorial(null);
   };
 
+  const cicloRomanos = {
+    1: "I",
+    2: "II",
+    3: "III",
+    4: "IV",
+    5: "V",
+    6: "VI"
+  };
+
   return (
     <MainLayout>
       <div className="estudiantes-container">
@@ -67,7 +77,11 @@ export default function Estudent() {
 
         <div className="search-filter-bar">
           <input className="search-input" type="text" placeholder="Buscar estudiante..." />
-          <select className="filter-select">
+          <select
+            className="filter-select"
+            value={filtroCiclo}
+            onChange={(e) => setFiltroCiclo(e.target.value)}
+          >
             <option value="">Todos los ciclos</option>
             <option value="I">Ciclo I</option>
             <option value="II">Ciclo II</option>
@@ -90,39 +104,44 @@ export default function Estudent() {
               </tr>
             </thead>
             <tbody>
-              {estudiantes.map((est) => (
-                <tr key={est.usuario_id}>
-                  <td className="user-info">
-                    <div className="avatar">
-                      {est.imagen_url ? (
-                        <img
-                          src={est.imagen_url}
-                          alt="Avatar"
-                          className="avatar-image"
-                        />
-                      ) : (
-                        <FaUserGraduate size={24} />
-                      )}
-                    </div>
-                    <div>
-                      <div className="name">{est.nombre} {est.apellido}</div>
-                      <div className="email">{est.correo}</div>
-                    </div>
-                  </td>
-                  <td>{est.ciclo}</td>
-                  <td>{new Date().getFullYear() - new Date(est.fecha_nacimiento).getFullYear()}</td>
-                  <td>{est.carrera}</td>
-                  <td>
-                    <button
-                      className="btn-more"
-                      onClick={() => verHistorialCitas(est.usuario_id)}
-                      style={{ fontSize: "12px" }}
-                    >
-                      Ver Historial
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {estudiantes
+                .filter((est) => {
+                  if (!filtroCiclo) return true;
+                  return cicloRomanos[est.ciclo] === filtroCiclo;
+                })
+                .map((est) => (
+                  <tr key={est.usuario_id}>
+                    <td className="user-info">
+                      <div className="avatar">
+                        {est.imagen_url ? (
+                          <img
+                            src={est.imagen_url}
+                            alt="Avatar"
+                            className="avatar-image"
+                          />
+                        ) : (
+                          <FaUserGraduate size={24} />
+                        )}
+                      </div>
+                      <div>
+                        <div className="name">{est.nombre} {est.apellido}</div>
+                        <div className="email">{est.correo}</div>
+                      </div>
+                    </td>
+                    <td>{cicloRomanos[est.ciclo]}</td>
+                    <td>{new Date().getFullYear() - new Date(est.fecha_nacimiento).getFullYear()}</td>
+                    <td>{est.carrera}</td>
+                    <td>
+                      <button
+                        className="btn-more"
+                        onClick={() => verHistorialCitas(est.usuario_id)}
+                        style={{ fontSize: "12px" }}
+                      >
+                        Ver Historial
+                      </button>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
