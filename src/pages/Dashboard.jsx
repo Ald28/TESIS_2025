@@ -28,7 +28,7 @@ const Dashboard = () => {
                 <h4>1,248</h4>
                 <small className="text-success">+12% este mes</small>
               </div>
-              <FaUsers size={30} color="#7e3ff2" />
+              <FaUsers size={30} color="#0d6efd" />
             </div>
           </Card>
         </Col>
@@ -40,7 +40,7 @@ const Dashboard = () => {
                 <h4>64</h4>
                 <small className="text-success">+8% este mes</small>
               </div>
-              <FaUserTie size={30} color="#7e3ff2" />
+              <FaUserTie size={30} color="#0d6efd" />
             </div>
           </Card>
         </Col>
@@ -52,7 +52,7 @@ const Dashboard = () => {
                 <h4>512</h4>
                 <small className="text-success">+24% este mes</small>
               </div>
-              <FaCalendarAlt size={30} color="#7e3ff2" />
+              <FaCalendarAlt size={30} color="#0d6efd" />
             </div>
           </Card>
         </Col>
@@ -64,7 +64,7 @@ const Dashboard = () => {
                 <h4>1,024</h4>
                 <small className="text-danger">-3% este mes</small>
               </div>
-              <FaClock size={30} color="#7e3ff2" />
+              <FaClock size={30} color="#0d6efd" />
             </div>
           </Card>
         </Col>
@@ -78,7 +78,7 @@ const Dashboard = () => {
             <XAxis dataKey="name" />
             <YAxis />
             <Tooltip />
-            <Bar dataKey="sesiones" fill="#a78bfa" />
+            <Bar dataKey="sesiones" fill="#91c3fd" />
           </BarChart>
         </ResponsiveContainer>
       </Card>

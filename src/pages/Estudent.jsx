@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import MainLayout from "../layouts/MainLayout";
-import { getEstudiantes, getHistorialCanceladas } from "../api/api_admin";
+import { getEstudiantes, getHistorialRealizadas } from "../api/api_admin";
+import { FaClock, FaUserMd, FaCalendarCheck, FaTimes, FaHistory } from "react-icons/fa";
 import { FaUserGraduate } from "react-icons/fa";
 import { Modal, Button } from "react-bootstrap";
 import "../styles/Estudent.css";
@@ -10,6 +11,7 @@ export default function Estudent() {
   const [historial, setHistorial] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedEstudiante, setSelectedEstudiante] = useState(null);
+  const [filtroPsicologo, setFiltroPsicologo] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -23,18 +25,29 @@ export default function Estudent() {
     fetchData();
   }, []);
 
-  // Función para obtener el historial de citas canceladas de un estudiante
-  const verHistorialCitas = async (estudianteId) => {
+  // Función para obtener el historial de citas de un estudiante
+  const verHistorialCitas = async (estudiante_id) => {
+    console.log("Estudiante ID usado para historial:", estudiante_id);
+
     try {
-      const historialData = await getHistorialCanceladas(estudianteId);
-      console.log("Historial recibido:", historialData);
-      setHistorial(historialData);
-      setSelectedEstudiante(estudianteId);
+      const data = await getHistorialRealizadas(estudiante_id);
+      setHistorial(data);
       setShowModal(true);
+      setSelectedEstudiante(estudiante_id);
     } catch (error) {
-      console.error("Error al obtener historial de citas canceladas", error);
+      console.error("Error al obtener historial de citas realizadas:", error);
+      setHistorial([]);
+      setShowModal(true);
     }
   };
+
+  const historialFiltrado = historial
+    ? historial.filter((cita) =>
+      `${cita.nombre_psicologo} ${cita.apellido_psicologo}`
+        .toLowerCase()
+        .includes(filtroPsicologo.toLowerCase())
+    )
+    : [];
 
   // Función para cerrar el modal
   const handleCloseModal = () => {
@@ -115,23 +128,57 @@ export default function Estudent() {
         </div>
 
         {/* Modal para mostrar el historial de citas */}
-        <Modal show={showModal} onHide={handleCloseModal}>
+        <Modal show={showModal} onHide={handleCloseModal} size="lg" centered>
           <Modal.Header closeButton>
-            <Modal.Title>Historial de Citas Canceladas</Modal.Title>
+            <Modal.Title>
+              <FaHistory style={{ marginRight: "8px", color: "#0d6efd" }} />
+              Historial de Citas Realizadas
+            </Modal.Title>
           </Modal.Header>
-          <Modal.Body>
-            {historial ? (
-              <ul>
-                {historial.map((cita) => (
-                  <li key={cita.cita_id}>
-                    <p><strong>Cita:</strong> {cita.fecha_inicio} - {cita.fecha_fin}</p>
-                    <p><strong>Psicólogo:</strong> {cita.nombre_psicologo} {cita.apellido_psicologo}</p>
-                    <p><strong>Tipo de cita:</strong> {cita.tipo_cita}</p>
-                  </li>
+          <Modal.Body style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+            <input
+              type="text"
+              placeholder="Filtrar por psicólogo..."
+              className="form-control mb-3"
+              value={filtroPsicologo}
+              onChange={(e) => setFiltroPsicologo(e.target.value)}
+            />
+
+            {historial && historial.length > 0 ? (
+              <div className="d-flex flex-column gap-3">
+                {historialFiltrado.map((cita) => (
+                  <div
+                    key={cita.cita_id}
+                    style={{
+                      border: '1px solid #dee2e6',
+                      borderRadius: '8px',
+                      padding: '15px',
+                      backgroundColor: '#f8f9fa',
+                    }}
+                  >
+                    <p>
+                      <FaClock style={{ marginRight: "6px", color: "#6c757d" }} />
+                      <strong>Fecha:</strong>{' '}
+                      {new Date(cita.fecha_inicio).toLocaleString()} –{' '}
+                      {new Date(cita.fecha_fin).toLocaleTimeString()}
+                    </p>
+                    <p>
+                      <FaUserMd style={{ marginRight: "6px", color: "#6c757d" }} />
+                      <strong>Psicólogo:</strong>{' '}
+                      {cita.nombre_psicologo} {cita.apellido_psicologo}
+                    </p>
+                    <p>
+                      <FaCalendarCheck style={{ marginRight: "6px", color: "#6c757d" }} />
+                      <strong>Tipo de cita:</strong> {cita.tipo_cita}
+                    </p>
+                  </div>
                 ))}
-              </ul>
+              </div>
             ) : (
-              <p>No se encontraron citas canceladas.</p>
+              <p className="text-muted">
+                <FaTimes style={{ marginRight: "6px" }} />
+                No se encontraron citas realizadas.
+              </p>
             )}
           </Modal.Body>
           <Modal.Footer>
