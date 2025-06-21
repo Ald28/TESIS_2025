@@ -67,7 +67,6 @@ const NotificationBell = () => {
       try {
         const inactividad = await revisarInactividadEstudiantes();
         if (inactividad?.message) {
-          console.log("🔄 Inactividad revisada:", inactividad.message);
         }
       } catch (err) {
         console.error("❌ Error al revisar inactividad:", err);
@@ -76,7 +75,6 @@ const NotificationBell = () => {
       try {
         const citas = await notificarCitasProximas();
         if (citas?.message) {
-          console.log("⏰ Citas próximas notificadas:", citas.message);
         }
       } catch (err) {
         console.error("❌ Error al notificar citas próximas:", err);
