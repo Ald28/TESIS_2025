@@ -105,3 +105,18 @@ DB_NAME=tesis_db
 
 -----------------------------------------------------
 adminTECSUP123
+
+----------------------------------------------------------
+docker-compose.yml
+services:
+  backend:
+    build: .
+    container_name: calmatec_backend
+    ports:
+      - "${PORT}:${PORT}"
+    env_file:
+      - .env
+
+-------------------------------------------------------------
+CREAR Y EJECUTAR:
+docker compose up --build
