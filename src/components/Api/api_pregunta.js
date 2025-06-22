@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8080/api/pregunta";
+const API_URL = import.meta.env.VITE_API_BASE +"/api/pregunta";
 
 // Crear una pregunta individualmente
 export const crearPregunta = async (datos) => {

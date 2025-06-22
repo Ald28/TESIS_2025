@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import VerificarCodigo from "./VerificarCodigo";
 import Swal from "sweetalert2";
 import "bootstrap/dist/css/bootstrap.min.css";
+const loginImage = new URL("../../assets/images/doctor-register.jpg", import.meta.url).href;
 import "../../App.css";
 
 const Register = () => {
@@ -93,7 +94,7 @@ const Register = () => {
 
                     <div className="col-md-5 d-none d-md-flex align-items-center justify-content-center p-3">
                         <img
-                            src="/src/assets/images/doctor-register.jpg"
+                            src={loginImage}
                             alt="Registro"
                             style={{ maxWidth: "100%", height: "auto", borderRadius: "15px" }}
                         />

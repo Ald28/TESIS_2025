@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8080/api/opcion";
+const API_URL = import.meta.env.VITE_API_BASE +"/api/opcion";
 
 export const crearOpcion = async (opcionData) => {
   try {

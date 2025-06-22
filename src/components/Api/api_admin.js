@@ -1,5 +1,5 @@
 import axios from "axios";
-const API = "http://localhost:8080/auth/admin";
+const API = import.meta.env.VITE_API_BASE +"/auth/admin";
 
 export const editarPsicologo = async (usuario_id, psicologoData) => {
     try {

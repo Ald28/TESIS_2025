@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api';
-const API_ESTUDIANTE = 'http://localhost:8080/auth';
+const API_URL = import.meta.env.VITE_API_BASE +'/api';
+const API_ESTUDIANTE = import.meta.env.VITE_API_BASE +'/auth';
 
 export const subirMetodo = async (formData) => {
   try {

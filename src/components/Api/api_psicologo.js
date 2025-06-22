@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const API = "http://localhost:8080/auth/psicologo";
-const API_ADMIN = "http://localhost:8080/auth/admin";
+const API = import.meta.env.VITE_API_BASE +"/auth/psicologo";
+const API_ADMIN = import.meta.env.VITE_API_BASE +"/auth/admin";
 
 export const loginPsicologo = async (credential) => {
   try {

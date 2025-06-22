@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const API = "http://localhost:8080/auth/psicologo";
-const API_ESTUDIANTE = 'http://localhost:8080/auth';
+const API = import.meta.env.VITE_API_BASE +"/auth/psicologo";
+const API_ESTUDIANTE = import.meta.env.VITE_API_BASE +'/auth';
 
 export const obtenerCitasAceptadas = async (token) => {
     const response = await axios.get(`${API}/citas-aceptadas`, {

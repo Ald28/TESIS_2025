@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { loginPsicologo } from "../Api/api_psicologo";
 import Swal from "sweetalert2";
 import "bootstrap/dist/css/bootstrap.min.css";
-const loginImage = new URL("../../assets/images/doctor-login.jpg", import.meta.url).href;
+const loginImage = new URL("../../assets/images/doctor-login.jpg", import.meta.url).href; 
 import "../../App.css";
 
 const Login = () => {

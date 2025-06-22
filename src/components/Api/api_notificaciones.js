@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API = 'http://localhost:8080/api/notificaciones';
+const API = import.meta.env.VITE_API_BASE +'/api/notificaciones';
 
 export const guardarTokenFCM = async (datos, token) => {
   try {

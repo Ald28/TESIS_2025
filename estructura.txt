@@ -39,11 +39,13 @@ EJECUTAR:
 docker run -d -p 5173:80 --name frontend-tesis frontend-tesis
 docker start frontend-tesis
 
-RECONSTRUIR:
-docker stop frontend-tesis
-docker rm frontend-tesis
-docker build -t frontend-tesis .
-docker run -d -p 5173:80 --name frontend-tesis frontend-tesis
+recontruir la imagen:
+docker compose down
+docker compose up --build
+
+CREAR IMAGEN Y EJECUTAR:
+docker build -t front-web-tesis .
+docker run -d -p 5173:80 --name front-web-tesis-container front-web-tesis
 
 SE HICIERON CAMBIOS Y QUIERES DOCKERIZARLO:
 docker build -t frontend-tesis .

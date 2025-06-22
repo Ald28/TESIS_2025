@@ -1,0 +1,11 @@
+services:
+  frontend-web:
+    build: .
+    container_name: frontend_web
+    ports:
+      - "5173:80"
+    networks:
+      - app_net
+
+networks:
+  app_net:
