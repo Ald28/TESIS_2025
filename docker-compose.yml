@@ -1,14 +1,13 @@
-version: "3.8"
+version: "3.9"
 
 services:
-  frontend:
+  admin-frontend:
     build: .
+    container_name: admin_frontend
     ports:
       - "3000:80"
-    depends_on:
-      - backend
+    networks:
+      - app_net
 
-  backend:
-    image: tu-backend-image
-    ports:
-      - "8080:8080"
+networks:
+  app_net:

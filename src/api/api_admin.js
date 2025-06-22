@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const API = "http://localhost:8080/auth/admin";
-const API_PSICO = "http://localhost:8080/auth/psicologo";
+const API = import.meta.env.VITE_API_BASE +"/auth/admin";
+const API_PSICO = import.meta.env.VITE_API_BASE +"auth/psicologo";
 //const API_PSICO = "http://localhost:8080/auth/psicologo";
 //const API_PSICO = "https://tesis-2025.onrender.com/auth/psicologo";
 
