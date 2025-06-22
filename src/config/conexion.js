@@ -9,14 +9,15 @@ const connectWithRetry = () => {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    port: process.env.DB_PORT
+    port: process.env.DB_PORT,
+    timezone: '-05:00',
   });
 
   conexion.connect((error) => {
     if (error) {
       console.error('❌ Error de conexión a MySQL:', error.message);
       console.log('🔁 Reintentando conexión en 5 segundos...');
-      setTimeout(connectWithRetry, 5000); // espera 5 segundos y reintenta
+      setTimeout(connectWithRetry, 5000);
     } else {
       console.log('✅ Conexión exitosa a MySQL');
     }

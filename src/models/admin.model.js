@@ -141,6 +141,30 @@ const obtenerHistorial = async (usuario_id) => {
   return await query(sql, [usuario_id]);
 };
 
+const obtenerPendientes = async (usuario_id) => {
+  const sql = `
+    SELECT 
+      c.id AS cita_id,
+      c.fecha,
+      c.fecha_inicio,
+      c.fecha_fin,
+      c.estado,
+      c.creado_por,
+      IF(c.seguimiento_id IS NULL, 'normal', 'seguimiento') AS tipo_cita,
+      u.nombre AS nombre_psicologo,
+      u.apellido AS apellido_psicologo
+    FROM cita c
+    JOIN estudiante e ON c.estudiante_id = e.id
+    JOIN usuario u2 ON e.usuario_id = u2.id
+    JOIN psicologo p ON c.psicologo_id = p.id
+    JOIN usuario u ON p.usuario_id = u.id
+    WHERE u2.id = ?
+    AND c.estado = 'pendiente'
+    ORDER BY c.fecha_inicio DESC;
+  `;
+  return await query(sql, [usuario_id]);
+};
+
 module.exports = {
   buscarAdminPorCorreo,
   listarEstudiantes,
@@ -151,4 +175,5 @@ module.exports = {
   activarPsicologo,
   actualizarPreRegistro,
   obtenerHistorial,
+  obtenerPendientes,
 };

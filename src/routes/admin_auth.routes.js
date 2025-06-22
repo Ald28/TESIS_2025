@@ -5,6 +5,7 @@ const adminController = require('../controllers/admin_auth.controller');
 // RUTA PREDETERMINADA localhost:8080/auth/admin
 router.get('/disponibilidad/turnos/:psicologo_id', adminController.listarDisponibilidadPorTurno);
 router.get('/historial-estudiantes/:usuario_id', adminController.obtenerHistorial);
+router.get('/historial-pendientes/:usuario_id', adminController.obtenerPendientes);
 router.get('/psicologos', adminController.obtenerPsicologos);
 router.get('/listar', adminController.obtenerEstudiantes);
 

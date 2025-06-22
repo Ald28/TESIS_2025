@@ -185,6 +185,17 @@ const obtenerHistorial = async (req, res) => {
   }
 };
 
+const obtenerPendientes = async (req, res) => {
+  try {
+    const { usuario_id } = req.params;
+    const pendientes = await adminModel.obtenerPendientes(usuario_id);
+    res.json(pendientes);
+  } catch (error) {
+    console.error("Error al obtener citas pendientes:", error);
+    res.status(500).json({ error: "Error al obtener citas pendientes" });
+  }
+}
+
 module.exports = {
   loginAdmin,
   obtenerEstudiantes,
@@ -195,4 +206,5 @@ module.exports = {
   activarPsicologo,
   editarPsicologo,
   obtenerHistorial,
+  obtenerPendientes,
 };
