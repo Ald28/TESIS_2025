@@ -35,6 +35,16 @@ export const getHistorialRealizadas = async (usuario_id) => {
   }
 };
 
+export const getHistorialPendientes = async (usuario_id) => {
+  try {
+    const response = await axios.get(`${API}/historial-pendientes/${usuario_id}`);
+    return response.data; 
+  } catch (error) {
+    console.error("Error al obtener historial pendientes:", error);
+    throw error;
+  }
+};
+
 export const getPsicologos = async (estado = "activo") => {
     try {
         const response = await axios.get(`${API}/psicologos?estado=${estado}`);

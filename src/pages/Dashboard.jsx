@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getEstudiantes, getPsicologos, getHistorialRealizadas } from "../api/api_admin";
+import { getEstudiantes, getPsicologos, getHistorialRealizadas, getHistorialPendientes} from "../api/api_admin";
 import MainLayout from "../layouts/MainLayout";
 import { Card, Row, Col } from "react-bootstrap";
 import { FaUsers, FaUserTie, FaCalendarAlt, FaClock } from "react-icons/fa";
@@ -50,6 +50,7 @@ const Dashboard = () => {
   const [cantidadEstudiantes, setCantidadEstudiantes] = useState(0);
   const [cantidadPsicologos, setCantidadPsicologos] = useState(0);
   const [historialRealizadas, setHistorialRealizadas] = useState(0);
+  const [historialPendientes, setHistorialPendientes] = useState(0);
 
   useEffect(() => {
     const cargarEstudiantes = async () => {
@@ -87,6 +88,24 @@ const Dashboard = () => {
       }
     };
 
+    const cargarHistorialPendientes = async () => {
+      try {
+        const estudiantes = await getEstudiantes();
+
+        let totalHistorial = 0;
+
+        for (const estudiante of estudiantes) {
+          const historial = await getHistorialPendientes(estudiante.usuario_id);
+          totalHistorial += historial.length;
+        }
+
+        setHistorialPendientes(totalHistorial);
+      } catch (error) {
+        console.error("Error al cargar historial de citas realizadas:", error);
+      }
+    };
+
+    cargarHistorialPendientes();
     cargarHistorialRealizadas();
     cargarPsicologos();
     cargarEstudiantes();
@@ -138,7 +157,7 @@ const Dashboard = () => {
             <div className="d-flex justify-content-between align-items-center">
               <div>
                 <h5>Citas pendientes</h5>
-                <h4>1,024</h4>
+                <h4>{historialPendientes}</h4>
                 <small className="text-danger">-3% este mes</small>
               </div>
               <FaClock size={30} color="#0d6efd" />
