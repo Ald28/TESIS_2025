@@ -1,47 +1,25 @@
 import { useEffect, useState } from "react";
-import { getEstudiantes, getPsicologos, getHistorialRealizadas, getHistorialPendientes} from "../api/api_admin";
+import { getEstudiantes, getPsicologos, getHistorialRealizadas, getHistorialPendientes } from "../api/api_admin";
 import MainLayout from "../layouts/MainLayout";
 import { Card, Row, Col } from "react-bootstrap";
 import { FaUsers, FaUserTie, FaCalendarAlt, FaClock } from "react-icons/fa";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
-const datosPorTipo = {
-  estudiantes: [
-    { name: "Mon", sesiones: 10 },
-    { name: "Tue", sesiones: 15 },
-    { name: "Wed", sesiones: 18 },
-    { name: "Thu", sesiones: 22 },
-    { name: "Fri", sesiones: 19 },
-    { name: "Sat", sesiones: 12 },
-    { name: "Sun", sesiones: 8 },
-  ],
-  psicologos: [
-    { name: "Mon", sesiones: 4 },
-    { name: "Tue", sesiones: 5 },
-    { name: "Wed", sesiones: 6 },
-    { name: "Thu", sesiones: 5 },
-    { name: "Fri", sesiones: 7 },
-    { name: "Sat", sesiones: 3 },
-    { name: "Sun", sesiones: 2 },
-  ],
-  citasRealizadas: [
-    { name: "Mon", sesiones: 30 },
-    { name: "Tue", sesiones: 25 },
-    { name: "Wed", sesiones: 40 },
-    { name: "Thu", sesiones: 45 },
-    { name: "Fri", sesiones: 35 },
-    { name: "Sat", sesiones: 20 },
-    { name: "Sun", sesiones: 10 },
-  ],
-  citasPendientes: [
-    { name: "Mon", sesiones: 20 },
-    { name: "Tue", sesiones: 22 },
-    { name: "Wed", sesiones: 25 },
-    { name: "Thu", sesiones: 23 },
-    { name: "Fri", sesiones: 18 },
-    { name: "Sat", sesiones: 15 },
-    { name: "Sun", sesiones: 10 },
-  ],
+// Función para convertir array de citas a conteo por día de la semana
+const contarPorDiaSemana = (citas) => {
+  const dias = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const conteo = {
+    Sun: 0, Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0,
+  };
+
+  citas.forEach((cita) => {
+    const fecha = new Date(cita.fecha_inicio);
+    const dia = dias[fecha.getDay()];
+    conteo[dia]++;
+  });
+
+  // Convertir a array para Recharts
+  return dias.map((dia) => ({ name: dia, sesiones: conteo[dia] }));
 };
 
 const Dashboard = () => {
@@ -51,6 +29,8 @@ const Dashboard = () => {
   const [cantidadPsicologos, setCantidadPsicologos] = useState(0);
   const [historialRealizadas, setHistorialRealizadas] = useState(0);
   const [historialPendientes, setHistorialPendientes] = useState(0);
+  const [datosCitasRealizadas, setDatosCitasRealizadas] = useState([]);
+  const [datosCitasPendientes, setDatosCitasPendientes] = useState([]);
 
   useEffect(() => {
     const cargarEstudiantes = async () => {
@@ -76,13 +56,16 @@ const Dashboard = () => {
         const estudiantes = await getEstudiantes();
 
         let totalHistorial = 0;
+        let todasLasCitas = [];
 
         for (const estudiante of estudiantes) {
           const historial = await getHistorialRealizadas(estudiante.usuario_id);
           totalHistorial += historial.length;
+          todasLasCitas = [...todasLasCitas, ...historial];
         }
 
         setHistorialRealizadas(totalHistorial);
+        setDatosCitasRealizadas(contarPorDiaSemana(todasLasCitas));
       } catch (error) {
         console.error("Error al cargar historial de citas realizadas:", error);
       }
@@ -93,15 +76,18 @@ const Dashboard = () => {
         const estudiantes = await getEstudiantes();
 
         let totalHistorial = 0;
+        let todasLasCitas = [];
 
         for (const estudiante of estudiantes) {
           const historial = await getHistorialPendientes(estudiante.usuario_id);
           totalHistorial += historial.length;
+          todasLasCitas = [...todasLasCitas, ...historial];
         }
 
         setHistorialPendientes(totalHistorial);
+        setDatosCitasPendientes(contarPorDiaSemana(todasLasCitas));
       } catch (error) {
-        console.error("Error al cargar historial de citas realizadas:", error);
+        console.error("Error al cargar historial de citas pendientes:", error);
       }
     };
 
@@ -110,6 +96,13 @@ const Dashboard = () => {
     cargarPsicologos();
     cargarEstudiantes();
   }, []);
+
+  const datosPorTipo = {
+    estudiantes: contarPorDiaSemana(Array(cantidadEstudiantes).fill({ fecha_inicio: new Date() })),
+    psicologos: contarPorDiaSemana(Array(cantidadPsicologos).fill({ fecha_inicio: new Date() })),
+    citasRealizadas: datosCitasRealizadas,
+    citasPendientes: datosCitasPendientes,
+  };
 
   return (
     <MainLayout>
@@ -145,7 +138,7 @@ const Dashboard = () => {
             <div className="d-flex justify-content-between align-items-center">
               <div>
                 <h5>Citas Realizadas</h5>
-                <h4>{historialRealizadas}</h4>
+                <h4>{datosCitasRealizadas.reduce((sum, d) => sum + d.sesiones, 0)}</h4>
                 <small className="text-success">+24% este mes</small>
               </div>
               <FaCalendarAlt size={30} color="#0d6efd" />
@@ -157,7 +150,7 @@ const Dashboard = () => {
             <div className="d-flex justify-content-between align-items-center">
               <div>
                 <h5>Citas pendientes</h5>
-                <h4>{historialPendientes}</h4>
+                <h4>{datosCitasPendientes.reduce((sum, d) => sum + d.sesiones, 0)}</h4>
                 <small className="text-danger">-3% este mes</small>
               </div>
               <FaClock size={30} color="#0d6efd" />
