@@ -55,7 +55,7 @@ const Sidebar = () => {
       {/* NAV LINKS */}
       <Nav className="flex-column align-items-center w-100">
         <Nav.Link
-          href="/dashboard"
+          onClick={() => navigate("/dashboard")}
           className="d-flex flex-column align-items-center py-3 text-white"
           style={{ fontSize: collapsed ? "12px" : "14px" }}
         >
@@ -63,7 +63,7 @@ const Sidebar = () => {
           {!collapsed && <span className="mt-1">Dashboard</span>}
         </Nav.Link>
         <Nav.Link
-          href="/psicologos"
+          onClick={() => navigate("/psicologos")}
           className="d-flex flex-column align-items-center py-3 text-white"
           style={{ fontSize: collapsed ? "12px" : "14px" }}
         >
@@ -71,7 +71,7 @@ const Sidebar = () => {
           {!collapsed && <span className="mt-1">Psicólogos</span>}
         </Nav.Link>
         <Nav.Link
-          href="/estudiantes"
+          onClick={() => navigate("/estudiantes")}
           className="d-flex flex-column align-items-center py-3 text-white"
           style={{ fontSize: collapsed ? "12px" : "14px" }}
         >
@@ -79,7 +79,7 @@ const Sidebar = () => {
           {!collapsed && <span className="mt-1">Estudiantes</span>}
         </Nav.Link>
         <Nav.Link
-          href="/disponibilidad"
+          onClick={() => navigate("/disponibilidad")}
           className="d-flex flex-column align-items-center py-3 text-white"
           style={{ fontSize: collapsed ? "12px" : "14px" }}
         >
