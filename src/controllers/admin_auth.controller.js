@@ -1,6 +1,6 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const adminModel = require('../models/admin.model');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 const loginAdmin = async (req, res) => {
   const { correo, contrasena } = req.body;
@@ -174,6 +174,16 @@ const editarPsicologo = async (req, res) => {
   }
 };
 
+const obtenerHistorial = async (req, res) => {
+  try {
+    const { usuario_id } = req.params;
+    const historial = await adminModel.obtenerHistorial(usuario_id);
+    res.json(historial);
+  } catch (error) {
+    console.error("Error al obtener historial de citas realizadas:", error);
+    res.status(500).json({ error: "Error al obtener historial de citas realizadas" });
+  }
+};
 
 module.exports = {
   loginAdmin,
@@ -184,4 +194,5 @@ module.exports = {
   eliminarPsicologo,
   activarPsicologo,
   editarPsicologo,
+  obtenerHistorial,
 };
