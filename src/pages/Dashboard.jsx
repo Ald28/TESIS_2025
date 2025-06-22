@@ -1,4 +1,5 @@
-import {useState} from "react";
+import { useEffect, useState } from "react";
+import { getEstudiantes, getPsicologos, getHistorialRealizadas } from "../api/api_admin";
 import MainLayout from "../layouts/MainLayout";
 import { Card, Row, Col } from "react-bootstrap";
 import { FaUsers, FaUserTie, FaCalendarAlt, FaClock } from "react-icons/fa";
@@ -46,6 +47,50 @@ const datosPorTipo = {
 const Dashboard = () => {
 
   const [opcionSeleccionada, setOpcionSeleccionada] = useState("estudiantes");
+  const [cantidadEstudiantes, setCantidadEstudiantes] = useState(0);
+  const [cantidadPsicologos, setCantidadPsicologos] = useState(0);
+  const [historialRealizadas, setHistorialRealizadas] = useState(0);
+
+  useEffect(() => {
+    const cargarEstudiantes = async () => {
+      try {
+        const estudiantes = await getEstudiantes();
+        setCantidadEstudiantes(estudiantes.length);
+      } catch (error) {
+        console.error("Error al cargar estudiantes:", error);
+      }
+    };
+
+    const cargarPsicologos = async () => {
+      try {
+        const psicologos = await getPsicologos();
+        setCantidadPsicologos(psicologos.length);
+      } catch (error) {
+        console.error("Error al cargar psicologos:", error);
+      }
+    };
+
+    const cargarHistorialRealizadas = async () => {
+      try {
+        const estudiantes = await getEstudiantes();
+
+        let totalHistorial = 0;
+
+        for (const estudiante of estudiantes) {
+          const historial = await getHistorialRealizadas(estudiante.usuario_id);
+          totalHistorial += historial.length;
+        }
+
+        setHistorialRealizadas(totalHistorial);
+      } catch (error) {
+        console.error("Error al cargar historial de citas realizadas:", error);
+      }
+    };
+
+    cargarHistorialRealizadas();
+    cargarPsicologos();
+    cargarEstudiantes();
+  }, []);
 
   return (
     <MainLayout>
@@ -57,7 +102,7 @@ const Dashboard = () => {
             <div className="d-flex justify-content-between align-items-center">
               <div>
                 <h5>Estudiantes</h5>
-                <h4>1,248</h4>
+                <h4>{cantidadEstudiantes}</h4>
                 <small className="text-success">+12% este mes</small>
               </div>
               <FaUsers size={30} color="#0d6efd" />
@@ -69,7 +114,7 @@ const Dashboard = () => {
             <div className="d-flex justify-content-between align-items-center">
               <div>
                 <h5>Psicólogos</h5>
-                <h4>64</h4>
+                <h4>{cantidadPsicologos}</h4>
                 <small className="text-success">+8% este mes</small>
               </div>
               <FaUserTie size={30} color="#0d6efd" />
@@ -81,7 +126,7 @@ const Dashboard = () => {
             <div className="d-flex justify-content-between align-items-center">
               <div>
                 <h5>Citas Realizadas</h5>
-                <h4>512</h4>
+                <h4>{historialRealizadas}</h4>
                 <small className="text-success">+24% este mes</small>
               </div>
               <FaCalendarAlt size={30} color="#0d6efd" />
