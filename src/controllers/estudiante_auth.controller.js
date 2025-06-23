@@ -4,6 +4,11 @@ const estudianteModel = require('../models/estudiante.model');
 const usuarioModel = require('../models/usuario');
 const citaModel = require('../models/cita.model');
 const jwt = require('jsonwebtoken');
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+const timezone = require('dayjs/plugin/timezone');
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const loginGoogleEstudiante = async (req, res) => {
   try {
@@ -140,14 +145,8 @@ const crearCita = async (req, res) => {
     }
 
     const { fecha, hora_inicio, hora_fin, psicologo_id } = req.body;
-    const [horaIni, minIni] = hora_inicio.split(':').map(Number);
-    const [horaFin, minFin] = hora_fin.split(':').map(Number);
-
-    const fechaInicio = new Date(fecha);
-    fechaInicio.setHours(horaIni, minIni, 0, 0);
-
-    const fechaFin = new Date(fecha);
-    fechaFin.setHours(horaFin, minFin, 0, 0);
+    const fechaInicio = dayjs.tz(`${fecha} ${hora_inicio}`, 'YYYY-MM-DD HH:mm', 'America/Lima').toDate();
+    const fechaFin = dayjs.tz(`${fecha} ${hora_fin}`, 'YYYY-MM-DD HH:mm', 'America/Lima').toDate();
 
     const ahora = new Date();
     const hoyLocal = new Date().toLocaleDateString('sv');
