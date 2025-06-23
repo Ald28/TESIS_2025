@@ -1,25 +1,4 @@
-version: "3.9"
-
 services:
-  mysql:
-    image: mysql:8
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    container_name: calmatec_db
-    ports:
-      - "3307:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: 1234
-      MYSQL_DATABASE: tesis_db
-    volumes:
-      - db_data:/var/lib/mysql
-      - ./src/database/init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - calmatec_net
-
   backend:
     build: .
     container_name: calmatec_backend
@@ -27,13 +6,3 @@ services:
       - "${PORT}:${PORT}"
     env_file:
       - .env
-    depends_on:
-      - mysql
-    networks:
-      - calmatec_net
-
-volumes:
-  db_data:
-
-networks:
-  calmatec_net:
