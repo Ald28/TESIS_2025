@@ -58,6 +58,7 @@ export default function Dashboard() {
   const refTardeFin = useRef();
   const refHoraInicio = useRef();
   const refHoraFin = useRef();
+  const diasSemana = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const [totalActividades, setTotalActividades] = useState(0);
   const cerrarModalDisponibilidad = () => {
     setShowModalDisponibilidad(false);
@@ -346,24 +347,20 @@ export default function Dashboard() {
       const privados = await listarTodosMetodosPrivados();
       const todos = [...recomendados, ...privados];
 
-      // Agrupar por fecha
-      const agrupados = todos.reduce((acc, metodo) => {
-        const rawFecha = metodo.createdAt || metodo.fecha_creacion || metodo.fecha || new Date().toISOString();
-        const fechaObj = new Date(rawFecha);
-        if (isNaN(fechaObj)) return acc;
+      const diasSemana = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-        const fecha = fechaObj.toLocaleDateString("es-PE");
-        const encontrado = acc.find(item => item.fecha === fecha);
+      // Agrupar por día de la semana
+      const conteo = diasSemana.map((diaTexto, idx) => {
+        const cantidad = todos.filter((metodo) => {
+          const rawFecha = metodo.createdAt || metodo.fecha_creacion || metodo.fecha;
+          const fechaObj = new Date(rawFecha);
+          return !isNaN(fechaObj) && fechaObj.getDay() === idx;
+        }).length;
 
-        if (encontrado) {
-          encontrado.actividades += 1;
-        } else {
-          acc.push({ fecha, actividades: 1 });
-        }
-        return acc;
-      }, []);
+        return { dia: diaTexto, cantidad };
+      });
 
-      setActividadesSubidasData(agrupados);
+      setActividadesSubidasData(conteo); // lista con: { dia: "Mon", cantidad: 3 }
       setTotalActividades(todos.length);
     } catch (error) {
       console.error("Error al obtener actividades:", error);
@@ -477,29 +474,19 @@ export default function Dashboard() {
 
       {categoriaSeleccionada === "actividades" && (
         <>
-          <h5 className="mt-4 text-center">Gráfico de Actividades por Día</h5>
-          {actividadesConLinea.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart
-                data={actividadesConLinea}
-                margin={{ top: 10, right: 30, left: 30, bottom: 40 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="fecha" angle={-45} textAnchor="end" interval={0} />
-                <YAxis allowDecimals={false} />
-                <Tooltip />
-                <Area
-                  type="monotone"
-                  dataKey="actividades"
-                  stroke="#28a745"
-                  fill="#28a745"
-                  fillOpacity={0.4}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          ) : (
-            <p>No hay actividades registradas para mostrar.</p>
-          )}
+          <h5 className="mt-4 text-center">Actividades por Día de la Semana</h5>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart
+              data={actividadesSubidasData}
+              margin={{ top: 10, right: 30, left: 20, bottom: 10 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="dia" />
+              <YAxis allowDecimals={false} />
+              <Tooltip />
+              <Bar dataKey="cantidad" fill="#28a745" />
+            </BarChart>
+          </ResponsiveContainer>
         </>
       )}
 
