@@ -430,8 +430,14 @@ const crearCitaSeguimiento = async (req, res) => {
 
         const correoPsicologo = psicologo.correo;
 
-        const fecha_inicio = new Date(`${fecha}T${hora_inicio}`);
-        const fecha_fin = new Date(`${fecha}T${hora_fin}`);
+        const [horaIni, minIni] = hora_inicio.split(':').map(Number);
+        const [horaFin, minFin] = hora_fin.split(':').map(Number);
+
+        const fecha_inicio = new Date(fecha);
+        fecha_inicio.setHours(horaIni, minIni, 0, 0);
+
+        const fecha_fin = new Date(fecha);
+        fecha_fin.setHours(horaFin, minFin, 0, 0);
 
         await citaModel.validarDisponibilidadParaSeguimiento(psicologo.psicologo_id, fecha_inicio, fecha_fin, estudiante_id);
 

@@ -140,14 +140,23 @@ const crearCita = async (req, res) => {
     }
 
     const { fecha, hora_inicio, hora_fin, psicologo_id } = req.body;
-    const fechaInicio = new Date(`${fecha}T${hora_inicio}`);
-    const fechaFin = new Date(`${fecha}T${hora_fin}`);
+    const [horaIni, minIni] = hora_inicio.split(':').map(Number);
+    const [horaFin, minFin] = hora_fin.split(':').map(Number);
+
+    const fechaInicio = new Date(fecha);
+    fechaInicio.setHours(horaIni, minIni, 0, 0);
+
+    const fechaFin = new Date(fecha);
+    fechaFin.setHours(horaFin, minFin, 0, 0);
 
     const ahora = new Date();
+    const hoyLocal = new Date().toLocaleDateString('sv');
+    const esHoy = hoyLocal === fecha;
 
-    const esHoy = new Date().toISOString().split('T')[0] === fecha;
     if (esHoy && fechaInicio < ahora) {
-      return res.status(400).json({ message: 'No puedes separar una cita en una hora que ya pasó.' });
+      return res.status(400).json({
+        message: 'No puedes separar una cita en una hora que ya pasó.',
+      });
     }
 
     const duracionMin = 30 * 60 * 1000;
@@ -184,7 +193,7 @@ const crearCita = async (req, res) => {
     }
 
     return res.status(201).json({ message: 'Cita registrada', id });
-    
+
   } catch (error) {
     console.error('Error al crear cita:', error);
     res.status(500).json({ message: error.message || 'Error interno del servidor' });

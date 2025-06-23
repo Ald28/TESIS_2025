@@ -102,8 +102,14 @@ const validarDisponibilidad = async (psicologo_id, fecha_inicio, fecha_fin, estu
 
     let coincide = false;
     for (const disp of disponibilidad) {
-        const inicioDisponible = new Date(`${fechaStr}T${disp.hora_inicio}`);
-        const finDisponible = new Date(`${fechaStr}T${disp.hora_fin}`);
+        const [horaIni, minIni] = disp.hora_inicio.split(':').map(Number);
+        const [horaFin, minFin] = disp.hora_fin.split(':').map(Number);
+
+        const inicioDisponible = new Date(fechaStr);
+        inicioDisponible.setHours(horaIni, minIni, 0, 0);
+
+        const finDisponible = new Date(fechaStr);
+        finDisponible.setHours(horaFin, minFin, 0, 0);
 
         if (fecha_inicio >= inicioDisponible && fecha_fin <= finDisponible) {
             coincide = true;
@@ -296,8 +302,14 @@ const validarDisponibilidadParaSeguimiento = async (psicologo_id, fecha_inicio, 
 
     const fechaStr = fecha_inicio.toISOString().split('T')[0];
     const disponible = disponibilidad.some((bloque) => {
-        const inicio = new Date(`${fechaStr}T${bloque.hora_inicio}`);
-        const fin = new Date(`${fechaStr}T${bloque.hora_fin}`);
+        const [horaIni, minIni] = bloque.hora_inicio.split(':').map(Number);
+        const [horaFin, minFin] = bloque.hora_fin.split(':').map(Number);
+
+        const inicio = new Date(fechaStr);
+        inicio.setHours(horaIni, minIni, 0, 0);
+
+        const fin = new Date(fechaStr);
+        fin.setHours(horaFin, minFin, 0, 0);
         return fecha_inicio >= inicio && fecha_fin <= fin;
     });
 
