@@ -26,6 +26,7 @@ const listarMetodosPrivadosPorEstudiante = async (estudiante_id) => {
       m.id,
       m.titulo,
       m.descripcion,
+      m.fecha_creacion,
       m.tipo,
       ma.url AS multimedia_url,
       u.nombre AS nombre_psicologo,
@@ -47,6 +48,7 @@ const listarMetodosRecomendados = async () => {
       m.titulo,
       m.descripcion,
       m.tipo,
+      m.fecha_creacion,
       ma.url AS multimedia_url,
       u.nombre AS nombre_psicologo,
       u.apellido AS apellido_psicologo
@@ -66,6 +68,7 @@ const listarTodosMetodosPrivados = async () => {
       m.id, 
       m.titulo, 
       m.descripcion, 
+      m.fecha_creacion,
       ma.url AS multimedia_url,
       e.id AS estudiante_id,
       u.nombre,

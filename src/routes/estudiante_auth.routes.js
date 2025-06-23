@@ -4,7 +4,7 @@ const verificarAutenticacion = require('../middlewares/verificarAutenticacion');
 const express = require('express');
 const router = express.Router();
 
-//Ruta predeterminado al usar el API https://tesis-2025.onrender.com/auth/
+//Ruta predeterminado al usar el API http://localhost:8080/auth/
 
 // Ruta para login de estudiante
 router.post('/google/estudiante', estudianteController.loginGoogleEstudiante);
