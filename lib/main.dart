@@ -4,6 +4,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:frondend/pages/login.dart';
 import 'package:frondend/pages/quiz_page.dart';
 import 'package:frondend/pages/home_page.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -42,6 +44,15 @@ class MyApp extends StatelessWidget {
       navigatorKey: navigatorKey, 
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('es', 'ES'), // Español
+        Locale('en', 'US'), // Inglés (opcional)
+      ],
       theme: ThemeData(
         primarySwatch: Colors.indigo,
         textTheme: TextTheme(

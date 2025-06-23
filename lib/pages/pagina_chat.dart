@@ -44,7 +44,7 @@ class _PaginaChatState extends State<PaginaChat> {
 
     try {
       final respuesta = await http.post(
-        Uri.parse('http://192.168.1.59:8080/api/chat-estudiante'),//// cambiar tambien
+        Uri.parse('https://tesis-2025.onrender.com/api/chat-estudiante'),//// cambiar tambien
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"mensaje": texto}),
       );

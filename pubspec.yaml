@@ -10,6 +10,8 @@ dependencies:
   flutter:
     sdk: flutter
   font_awesome_flutter: ^10.7.0
+  flutter_localizations:
+    sdk: flutter
   video_player: ^2.7.0
   shared_preferences: ^2.5.3
   google_sign_in: ^6.1.5

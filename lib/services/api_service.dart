@@ -17,7 +17,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 
 
 class ApiService {
-  static const String baseUrl ='http://192.168.1.59:8080';////cambiar qui para todo y tambien en el login buscar lo de pi
+  static const String baseUrl ='https://tesis-2025.onrender.com';////cambiar qui para todo y tambien en el login buscar lo de pi
 
 
 ///notificaciones
