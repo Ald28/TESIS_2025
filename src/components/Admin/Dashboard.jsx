@@ -352,7 +352,7 @@ export default function Dashboard() {
       // Agrupar por día de la semana
       const conteo = diasSemana.map((diaTexto, idx) => {
         const cantidad = todos.filter((metodo) => {
-          const rawFecha = metodo.createdAt || metodo.fecha_creacion || metodo.fecha;
+          const rawFecha = metodo.fecha_creacion;
           const fechaObj = new Date(rawFecha);
           return !isNaN(fechaObj) && fechaObj.getDay() === idx;
         }).length;
@@ -360,7 +360,7 @@ export default function Dashboard() {
         return { dia: diaTexto, cantidad };
       });
 
-      setActividadesSubidasData(conteo); // lista con: { dia: "Mon", cantidad: 3 }
+      setActividadesSubidasData(conteo);
       setTotalActividades(todos.length);
     } catch (error) {
       console.error("Error al obtener actividades:", error);
