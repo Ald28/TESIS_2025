@@ -249,7 +249,15 @@ const obtenerCitasActivas = async (req, res) => {
     if (!estudiante) return res.status(404).json({ message: 'Estudiante no encontrado' });
 
     const citas = await citaModel.obtenerCitasActivasPorEstudiante(estudiante.estudiante_id);
-    return res.status(200).json({ citas });
+
+    const citasConvertidas = citas.map(cita => ({
+      ...cita,
+      fecha_inicio: dayjs(cita.fecha_inicio).tz('America/Lima').format(),
+      fecha_fin: dayjs(cita.fecha_fin).tz('America/Lima').format(),
+    }));
+
+    return res.status(200).json({ citas: citasConvertidas });
+
   } catch (error) {
     console.error('Error al obtener citas activas:', error);
     res.status(500).json({ message: 'Error interno del servidor' });
