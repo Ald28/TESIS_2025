@@ -1,6 +1,11 @@
 const { crearNotificacion } = require('../models/notificacion.model');
 const notificacionModel = require('../models/notificacion.model');
+const timezone = require('dayjs/plugin/timezone');
 const admin = require('firebase-admin');
+const utc = require('dayjs/plugin/utc');
+const dayjs = require('dayjs');
+dayjs.extend(timezone);
+dayjs.extend(utc);
 
 const enviarNotificacionSistema = async ({ usuario_id, titulo, mensaje, tipo = 'sistema' }) => {
   const token = await notificacionModel.obtenerTokenPorUsuarioId(usuario_id);
@@ -23,7 +28,7 @@ const enviarNotificacionWeb = async ({ usuario_id, titulo, mensaje, tipo = 'sist
       titulo,
       mensaje,
       tipo,
-      fecha_envio: new Date()
+      fecha_envio: dayjs().tz('America/Lima').toDate()
     });
     console.log(`📢 Notificación enviada a usuario ${usuario_id}`);
   } else {

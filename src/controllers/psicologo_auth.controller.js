@@ -9,6 +9,11 @@ const citaModel = require('../models/cita.model');
 const { google } = require('googleapis');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
+const timezone = require('dayjs/plugin/timezone');
+const utc = require('dayjs/plugin/utc');
+const dayjs = require('dayjs');
+dayjs.extend(timezone);
+dayjs.extend(utc);
 
 const loginGooglePsicologo = async (req, res) => {
     try {
@@ -430,14 +435,8 @@ const crearCitaSeguimiento = async (req, res) => {
 
         const correoPsicologo = psicologo.correo;
 
-        const [horaIni, minIni] = hora_inicio.split(':').map(Number);
-        const [horaFin, minFin] = hora_fin.split(':').map(Number);
-
-        const fecha_inicio = new Date(fecha);
-        fecha_inicio.setHours(horaIni, minIni, 0, 0);
-
-        const fecha_fin = new Date(fecha);
-        fecha_fin.setHours(horaFin, minFin, 0, 0);
+        const fecha_inicio = dayjs.tz(`${fecha} ${hora_inicio}`, 'YYYY-MM-DD HH:mm', 'America/Lima').toDate();
+        const fecha_fin = dayjs.tz(`${fecha} ${hora_fin}`, 'YYYY-MM-DD HH:mm', 'America/Lima').toDate();
 
         await citaModel.validarDisponibilidadParaSeguimiento(psicologo.psicologo_id, fecha_inicio, fecha_fin, estudiante_id);
 
