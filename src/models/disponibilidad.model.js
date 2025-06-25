@@ -15,11 +15,11 @@ const crearDisponibilidad = async (dia, mañana_inicio, mañana_fin, tarde_inici
     const tardeFin = padHora(tarde_fin);
 
     // Validación de rangos permitidos
-    if (mañanaInicio < '08:30:00' || mañanaFin > '12:31:59') {
-        throw new Error("Horario de mañana inválido: debe estar entre 08:30 y 12:30.");
+    if (mañanaInicio < '08:00:00' || mañanaFin > '12:31:59') {
+        throw new Error("El rango debe ser de 3 a 4 horas con 30 minutos.");
     }
     if (tardeInicio < '13:30:00' || tardeFin > '17:30:00') {
-        throw new Error("Horario de tarde inválido: debe estar entre 13:30 y 17:30.");
+        throw new Error("El rango debe ser de 3 a 4 horas con 30 minutos.");
     }
 
     // Validación de duración mínima de 4 horas (14400 segundos)
@@ -32,16 +32,17 @@ const crearDisponibilidad = async (dia, mañana_inicio, mañana_fin, tarde_inici
     const duracionMañana = duracionHoras(mañanaFin, mañanaInicio);
     const duracionTarde = duracionHoras(tardeFin, tardeInicio);
 
-    const DURACION_MIN_MAÑANA = 14400;
-    const DURACION_MIN_TARDE = 12600;
-    const DURACION_MAX_TARDE = 14400;
+    const DURACION_MIN_MAÑANA = 10800;
+    const DURACION_MAX_MAÑANA = 16200;
+    const DURACION_MIN_TARDE = 10800;
+    const DURACION_MAX_TARDE = 16200;
 
-    if (duracionMañana < DURACION_MIN_MAÑANA) {
-        throw new Error("El horario de mañana debe tener al menos 4 horas.");
+    if (duracionMañana < DURACION_MIN_MAÑANA || duracionMañana > DURACION_MAX_MAÑANA) {
+        throw new Error("El horario de mañana debe durar entre 3 horas y 4 horas con 30 minutos.");
     }
 
     if (duracionTarde < DURACION_MIN_TARDE || duracionTarde > DURACION_MAX_TARDE) {
-        throw new Error("El horario de tarde debe durar entre 3 horas y 30 minutos y 4 horas como máximo.");
+        throw new Error("El horario de tarde debe durar entre 3 horas y 4 horas con 30 minutos.");
     }
 
     // Verificar si ya existe disponibilidad
