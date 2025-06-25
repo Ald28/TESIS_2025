@@ -1,5 +1,10 @@
 const { query } = require('../config/conexion');
 const { verificarEventosGoogleCalendar, eliminarEventoGoogleCalendar } = require('../services/google_calendar.service');
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+const timezone = require('dayjs/plugin/timezone');
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 // Estudiante crea la cita
 const crearCita = async ({ fecha, fecha_inicio, fecha_fin, estudiante_id, psicologo_id }) => {
@@ -105,11 +110,8 @@ const validarDisponibilidad = async (psicologo_id, fecha_inicio, fecha_fin, estu
         const [horaIni, minIni] = disp.hora_inicio.split(':').map(Number);
         const [horaFin, minFin] = disp.hora_fin.split(':').map(Number);
 
-        const inicioDisponible = new Date(fechaStr);
-        inicioDisponible.setHours(horaIni, minIni, 0, 0);
-
-        const finDisponible = new Date(fechaStr);
-        finDisponible.setHours(horaFin, minFin, 0, 0);
+        const inicioDisponible = dayjs.tz(`${fechaStr} ${disp.hora_inicio}`, 'YYYY-MM-DD HH:mm', 'America/Lima').toDate();
+        const finDisponible = dayjs.tz(`${fechaStr} ${disp.hora_fin}`, 'YYYY-MM-DD HH:mm', 'America/Lima').toDate();
 
         if (fecha_inicio >= inicioDisponible && fecha_fin <= finDisponible) {
             coincide = true;
