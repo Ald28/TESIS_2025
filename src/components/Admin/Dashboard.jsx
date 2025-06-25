@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "../Styles/Dashboard.css";
 import { FiRefreshCw } from "react-icons/fi";
 import { Container, Row, Col, Card, Button, Table, Modal, Form, Accordion, InputGroup } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
@@ -386,7 +387,11 @@ export default function Dashboard() {
 
       <Row className="g-4 mb-4">
         <Col xs={12} md={6} lg={3}>
-          <Card onClick={() => manejarSeleccion("aceptada")} className="p-3 h-100 glass-card" style={{ cursor: "pointer" }}>
+          <Card
+            onClick={() => manejarSeleccion("aceptada")}
+            className="p-3 h-100 card-cuadrada"
+            style={{ cursor: "pointer" }}
+          >
             <div className="d-flex justify-content-between align-items-center">
               <div>
                 <h6 className="fw-semibold">Pacientes Activos</h6>
@@ -398,7 +403,7 @@ export default function Dashboard() {
         </Col>
 
         <Col xs={12} md={6} lg={3}>
-          <Card onClick={() => manejarSeleccion("pendiente")} className="p-3 h-100 glass-card" style={{ cursor: "pointer" }}>
+          <Card onClick={() => manejarSeleccion("pendiente")} className="p-3 h-100 card-cuadrada" style={{ cursor: "pointer" }}>
             <div className="d-flex justify-content-between align-items-center">
               <div>
                 <h6 className="fw-semibold">Citas Pendientes</h6>
@@ -410,7 +415,7 @@ export default function Dashboard() {
         </Col>
 
         <Col xs={12} md={6} lg={3}>
-          <Card onClick={() => manejarSeleccion("actividades")} className="p-3 h-100 glass-card" style={{ cursor: "pointer" }}>
+          <Card onClick={() => manejarSeleccion("actividades")} className="p-3 h-100 card-cuadrada" style={{ cursor: "pointer" }}>
             <div className="d-flex justify-content-between align-items-center">
               <div>
                 <h6 className="fw-semibold">Actividades</h6>
@@ -422,7 +427,7 @@ export default function Dashboard() {
         </Col>
 
         <Col xs={12} md={6} lg={3}>
-          <Card onClick={() => manejarSeleccion("disponibilidad")} className="p-3 h-100 glass-card" style={{ cursor: "pointer" }}>
+          <Card onClick={() => manejarSeleccion("disponibilidad")} className="p-3 h-100 card-cuadrada" style={{ cursor: "pointer" }}>
             <div className="d-flex justify-content-between align-items-center">
               <div>
                 <h6 className="fw-semibold">Horas Disponibles</h6>
