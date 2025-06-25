@@ -150,6 +150,10 @@ const crearCita = async (req, res) => {
     const fechaFin = dayjs.tz(`${fecha} ${hora_fin}`, 'YYYY-MM-DD HH:mm', 'America/Lima').toDate();
     console.log("fechaFin:", fechaFin.toISOString());
 
+    console.log("hora local:", dayjs(fecha_inicio).tz("America/Lima").format("HH:mm"));
+    console.log("día:", dayjs(fecha_inicio).tz("America/Lima").format("dddd"));
+    console.log("fecha UTC:", fecha_inicio);
+
     const ahora = new Date();
     const hoyLocal = new Date().toLocaleDateString('sv');
     const esHoy = hoyLocal === fecha;
