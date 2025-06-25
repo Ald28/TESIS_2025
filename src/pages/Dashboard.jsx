@@ -89,7 +89,7 @@ const exportarExcel = async () => {
     // Generar archivo Excel
     const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
     const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(blob, "Reporte_Dashboard.xlsx");
+    saveAs(blob, "Reporte_general.xlsx");
   } catch (error) {
     console.error("Error exportando a Excel:", error);
   }
