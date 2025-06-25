@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { getEstudiantes, getPsicologos, getHistorialRealizadas, getHistorialPendientes } from "../api/api_admin";
 import MainLayout from "../layouts/MainLayout";
-import { Card, Row, Col } from "react-bootstrap";
+import { Card, Row, Col, Button } from "react-bootstrap";
 import { FaUsers, FaUserTie, FaCalendarAlt, FaClock } from "react-icons/fa";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 // Función para convertir array de citas a conteo por día de la semana
 const contarPorDiaSemana = (citas) => {
@@ -20,6 +22,77 @@ const contarPorDiaSemana = (citas) => {
 
   // Convertir a array para Recharts
   return dias.map((dia) => ({ name: dia, sesiones: conteo[dia] }));
+};
+
+const exportarExcel = async () => {
+  try {
+    // Obtener datos desde backend
+    const estudiantes = await getEstudiantes();
+    const psicologos = await getPsicologos();
+
+    let citasRealizadas = [];
+    let citasPendientes = [];
+
+    for (const estudiante of estudiantes) {
+      const realizadas = await getHistorialRealizadas(estudiante.usuario_id);
+      const pendientes = await getHistorialPendientes(estudiante.usuario_id);
+      citasRealizadas = [...citasRealizadas, ...realizadas];
+      citasPendientes = [...citasPendientes, ...pendientes];
+    }
+
+    // Crear libro de Excel
+    const workbook = XLSX.utils.book_new();
+
+    // Hoja 1: Estudiantes
+    const hojaEstudiantes = estudiantes.map(e => ({
+      Nombre: e.nombre,
+      Apellido: e.apellido,
+      Correo: e.email,
+      Código: e.codigo,
+      Teléfono: e.telefono,
+    }));
+    const wsEstudiantes = XLSX.utils.json_to_sheet(hojaEstudiantes);
+    XLSX.utils.book_append_sheet(workbook, wsEstudiantes, "Estudiantes");
+
+    // Hoja 2: Psicólogos
+    const hojaPsicologos = psicologos.map(p => ({
+      Nombre: p.nombre,
+      Apellido: p.apellido,
+      Correo: p.email,
+      Especialidad: p.especialidad || "",
+    }));
+    const wsPsicologos = XLSX.utils.json_to_sheet(hojaPsicologos);
+    XLSX.utils.book_append_sheet(workbook, wsPsicologos, "Psicologos");
+
+    // Hoja 3: Citas Realizadas
+    const hojaCitasRealizadas = citasRealizadas.map(c => ({
+      Fecha: c.fecha_inicio,
+      Hora: c.hora_inicio,
+      Estado: c.estado,
+      Estudiante: c.nombre_estudiante || "",
+      Psicólogo: c.nombre_psicologo || "",
+    }));
+    const wsRealizadas = XLSX.utils.json_to_sheet(hojaCitasRealizadas);
+    XLSX.utils.book_append_sheet(workbook, wsRealizadas, "Citas Realizadas");
+
+    // Hoja 4: Citas Pendientes
+    const hojaCitasPendientes = citasPendientes.map(c => ({
+      Fecha: c.fecha_inicio,
+      Hora: c.hora_inicio,
+      Estado: c.estado,
+      Estudiante: c.nombre_estudiante || "",
+      Psicólogo: c.nombre_psicologo || "",
+    }));
+    const wsPendientes = XLSX.utils.json_to_sheet(hojaCitasPendientes);
+    XLSX.utils.book_append_sheet(workbook, wsPendientes, "Citas Pendientes");
+
+    // Generar archivo Excel
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(blob, "Reporte_Dashboard.xlsx");
+  } catch (error) {
+    console.error("Error exportando a Excel:", error);
+  }
 };
 
 const Dashboard = () => {
@@ -106,7 +179,14 @@ const Dashboard = () => {
 
   return (
     <MainLayout>
-      <h2 className="mb-4">Dashboard</h2>
+      <Row className="align-items-center justify-content-between mb-4">
+        <Col><h2 className="mb-0">Dashboard</h2></Col>
+        <Col xs="auto">
+          <Button variant="success" onClick={exportarExcel}>
+            Exportar a Excel
+          </Button>
+        </Col>
+      </Row>
 
       <Row className="mb-4">
         <Col md={3}>
