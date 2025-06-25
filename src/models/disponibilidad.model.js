@@ -98,14 +98,14 @@ const editarDisponibilidad = async (id, psicologo_id, hora_inicio, hora_fin) => 
     const duracion = duracionHoras(fin, inicio);
 
     if (turno === "temprano") {
-        if (inicio < "08:30:00" || fin > "12:31:59") {
+        if (inicio < "08:00:00" || fin > "12:31:00") {
             throw new Error("El turno temprano debe estar entre 08:30 y 12:30.");
         }
-        if (duracion < 14400) {
-            throw new Error("El turno temprano debe durar al menos 4 horas.");
+        if (duracion < 10800 || duracion > 16200) {
+            throw new Error("El turno temprano debe durar entre 3 horas y 4 horas con 30 minutos.");
         }
     } else if (turno === "tarde") {
-        if (inicio < "13:30:00" || fin > "17:30:00") {
+        if (inicio < "13:29:00" || fin > "17:31:00") {
             throw new Error("El turno tarde debe estar entre 13:30 y 17:30.");
         }
         if (duracion < 12600 || duracion > 14400) {
