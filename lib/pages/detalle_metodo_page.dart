@@ -15,7 +15,6 @@ class PaginaDetalleMetodo extends StatelessWidget {
       backgroundColor: Colors.grey[50],
       body: CustomScrollView(
         slivers: [
-          // App Bar con imagen/video de fondo
           SliverAppBar(
             expandedHeight: 280,
             pinned: true,
@@ -102,8 +101,6 @@ class PaginaDetalleMetodo extends StatelessWidget {
                           ),
                           
                           const SizedBox(height: 20),
-                          
-                          // Información del psicólogo con diseño mejorado
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
@@ -159,7 +156,6 @@ class PaginaDetalleMetodo extends StatelessWidget {
                           
                           const SizedBox(height: 24),
                           
-                          // Separador elegante
                           Row(
                             children: [
                               Expanded(child: Divider(color: Colors.grey[300])),
@@ -180,7 +176,6 @@ class PaginaDetalleMetodo extends StatelessWidget {
                           
                           const SizedBox(height: 20),
                           
-                          // Descripción con mejor tipografía
                           Text(
                             metodo.descripcion,
                             style: const TextStyle(

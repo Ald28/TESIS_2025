@@ -4,6 +4,8 @@ import '../services/api_service.dart';
 import '../classes/disponibilidad.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
+import 'dart:convert';
+
 
 class PaginaDetallePsicologo extends StatefulWidget {
   final Psicologo? psicologo;
@@ -32,6 +34,7 @@ void initState() {
   });
 }
 
+
 Future<Map<String, dynamic>> obtenerDisponibilidadYHorasOcupadas(int psicologoId, String token, DateTime fecha) async {
   final disponibilidad = await ApiService.fetchDisponibilidad(psicologoId);
   final horasOcupadas = await ApiService.fetchHorasOcupadas(psicologoId, fecha, token);
@@ -39,7 +42,7 @@ Future<Map<String, dynamic>> obtenerDisponibilidadYHorasOcupadas(int psicologoId
   return {
     'disponibilidad': disponibilidad,
     'horasOcupadasSet': horasOcupadas
-        .map((h) => "${h['hora_inicio']}-${h['hora_fin']}")
+        .map((h) => "${normalizarHora(h['hora_inicio'])}-${normalizarHora(h['hora_fin'])}")
         .toSet(),
   };
 }
@@ -57,23 +60,25 @@ List<Map<String, String>> generarBloquesHorario(String horaInicio, String horaFi
     minute: int.parse(horaFin.split(":")[1]),
   );
 
-  while (inicio.hour < fin.hour || (inicio.hour == fin.hour && inicio.minute < fin.minute)) {
-    final siguiente = TimeOfDay(
-      hour: inicio.minute + 30 >= 60 ? inicio.hour + 1 : inicio.hour,
-      minute: (inicio.minute + 30) % 60,
-    );
+  while (true) {
+  final siguiente = TimeOfDay(
+    hour: inicio.minute + 30 >= 60 ? inicio.hour + 1 : inicio.hour,
+    minute: (inicio.minute + 30) % 60,
+  );
 
-    if (siguiente.hour > fin.hour || (siguiente.hour == fin.hour && siguiente.minute > fin.minute)) {
-      break;
-    }
+  final bloqueTerminaDespuesDelLimite =
+      (siguiente.hour > fin.hour) || (siguiente.hour == fin.hour && siguiente.minute > fin.minute);
 
-    bloques.add({
-      'inicio': '${inicio.hour.toString().padLeft(2, '0')}:${inicio.minute.toString().padLeft(2, '0')}:00',
-      'fin': '${siguiente.hour.toString().padLeft(2, '0')}:${siguiente.minute.toString().padLeft(2, '0')}:00',
-    });
+  if (bloqueTerminaDespuesDelLimite) break;
 
-    inicio = siguiente;
-  }
+  bloques.add({
+    'inicio': '${inicio.hour.toString().padLeft(2, '0')}:${inicio.minute.toString().padLeft(2, '0')}:00',
+    'fin': '${siguiente.hour.toString().padLeft(2, '0')}:${siguiente.minute.toString().padLeft(2, '0')}:00',
+  });
+
+  inicio = siguiente;
+}
+
 
   return bloques;
 }
@@ -94,7 +99,6 @@ Map<String, List<Map<String, String>>> agruparPorTurno(List<Map<String, String>>
     turnosAgrupados[turno]!.add(bloque);
   }
 
-  // Remover turnos vacíos
   turnosAgrupados.removeWhere((key, value) => value.isEmpty);
   
   return turnosAgrupados;
@@ -111,14 +115,61 @@ Map<String, List<Map<String, String>>> agruparPorTurno(List<Map<String, String>>
   String formatHora(TimeOfDay hora) {
     return '${hora.hour.toString().padLeft(2, '0')}:${hora.minute.toString().padLeft(2, '0')}:00';
   }
-
+  String normalizarHora(String hora) {
+  final partes = hora.split(':');
+  final h = partes[0].padLeft(2, '0');
+  final m = partes[1].padLeft(2, '0');
+  return '$h:$m:00';
+}
 
 String obtenerNombreDia(DateTime fecha) {
-  const dias = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
+  const dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
   return dias[fecha.weekday - 1];
 }
 
-
+void _showCustomSnackBar({
+  required String title,
+  required String message,
+  required IconData icon,
+  required Color color,
+}) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Row(
+        children: [
+          Icon(icon, color: Colors.white, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                Text(
+                  message,
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      backgroundColor: color,
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      margin: const EdgeInsets.all(16),
+      duration: const Duration(seconds: 3),
+    ),
+  );
+}
   @override
   Widget build(BuildContext context) {
     final psicologo = widget.psicologo;
@@ -305,66 +356,46 @@ String obtenerNombreDia(DateTime fecha) {
 
                               for (var disp in disponibilidad.where((d) => d.dia.toLowerCase() == obtenerNombreDia(fechaSeleccionada).toLowerCase())) {
 
-                                final bloques = generarBloquesHorario(disp.horaInicio, disp.horaFin)
-                                .where((bloque) {
-                                  final key = "${bloque['inicio']}-${bloque['fin']}";
-                                  return !horasOcupadasSet.contains(key);
-                                }).toList();
+                                final bloques = generarBloquesHorario(disp.horaInicio, disp.horaFin);
 
-                                diasAgrupados.update(disp.dia, (list) => list + bloques, ifAbsent: () => bloques);
+                                if (bloques.isNotEmpty) {
+                                  if (!diasAgrupados.containsKey(disp.dia)) {
+                                    diasAgrupados[disp.dia] = [];
+                                  }
+                                  diasAgrupados[disp.dia]!.addAll(bloques);
+                                }
                               }
 
                               return Column(
                                 children: diasAgrupados.entries.map((entry) {
-                                  final turnosAgrupados = agruparPorTurno(entry.value);
-
                                   return ExpansionTile(
-                                    title: Text(
-                                      entry.key[0].toUpperCase() + entry.key.substring(1),
-                                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                                    ),
-                                    children: turnosAgrupados.entries.map((turnoEntry) {
-                                      return ExpansionTile(
-                                        title: Row(
-                                          children: [
-                                            Icon(
-                                              turnoEntry.key == 'Mañana' ? Icons.wb_sunny : Icons.nights_stay,
-                                              color: turnoEntry.key == 'Mañana' ? Colors.orange : Colors.indigo,
-                                              size: 20,
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              turnoEntry.key,
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w600,
-                                                color: turnoEntry.key == 'Mañana' ? Colors.orange[700] : Colors.indigo[700],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        children: turnoEntry.value.map((bloque) {
-                                          final bloqueKey = "${bloque['inicio']}-${bloque['fin']}";
-                                          final ocupado = horasOcupadasSet.contains(bloqueKey);
+                                      title: Text(
+                                        entry.key[0].toUpperCase() + entry.key.substring(1),
+                                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                      ),
+                                      children: entry.value.map((bloque) {
+                                        final bloqueKey = "${bloque['inicio']}-${bloque['fin']}";
+                                        final ocupado = horasOcupadasSet.contains(bloqueKey);
 
-                                          return Container(
-                                            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                                            decoration: BoxDecoration(
-                                              color: Colors.grey[50],
-                                              borderRadius: BorderRadius.circular(8),
-                                              border: Border.all(color: Colors.grey[300]!),
+                                        return Container(
+                                          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey[50],
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(color: Colors.grey[300]!),
+                                          ),
+                                          child: ListTile(
+                                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                            title: Text(
+                                              "${bloque['inicio']!.substring(0, 5)} - ${bloque['fin']!.substring(0, 5)}",
+                                              style: const TextStyle(fontSize: 16),
                                             ),
-                                            child: ListTile(
-                                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                                              title: Text(
-                                                "${bloque['inicio']!.substring(0, 5)} - ${bloque['fin']!.substring(0, 5)}",
-                                                style: const TextStyle(fontSize: 16),
-                                              ),
-                                              trailing: ElevatedButton.icon(
+                                            trailing: ElevatedButton.icon(
                                                 onPressed: ocupado
                                                     ? null
                                                     : () async {
                                                         final fechaCita = fechaSeleccionada;
+
                                                         showDialog(
                                                           context: context,
                                                           barrierDismissible: false,
@@ -374,33 +405,86 @@ String obtenerNombreDia(DateTime fecha) {
                                                         );
 
                                                         try {
-                                                          
+                                                          final inicioParts = bloque['inicio']!.split(':').map(int.parse).toList();
+                                                          final finParts = bloque['fin']!.split(':').map(int.parse).toList();
+
+                                                          final inicioLima = DateTime(
+                                                            fechaSeleccionada.year,
+                                                            fechaSeleccionada.month,
+                                                            fechaSeleccionada.day,
+                                                            inicioParts[0],
+                                                            inicioParts[1],
+                                                          );
+
+                                                          final finLima = DateTime(
+                                                            fechaSeleccionada.year,
+                                                            fechaSeleccionada.month,
+                                                            fechaSeleccionada.day,
+                                                            finParts[0],
+                                                            finParts[1],
+                                                          );
                                                           await ApiService.crearCita(
                                                             psicologoId: psicologo.id,
                                                             estudianteId: estudianteId!,
                                                             fecha: fechaSeleccionada,
-                                                            horaInicio: bloque['inicio']!,
-                                                            horaFin: bloque['fin']!,
+                                                            horaInicio: normalizarHora('${inicioLima.hour}:${inicioLima.minute}'),
+                                                            horaFin: normalizarHora('${finLima.hour}:${finLima.minute}'),
                                                             token: token!,
+                                                            
                                                           );
+                                                          
+
+
                                                           Navigator.of(context).pop();
-                                                          ScaffoldMessenger.of(context).showSnackBar(
-                                                            const SnackBar(
-                                                              content: Text("✅ Cita creada correctamente."),
-                                                              backgroundColor: Colors.green,
-                                                            ),
+
+                                                          _showCustomSnackBar(
+                                                            title: "Éxito",
+                                                            message: "Cita creada correctamente.",
+                                                            icon: Icons.check_circle_outline,
+                                                            color: Colors.green,
                                                           );
+
                                                           setState(() {
                                                             fechaSeleccionada = fechaSeleccionada;
                                                           });
 
                                                         } catch (e) {
                                                           Navigator.of(context).pop();
-                                                          ScaffoldMessenger.of(context).showSnackBar(
-                                                            SnackBar(
-                                                              content: Text("❌ $e"),
-                                                              backgroundColor: Colors.red,
-                                                            ),
+
+                                                          String mensajeLimpio = "Ocurrió un error al agendar la cita";
+
+                                                          try {
+                                                            final partes = e.toString().split('Exception:');
+                                                            if (partes.length > 1) {
+                                                              final posibleJson = partes[1].trim();
+                                                              final indexJson = posibleJson.indexOf('{');
+
+                                                              if (indexJson != -1) {
+                                                                final jsonSolo = posibleJson.substring(indexJson);
+                                                                final decoded = jsonDecode(jsonSolo);
+                                                                if (decoded is Map && decoded.containsKey('message')) {
+                                                                  final mensajeBackend = decoded['message'].toString().toLowerCase();
+
+                                                                  if (mensajeBackend.contains("no está disponible") ||
+                                                                      mensajeBackend.contains("no esta disponible") ||
+                                                                      mensajeBackend.contains("ya ha sido tomada") ||
+                                                                      mensajeBackend.contains("ya no está disponible")) {
+                                                                    mensajeLimpio = "Ese horario ya no está disponible. Por favor, selecciona otro.";
+                                                                  } else {
+                                                                    mensajeLimpio = decoded['message'];
+                                                                  }
+                                                                }
+                                                              }
+                                                            }
+                                                          } catch (e) {
+                                                            debugPrint("❌ Error al intentar leer el mensaje del backend: $e");
+                                                          }
+
+                                                          _showCustomSnackBar(
+                                                            title: "Error",
+                                                            message: mensajeLimpio,
+                                                            icon: Icons.error_outline,
+                                                            color: Colors.red,
                                                           );
                                                         }
                                                       },
@@ -416,18 +500,17 @@ String obtenerNombreDia(DateTime fecha) {
                                                   ),
                                                 ),
                                                 style: ElevatedButton.styleFrom(
-                                                  backgroundColor:
-                                                      ocupado ? Colors.grey[300] : theme.colorScheme.primary,
+                                                  backgroundColor: ocupado ? Colors.grey[300] : Theme.of(context).colorScheme.primary,
                                                   foregroundColor: ocupado ? Colors.grey[600] : Colors.white,
                                                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                                 ),
                                               ),
-                                            ),
-                                          );
-                                        }).toList(),
-                                      );
-                                    }).toList(),
-                                  );
+
+                                          ),
+                                        );
+                                      }).toList(),
+                                    );
+
                                 }).toList(),
                               );
                             },
@@ -498,15 +581,22 @@ String obtenerNombreDia(DateTime fecha) {
                                         token: token!,
                                       );
 
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text("✅ Cita cancelada")),
-                                      );
+                                      _showCustomSnackBar(
+                                          title: "Cancelado",
+                                          message: "Cita cancelada correctamente",
+                                          icon: Icons.cancel,
+                                          color: Colors.orange,
+                                        );
 
-                                      setState(() {}); // Refrescar
+
+                                      setState(() {}); 
                                     } catch (e) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text("❌ Error al cancelar: $e")),
-                                      );
+                                      _showCustomSnackBar(
+                                            title: "Error",
+                                            message: "No se pudo cancelar la cita",
+                                            icon: Icons.error_outline,
+                                            color: Colors.red,
+                                          );
                                     }
                                   },
                                 ),

@@ -61,8 +61,49 @@ void _cargarDatos() async {
     _datosCargados = true;
   });
 }
-
-
+void _showCustomSnackBar({
+  required String title,
+  required String message,
+  required IconData icon,
+  required Color color,
+}) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Row(
+        children: [
+          Icon(icon, color: Colors.white, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                Text(
+                  message,
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      backgroundColor: color,
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      margin: const EdgeInsets.all(16),
+      duration: const Duration(seconds: 3),
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -178,15 +219,47 @@ void _cargarDatos() async {
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return const Center(child: Text('No hay métodos de relajación disponibles.'));
+              } 
+              
+              if (snapshot.hasError) {
+                // Mostrar snackbar solo una vez al construir el widget
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  _showCustomSnackBar(
+                    title: "Error",
+                    message: "No se pudieron cargar los métodos de relajación.",
+                    icon: Icons.error_outline,
+                    color: Colors.red,
+                  );
+                });
+
+                return const Center(
+                  child: Text(
+                    'Error al cargar los datos',
+                    style: TextStyle(fontSize: 16, color: Colors.red),
+                  ),
+                );
+              }
+
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  _showCustomSnackBar(
+                    title: "Sin resultados",
+                    message: "No hay métodos de relajación disponibles.",
+                    icon: Icons.info_outline,
+                    color: Colors.blue,
+                  );
+                });
+
+                return const Center(
+                  child: Text(
+                    'No hay métodos de relajación disponibles.',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                );
               }
 
               final metodosFiltrados = _todosLosMetodos;
-
-
+              
               return ListView.builder(
                 itemCount: metodosFiltrados.length,
                 itemBuilder: (context, index) {

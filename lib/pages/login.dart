@@ -65,8 +65,11 @@ class _LoginState extends State<Login> {
       final GoogleSignInAccount? user = await _googleSignIn.signIn();
 
       if (user == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Inicio de sesión cancelado')),
+        _showCustomSnackBar(
+          title: "Cancelado",
+          message: "Inicio de sesión cancelado",
+          icon: Icons.cancel,
+          color: Colors.orange,
         );
         setState(() => isLoading = false);
         return;
@@ -119,23 +122,78 @@ class _LoginState extends State<Login> {
 
 
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error al obtener perfil: ${perfilResponse.body}')),
+          _showCustomSnackBar(
+            title: "Error",
+            message: "No se pudo obtener el perfil del usuario",
+            icon: Icons.error_outline,
+            color: Colors.red,
           );
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error en login: ${response.body}')),
+        _showCustomSnackBar(
+          title: "Error",
+          message: "No se pudo iniciar sesión: ${response.body}",
+          icon: Icons.error_outline,
+          color: Colors.red,
         );
       }
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $error')),
-      );
+      _showCustomSnackBar(
+            title: "Error",
+            message: "Algo salió mal: $error",
+            icon: Icons.error,
+            color: Colors.red,
+          );
+
     }
 
     setState(() => isLoading = false);
   }
+  
+  void _showCustomSnackBar({
+  required String title,
+  required String message,
+  required IconData icon,
+  required Color color,
+}) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Row(
+        children: [
+          Icon(icon, color: Colors.white, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                Text(
+                  message,
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      backgroundColor: color,
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      margin: const EdgeInsets.all(16),
+      duration: const Duration(seconds: 3),
+    ),
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
