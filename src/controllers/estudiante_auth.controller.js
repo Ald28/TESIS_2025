@@ -146,13 +146,7 @@ const crearCita = async (req, res) => {
 
     const { fecha, hora_inicio, hora_fin, psicologo_id } = req.body;
     const fechaInicio = dayjs.tz(`${fecha} ${hora_inicio}`, 'YYYY-MM-DD HH:mm', 'America/Lima').toDate();
-    console.log("fechaInicio:", fechaInicio.toISOString());
     const fechaFin = dayjs.tz(`${fecha} ${hora_fin}`, 'YYYY-MM-DD HH:mm', 'America/Lima').toDate();
-    console.log("fechaFin:", fechaFin.toISOString());
-
-    console.log("hora local:", dayjs(fechaInicio).tz("America/Lima").format("HH:mm"));
-    console.log("día:", dayjs(fechaInicio).tz("America/Lima").format("dddd"));
-    console.log("fecha UTC:", fechaInicio);
 
     const ahora = new Date();
     const hoyLocal = new Date().toLocaleDateString('sv');
