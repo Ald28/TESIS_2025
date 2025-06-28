@@ -20,6 +20,12 @@ const loginGoogleEstudiante = async (req, res) => {
 
     const usuarios = await usuarioModel.buscarUsuarioPorCorreo(correo);
 
+    const correoValido = /^[a-z]+\.[a-z]+(\.[a-z])?@tecsup\.edu\.pe$/i;
+
+    if (!correoValido.test(correo)) {
+      return res.status(403).json({ message: 'Solo se permiten correos institucionales de estudiantes Tecsup' });
+    }
+
     if (usuarios.length > 0) {
       const usuario = usuarios[0];
 
