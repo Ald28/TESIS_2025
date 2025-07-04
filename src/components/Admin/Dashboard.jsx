@@ -5,7 +5,7 @@ import "../Styles/Dashboard.css";
 import { FiRefreshCw } from "react-icons/fi";
 import { Container, Row, Col, Card, Button, Table, Modal, Form, Accordion, InputGroup } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { FaUsers, FaCalendarCheck, FaTasks, FaClock, FaGoogle } from "react-icons/fa";
+import { FaUsers, FaCalendarCheck, FaTasks, FaClock, FaGoogle, FaCheckCircle } from "react-icons/fa";
 import { io } from "socket.io-client";
 import {
   LineChart,
@@ -531,8 +531,14 @@ export default function Dashboard() {
                 disabled={calendarConectado}
                 title={calendarConectado ? "Ya conectado con Google Calendar" : ""}
               >
-                <i className="bi bi-calendar-check me-1"></i>
-                {calendarConectado ? "Conectado ✅" : "Conectar Google Calendar"}
+                <FaCalendarCheck className="me-1" />
+                {calendarConectado ? (
+                  <>
+                    Conectado <FaCheckCircle className="ms-1" />
+                  </>
+                ) : (
+                  "Conectar Google Calendar"
+                )}
               </Button>
             </div>
 

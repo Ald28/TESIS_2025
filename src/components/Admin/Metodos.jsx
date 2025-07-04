@@ -277,11 +277,12 @@ export default function Metodos() {
                     <tr key={metodo.id}>
                       <td>{metodo.titulo}</td>
                       <td>{metodo.descripcion}</td>
-                      <td className="d-flex gap-2">
+                      <td className="text-center">
                         {metodo.multimedia_url && (
                           <Button
                             variant="outline-success"
                             size="sm"
+                            className="mx-2"
                             onClick={() => abrirModalArchivo(metodo.multimedia_url)}
                           >
                             Ver Archivo
@@ -290,6 +291,7 @@ export default function Metodos() {
                         <Button
                           variant="outline-primary"
                           size="sm"
+                          className="mx-2"
                           onClick={() => {
                             setIdEditar(metodo.id);
                             setTitulo(metodo.titulo);
@@ -306,6 +308,7 @@ export default function Metodos() {
                         <Button
                           variant="outline-danger"
                           size="sm"
+                          className="mx-2"
                           onClick={() => handleEliminar(metodo.id)}
                         >
                           Eliminar
@@ -342,11 +345,12 @@ export default function Metodos() {
                       <td>{metodo.nombre} {metodo.apellido}</td>
                       <td>{metodo.titulo}</td>
                       <td>{metodo.descripcion}</td>
-                      <td className="d-flex gap-2">
+                      <td className="d-flex justify-content-center gap-3">
                         {metodo.multimedia_url && (
                           <Button
                             variant="outline-danger"
                             size="sm"
+                            className="mx-2"
                             onClick={() => abrirModalArchivo(metodo.multimedia_url)}
                           >
                             Ver Archivo
@@ -355,6 +359,7 @@ export default function Metodos() {
                         <Button
                           variant="outline-primary"
                           size="sm"
+                          className="mx-2"
                           onClick={() => {
                             setIdEditar(metodo.id);
                             setTitulo(metodo.titulo);
@@ -371,6 +376,7 @@ export default function Metodos() {
                         <Button
                           variant="outline-danger"
                           size="sm"
+                          className="mx-2"
                           onClick={() => handleEliminar(metodo.id)}
                         >
                           Eliminar

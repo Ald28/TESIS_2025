@@ -67,13 +67,14 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
             <li key={idx} className="nav-item mb-3">
               <Link
                 to={item.to}
-                className={`nav-link d-flex align-items-center ${isActive ? "bg-light text-primary fw-bold rounded-start" : "text-white"}`}
+                className={`nav-link d-flex align-items-center ${isActive ? "bg-white text-primary fw-bold border-0" : "text-white"}`}
                 style={{
                   justifyContent: collapsed ? "center" : "flex-start",
                   gap: "8px",
                   paddingLeft: collapsed ? "0" : "1rem",
                   paddingTop: "0.5rem",
                   paddingBottom: "0.5rem",
+                  borderRadius: isActive ? "0" : "4px",
                 }}
               >
                 {item.icon}
