@@ -1,0 +1,151 @@
+.notification-bell {
+  position: relative;
+}
+
+.bell-wrapper {
+  position: relative;
+  cursor: pointer;
+}
+
+.notif-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: red;
+  color: white;
+  font-size: 9px;
+  border-radius: 50%;
+  padding: 1px 5px;
+  font-weight: bold;
+  min-width: 16px;
+  text-align: center;
+}
+
+.notif-dropdown {
+  position: absolute;
+  top: 30px;
+  right: 0;
+  width: 290px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  max-height: 350px;
+  overflow-y: auto;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.notif-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  font-weight: bold;
+  font-size: 14px;
+  border-bottom: 1px solid #eee;
+}
+
+.notif-close {
+  cursor: pointer;
+  color: #999;
+}
+
+.notif-empty {
+  padding: 16px;
+  text-align: center;
+  color: #777;
+  font-size: 13px;
+}
+
+.notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #f3f3f3;
+  position: relative;
+}
+
+.notif-icon {
+  font-size: 14px;
+  padding: 5px;
+  border-radius: 6px;
+}
+
+.notif-icon.success {
+  background-color: #d1f7dd;
+  color: #30b350;
+}
+
+.notif-icon.info {
+  background-color: #e5e7ff;
+  color: #4a58ed;
+}
+
+.notif-icon.default {
+  background-color: #e9e9e9;
+  color: #444;
+}
+
+.notif-content {
+  flex: 1;
+  font-size: 13px;
+}
+
+.notif-content strong {
+  font-size: 13px;
+  display: block;
+}
+
+.notif-time {
+  font-size: 11px;
+  color: #888;
+  margin-top: 3px;
+  display: block;
+}
+
+.notif-delete {
+  color: #c0392b;
+  font-size: 12px;
+  cursor: pointer;
+  position: absolute;
+  top: 8px;
+  right: 10px;
+}
+
+.notif-footer {
+  text-align: center;
+  padding: 10px;
+  border-top: 1px solid #eee;
+  font-size: 13px;
+}
+
+.notif-footer a {
+  color: #0056d2;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.notif-item.new {
+  background-color: #e6f2ff !important; /* Celeste claro */
+  border-left: 4px solid #4aa6ff;
+  transition: background-color 0.3s ease;
+}
+
+.notif-dropdown {
+  scrollbar-width: thin;
+  scrollbar-color: #ccc transparent;
+}
+
+.notif-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notif-dropdown::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 4px;
+}
+
+.notif-dropdown::-webkit-scrollbar-track {
+  background: transparent;
+}

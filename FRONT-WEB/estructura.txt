@@ -1,0 +1,51 @@
+src/
+├── components/
+|   ├── Api/
+│   │   ├── api_psicologo.js
+|   |   ├── api_cuestionario.js
+|   |   ├── api_pregunta.js
+|   |   ├── api_opcion.js
+│   ├── Auth/
+│   │   ├── Login.jsx
+│   │   ├── Register.jsx
+|   ├── Common/
+│   │   ├── NotFound.jsx
+│   ├── Admin/
+│   │   ├── Dashboard.jsx       # Vista principal del Dashboard
+│   │   ├── Usuarios.jsx        # Vista para gestión de usuarios
+│   │   ├── Ajustes.jsx         # Vista de ajustes del sistema
+|   |   ├── PerfilDoctor.jsx 
+|   |   ├── Cuestionario.jsx 
+|   |   ├── Formulario.jsx
+│   ├── Layout/
+│   │   ├── Layout.jsx          # Layout que combina Sidebar y Navbar
+│   │   ├── Sidebar.jsx         # Menú lateral del administrador
+│   │   ├── Navbar.jsx          # Barra superior del administrador
+|   ├── Styles/
+│   │   ├── Cuestionario.css
+├── assets/
+│   ├── images/
+│   │   ├── doctor-login.jpg
+│   │   ├── doctor-register.jpg
+|   |   ├── icon.png
+├── App.jsx                     # Definición de rutas principales
+├── main.jsx                    # Renderizado
+
+AGERGAR PERFIL
+EDITAR PERFIL
+CERRAR SESSION
+
+EJECUTAR:
+docker run -d -p 5173:80 --name frontend-tesis frontend-tesis
+docker start frontend-tesis
+
+recontruir la imagen:
+docker compose down
+docker compose up --build
+
+CREAR IMAGEN Y EJECUTAR:
+docker build -t front-web-tesis .
+docker run -d -p 5173:80 --name front-web-tesis-container front-web-tesis
+
+SE HICIERON CAMBIOS Y QUIERES DOCKERIZARLO:
+docker build -t frontend-tesis .
