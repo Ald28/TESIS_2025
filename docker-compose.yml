@@ -11,7 +11,7 @@ services:
       MYSQL_DATABASE: tesis_db
     volumes:
       - db_data:/var/lib/mysql
-      - ./backend/src/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./BACKEND/src/database/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -22,13 +22,13 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: ./BACKEND
       dockerfile: Dockerfile
     container_name: calmatec_backend
     ports:
       - "8080:8080"   # Asumiendo que PORT está en tu .env
     env_file:
-      - ./backend/.env
+      - ./BACKEND/.env
     depends_on:
       - mysql
     networks:
@@ -36,7 +36,7 @@ services:
 
   frontend-web:
     build:
-      context: ./frontend-web
+      context: ./FRONT-WEB
       dockerfile: Dockerfile
     container_name: frontend_web
     ports:
@@ -46,7 +46,7 @@ services:
 
   admin-frontend:
     build:
-      context: ./admin-frontend
+      context: ./ADMIN-WEB
       dockerfile: Dockerfile
     container_name: admin_frontend
     ports:
