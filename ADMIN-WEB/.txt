@@ -1,0 +1,10 @@
+Construir imagen docker
+docker build -t frontend-admin .
+
+Ejecutar contenedor
+docker run -d -p 3000:80 --name frontend-admin-container frontend-admin
+
+recontruir la imagen:
+docker compose down
+docker compose up --build
+s 
