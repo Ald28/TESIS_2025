@@ -1,37 +1,61 @@
-version: "3.8"
+version: "3.9"
+
 services:
+  mysql:
+    image: mysql:8
+    container_name: calmatec_db
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: tesis_db
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./backend/src/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - calmatec_net
+
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    container_name: calmatec_backend
     ports:
-      - "8080:8080"
-    environment:
-      - NODE_ENV=development
-    volumes:
-      - ./backend:/app
-    command: npm start  # ajusta según tu proyecto
+      - "${PORT}:${PORT}"   # Asumiendo que PORT está en tu .env
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - mysql
+    networks:
+      - calmatec_net
 
-  front-web:
+  frontend-web:
     build:
-      context: ./front-web
+      context: ./frontend-web
       dockerfile: Dockerfile
+    container_name: frontend_web
     ports:
-      - "5173:5173"
-    environment:
-      - NODE_ENV=development
-    volumes:
-      - ./front-web:/app
-    command: npm run dev  # ajusta según el framework (vite, react-scripts, etc.)
+      - "5173:80"   # Puerto local 5173, puerto interno 80 (por Nginx probablemente)
+    networks:
+      - calmatec_net
 
-  admin-web:
+  admin-frontend:
     build:
-      context: ./admin-web
+      context: ./admin-frontend
       dockerfile: Dockerfile
+    container_name: admin_frontend
     ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=development
-    volumes:
-      - ./admin-web:/app
-    command: npm run dev  # ajusta según el framework
+      - "3000:80"  # Admin accede en localhost:3000
+    networks:
+      - calmatec_net
+
+volumes:
+  db_data:
+
+networks:
+  calmatec_net:
