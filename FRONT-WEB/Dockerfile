@@ -2,9 +2,11 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
+# Copiamos dependencias y las instalamos
 COPY package.json package-lock.json* ./
 RUN npm install
 
+# Copiamos el resto de archivos y hacemos el build
 COPY . .
 RUN npm run build
 
