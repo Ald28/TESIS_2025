@@ -278,41 +278,40 @@ export default function Metodos() {
                       <td>{metodo.titulo}</td>
                       <td>{metodo.descripcion}</td>
                       <td className="text-center">
-                        {metodo.multimedia_url && (
+                        <div className="d-flex justify-content-center gap-3 text-nowrap">
+                          {metodo.multimedia_url && (
+                            <Button
+                              variant="outline-success"
+                              size="sm"
+                              onClick={() => abrirModalArchivo(metodo.multimedia_url)}
+                            >
+                              Ver Archivo
+                            </Button>
+                          )}
                           <Button
-                            variant="outline-success"
+                            variant="outline-primary"
                             size="sm"
-                            className="mx-2"
-                            onClick={() => abrirModalArchivo(metodo.multimedia_url)}
+                            onClick={() => {
+                              setIdEditar(metodo.id);
+                              setTitulo(metodo.titulo);
+                              setDescripcion(metodo.descripcion);
+                              setTipo(metodo.tipo);
+                              setEstudianteId('');
+                              setArchivo(null);
+                              setModoEdicion(true);
+                              setMostrarModal(true);
+                            }}
                           >
-                            Ver Archivo
+                            Editar
                           </Button>
-                        )}
-                        <Button
-                          variant="outline-primary"
-                          size="sm"
-                          className="mx-2"
-                          onClick={() => {
-                            setIdEditar(metodo.id);
-                            setTitulo(metodo.titulo);
-                            setDescripcion(metodo.descripcion);
-                            setTipo(metodo.tipo);
-                            setEstudianteId('');
-                            setArchivo(null);
-                            setModoEdicion(true);
-                            setMostrarModal(true);
-                          }}
-                        >
-                          Editar
-                        </Button>
-                        <Button
-                          variant="outline-danger"
-                          size="sm"
-                          className="mx-2"
-                          onClick={() => handleEliminar(metodo.id)}
-                        >
-                          Eliminar
-                        </Button>
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => handleEliminar(metodo.id)}
+                          >
+                            Eliminar
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -345,12 +344,11 @@ export default function Metodos() {
                       <td>{metodo.nombre} {metodo.apellido}</td>
                       <td>{metodo.titulo}</td>
                       <td>{metodo.descripcion}</td>
-                      <td className="d-flex justify-content-center gap-3">
+                      <div className="d-flex justify-content-center gap-3 text-nowrap">
                         {metodo.multimedia_url && (
                           <Button
                             variant="outline-danger"
                             size="sm"
-                            className="mx-2"
                             onClick={() => abrirModalArchivo(metodo.multimedia_url)}
                           >
                             Ver Archivo
@@ -359,7 +357,6 @@ export default function Metodos() {
                         <Button
                           variant="outline-primary"
                           size="sm"
-                          className="mx-2"
                           onClick={() => {
                             setIdEditar(metodo.id);
                             setTitulo(metodo.titulo);
@@ -376,12 +373,11 @@ export default function Metodos() {
                         <Button
                           variant="outline-danger"
                           size="sm"
-                          className="mx-2"
                           onClick={() => handleEliminar(metodo.id)}
                         >
                           Eliminar
                         </Button>
-                      </td>
+                      </div>
                     </tr>
                   ))
                 ) : (
