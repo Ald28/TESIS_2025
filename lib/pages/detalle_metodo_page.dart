@@ -4,6 +4,7 @@ import '../classes/metodo_relajacion.dart';
 
 class PaginaDetalleMetodo extends StatelessWidget {
   final MetodoRelajacion metodo;
+  static const Color cyanColor = Color(0xFF00AEEF);
 
   const PaginaDetalleMetodo({super.key, required this.metodo});
 
@@ -12,38 +13,59 @@ class PaginaDetalleMetodo extends StatelessWidget {
     final esVideo = metodo.url.toLowerCase().endsWith('.mp4');
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: const Color(0xFFF5F5F5),
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 280,
+            expandedHeight: 320,
             pinned: true,
-            backgroundColor: Colors.indigo,
+            backgroundColor: const Color(0xFF231F20),
             iconTheme: const IconThemeData(color: Colors.white),
+            elevation: 0,
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
                 fit: StackFit.expand,
                 children: [
                   esVideo
                       ? VideoDetalle(url: metodo.url)
-                      : Image.network(
-                          metodo.url,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(
-                            color: Colors.grey[300],
-                            child: const Icon(Icons.image_not_supported, size: 50),
+                      : ClipRRect(
+                          borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(24),
+                            bottomRight: Radius.circular(24),
+                          ),
+                          child: Image.network(
+                            metodo.url,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => Container(
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF4D4D4D),
+                                borderRadius: const BorderRadius.only(
+                                  bottomLeft: Radius.circular(24),
+                                  bottomRight: Radius.circular(24),
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.image_not_supported, 
+                                size: 50,
+                                color: Color(0xFF808080),
+                              ),
+                            ),
                           ),
                         ),
-                  // Gradiente para mejor legibilidad
                   Container(
                     decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(24),
+                        bottomRight: Radius.circular(24),
+                      ),
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Colors.black.withOpacity(0.3),
+                          const Color(0xFF231F20).withOpacity(0.7),
                         ],
+                        stops: const [0.6, 1.0],
                       ),
                     ),
                   ),
@@ -52,77 +74,61 @@ class PaginaDetalleMetodo extends StatelessWidget {
             ),
           ),
           
-          // Contenido principal
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  // Tarjeta principal con información
-                  Card(
-                    elevation: 8,
-                    shadowColor: Colors.indigo.withOpacity(0.2),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Título con icono decorativo
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.indigo.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Icon(
-                                  esVideo ? Icons.play_circle : Icons.image,
-                                  color: Colors.indigo,
-                                  size: 24,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  metodo.titulo,
-                                  style: const TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
-                                    letterSpacing: -0.5,
-                                  ),
-                                ),
-                              ),
-                            ],
+            child: Transform.translate(
+              offset: const Offset(0, -20),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF231F20).withOpacity(0.08),
+                            blurRadius: 24,
+                            offset: const Offset(0, 8),
                           ),
-                          
-                          const SizedBox(height: 20),
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.indigo.withOpacity(0.05),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: Colors.indigo.withOpacity(0.1),
-                                width: 1,
-                              ),
-                            ),
-                            child: Row(
+                          BoxShadow(
+                            color: cyanColor.withOpacity(0.05),
+                            blurRadius: 40,
+                            offset: const Offset(0, 16),
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(28),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
                               children: [
                                 Container(
-                                  padding: const EdgeInsets.all(10),
+                                  padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: Colors.indigo,
-                                    borderRadius: BorderRadius.circular(12),
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        cyanColor,
+                                        cyanColor.withOpacity(0.8),
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: cyanColor.withOpacity(0.3),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
                                   ),
-                                  child: const Icon(
-                                    Icons.psychology,
+                                  child: Icon(
+                                    esVideo ? Icons.play_circle_filled : Icons.image_rounded,
                                     color: Colors.white,
-                                    size: 20,
+                                    size: 28,
                                   ),
                                 ),
                                 const SizedBox(width: 16),
@@ -130,21 +136,23 @@ class PaginaDetalleMetodo extends StatelessWidget {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      const Text(
-                                        'Especialista',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey,
-                                          fontWeight: FontWeight.w500,
+                                      Text(
+                                        metodo.titulo,
+                                        style: const TextStyle(
+                                          fontSize: 26,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF231F20),
+                                          letterSpacing: -0.5,
+                                          height: 1.2,
                                         ),
                                       ),
-                                      const SizedBox(height: 2),
+                                      const SizedBox(height: 4),
                                       Text(
-                                        metodo.psicologo,
+                                        esVideo ? 'Contenido en video' : 'Contenido visual',
                                         style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black87,
+                                          fontSize: 14,
+                                          color: Color(0xFF808080),
+                                          fontWeight: FontWeight.w500,
                                         ),
                                       ),
                                     ],
@@ -152,47 +160,151 @@ class PaginaDetalleMetodo extends StatelessWidget {
                                 ),
                               ],
                             ),
-                          ),
-                          
-                          const SizedBox(height: 24),
-                          
-                          Row(
-                            children: [
-                              Expanded(child: Divider(color: Colors.grey[300])),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
-                                child: Text(
-                                  'Descripción',
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                            
+                            const SizedBox(height: 32),
+                            
+                            Container(
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: cyanColor.withOpacity(0.05),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: cyanColor.withOpacity(0.1),
+                                  width: 1,
                                 ),
                               ),
-                              Expanded(child: Divider(color: Colors.grey[300])),
-                            ],
-                          ),
-                          
-                          const SizedBox(height: 20),
-                          
-                          Text(
-                            metodo.descripcion,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.black87,
-                              height: 1.6,
-                              letterSpacing: 0.2,
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: cyanColor,
+                                      borderRadius: BorderRadius.circular(16),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: cyanColor.withOpacity(0.3),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: const Icon(
+                                      Icons.psychology_rounded,
+                                      color: Colors.white,
+                                      size: 24,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 18),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          'Especialista',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: Color(0xFF808080),
+                                            fontWeight: FontWeight.w600,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          metodo.psicologo,
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF231F20),
+                                            letterSpacing: -0.3,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            textAlign: TextAlign.justify,
-                          ),
-                        ],
+                            
+                            const SizedBox(height: 36),
+                            
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    height: 1,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          Colors.transparent,
+                                          cyanColor.withOpacity(0.3),
+                                          Colors.transparent,
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: cyanColor.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    'Descripción',
+                                    style: TextStyle(
+                                      color: cyanColor,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Container(
+                                    height: 1,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          Colors.transparent,
+                                          cyanColor.withOpacity(0.3),
+                                          Colors.transparent,
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            
+                            const SizedBox(height: 28),
+                            
+                            Container(
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF4D4D4D).withOpacity(0.02),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: const Color(0xFFB3B3B3).withOpacity(0.3),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Text(
+                                metodo.descripcion,
+                                style: const TextStyle(
+                                  fontSize: 17,
+                                  color: Color(0xFF4D4D4D),
+                                  height: 1.7,
+                                  letterSpacing: 0.3,
+                                ),
+                                textAlign: TextAlign.justify,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  
-                  const SizedBox(height: 20),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -204,6 +316,8 @@ class PaginaDetalleMetodo extends StatelessWidget {
 
 class VideoDetalle extends StatefulWidget {
   final String url;
+  static const Color cyanColor = Color(0xFF00AEEF);
+  
   const VideoDetalle({super.key, required this.url});
 
   @override
@@ -222,7 +336,6 @@ class _VideoDetalleState extends State<VideoDetalle> {
         setState(() {});
         _controller.setLooping(true);
         _controller.play();
-
       });
   }
 
@@ -237,32 +350,50 @@ class _VideoDetalleState extends State<VideoDetalle> {
     return _controller.value.isInitialized
         ? GestureDetector(
             onTap: () => setState(() => _showControls = !_showControls),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                AspectRatio(
-                  aspectRatio: _controller.value.aspectRatio,
-                  child: VideoPlayer(_controller),
-                ),
-
-                if (_showControls) ...[
-                  Container(
-                    color: Colors.black.withOpacity(0.3),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(24),
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  AspectRatio(
+                    aspectRatio: _controller.value.aspectRatio,
+                    child: VideoPlayer(_controller),
                   ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
+
+                  if (_showControls) ...[
+                    Positioned.fill(
+                      child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.7),
-                          borderRadius: BorderRadius.circular(50),
+                          borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(24),
+                            bottomRight: Radius.circular(24),
+                          ),
+                          color: const Color(0xFF231F20).withOpacity(0.4),
                         ),
-                          child: IconButton(
+                      ),
+                    ),
+                    Center(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: VideoDetalle.cyanColor.withOpacity(0.9),
+                          borderRadius: BorderRadius.circular(40),
+                          boxShadow: [
+                            BoxShadow(
+                              color: VideoDetalle.cyanColor.withOpacity(0.4),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: IconButton(
+                          iconSize: 60,
                           icon: Icon(
                             _controller.value.isPlaying
-                                ? Icons.pause_circle_filled
-                                : Icons.play_circle_fill,
-                            size: 70,
+                                ? Icons.pause_rounded
+                                : Icons.play_arrow_rounded,
                             color: Colors.white,
                           ),
                           onPressed: () {
@@ -275,41 +406,62 @@ class _VideoDetalleState extends State<VideoDetalle> {
                             });
                           },
                         ),
-
                       ),
-                      const SizedBox(height: 20),
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 20),
+                    ),
+                    Positioned(
+                      bottom: 32,
+                      left: 24,
+                      right: 24,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF231F20).withOpacity(0.6),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         child: VideoProgressIndicator(
                           _controller,
                           allowScrubbing: true,
-                          colors: const VideoProgressColors(
-                            playedColor: Colors.white,
-                            bufferedColor: Colors.white30,
-                            backgroundColor: Colors.white12,
+                          colors: VideoProgressColors(
+                            playedColor: VideoDetalle.cyanColor,
+                            bufferedColor: const Color(0xFF808080),
+                            backgroundColor: const Color(0xFFB3B3B3),
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           )
         : Container(
-            height: 280,
-            color: Colors.grey[300],
-            child: const Center(
+            height: 320,
+            decoration: BoxDecoration(
+              color: const Color(0xFF4D4D4D).withOpacity(0.1),
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(24),
+              ),
+            ),
+            child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(color: Colors.indigo),
-                  SizedBox(height: 16),
-                  Text(
+                  SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: CircularProgressIndicator(
+                      color: VideoDetalle.cyanColor,
+                      strokeWidth: 3,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
                     'Cargando video...',
                     style: TextStyle(
-                      color: Colors.grey,
+                      color: Color(0xFF808080),
                       fontSize: 16,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],

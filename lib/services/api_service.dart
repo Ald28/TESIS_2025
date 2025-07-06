@@ -13,12 +13,8 @@ import 'package:mime/mime.dart';
 import 'package:frondend/classes/notificacion_model.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
-
-
-
 class ApiService {
-  static const String baseUrl ='https://tesis-2025.onrender.com';////cambiar qui para todo y tambien en el login buscar lo de pi
-
+  static const String baseUrl ='http://192.168.177.182:8080';
 
 ///notificaciones
 static Future<List<Notificacion>> listarNotificacionesGuardadas() async {

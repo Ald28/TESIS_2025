@@ -210,27 +210,6 @@ class _PaginaEditState extends State<PaginaEdit> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        title: const Text(
-          "Notificaciones",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        centerTitle: true,
-        automaticallyImplyLeading: false,
-        backgroundColor: const Color(0xFF4A90E2),
-        elevation: 0,
-        actions: [
-          if (_notificacionesGuardadas.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.refresh, color: Colors.white),
-              onPressed: _cargarNotificaciones,
-              tooltip: "Actualizar",
-            ),
-        ],
-      ),
       body: _isLoading
           ? const Center(
               child: Column(

@@ -7,6 +7,8 @@ import '../pages/navigation_screen.dart';
 import '../services/api_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'dart:convert';
+import 'package:flutter/services.dart';
+
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -17,6 +19,7 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   bool isLoading = false;
+  static const Color cyanColor = Color(0xFF00BFFF);
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: ['email'],
@@ -26,12 +29,11 @@ class _LoginState extends State<Login> {
   Future<void> guardarTokenFCMEnBackend() async {
     final prefs = await SharedPreferences.getInstance();
     final usuarioId = prefs.getInt('usuario_id');
-    print("🧾 Usuario ID guardado: $usuarioId");
     final token = await FirebaseMessaging.instance.getToken();
 
     if (usuarioId != null && token != null) {
       final response = await http.post(
-        Uri.parse('https://tesis-2025.onrender.com/api/notificaciones/guardar-token-fcm'),///cambiar tambien
+        Uri.parse('http://192.168.177.182:8080/api/notificaciones/guardar-token-fcm'),///cambiar tambien
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'usuario_id': usuarioId,
@@ -69,7 +71,7 @@ class _LoginState extends State<Login> {
           title: "Cancelado",
           message: "Inicio de sesión cancelado",
           icon: Icons.cancel,
-          color: Colors.orange,
+          color: const Color(0xFF808080), // Gris 50%
         );
         setState(() => isLoading = false);
         return;
@@ -78,17 +80,29 @@ class _LoginState extends State<Login> {
       final GoogleSignInAuthentication auth = await user.authentication;
 
       final response = await http.post(
-        Uri.parse('https://tesis-2025.onrender.com/auth/google/estudiante'),
+        Uri.parse('http://192.168.177.182:8080/auth/google/estudiante'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'credential': auth.idToken}),
       );
+
+      if (response.statusCode == 403) {
+        final data = json.decode(response.body);
+        _showCustomSnackBar(
+          title: "Cuenta no válida",
+          message: data['message'] ?? "Cuenta no autorizada",
+          icon: Icons.block,
+          color: const Color(0xFF808080), // Gris 50%
+        );
+        setState(() => isLoading = false);
+        return;
+      }
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = json.decode(response.body);
         final token = data['token'];
 
         final perfilResponse = await http.get(
-          Uri.parse('https://tesis-2025.onrender.com/auth/perfil'),
+          Uri.parse('http://192.168.177.182:8080/auth/perfil'),
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer $token',
@@ -104,6 +118,13 @@ class _LoginState extends State<Login> {
           await prefs.setString('token', token);
           await prefs.setInt('estudiante_id', estudianteId);
           await prefs.setInt('usuario_id', usuarioId);
+
+          _showCustomSnackBar(
+          title: "Éxito",
+          message: "Inicio de sesión exitoso",
+          icon: Icons.check_circle,
+          color: const Color(0xFF00AEEF), // Cyan
+        );
 
           await guardarTokenFCMEnBackend();
 
@@ -122,33 +143,39 @@ class _LoginState extends State<Login> {
 
 
         } else {
+        _showCustomSnackBar(
+                title: "Error",
+                message: "No se pudo obtener el perfil del usuario",
+                icon: Icons.error_outline,
+                color: const Color(0xFF231F20), // Negro
+              );
+            }
+          } else {
+            _showCustomSnackBar(
+              title: "Error",
+              message: "No se pudo iniciar sesión.",
+              icon: Icons.error_outline,
+              color: const Color(0xFF231F20), // Negro
+            );
+          }
+        } on PlatformException catch (e) {
           _showCustomSnackBar(
             title: "Error",
-            message: "No se pudo obtener el perfil del usuario",
-            icon: Icons.error_outline,
-            color: Colors.red,
+            message: "Fallo en el inicio de sesión con Google",
+            icon: Icons.error,
+            color: const Color(0xFF231F20), // Negro
+          );
+        } catch (error) {
+          _showCustomSnackBar(
+            title: "Error",
+            message: "Ocurrió un problema inesperado",
+            icon: Icons.error,
+            color: const Color(0xFF231F20), // Negro
           );
         }
-      } else {
-        _showCustomSnackBar(
-          title: "Error",
-          message: "No se pudo iniciar sesión: ${response.body}",
-          icon: Icons.error_outline,
-          color: Colors.red,
-        );
+
+        setState(() => isLoading = false);
       }
-    } catch (error) {
-      _showCustomSnackBar(
-            title: "Error",
-            message: "Algo salió mal: $error",
-            icon: Icons.error,
-            color: Colors.red,
-          );
-
-    }
-
-    setState(() => isLoading = false);
-  }
   
   void _showCustomSnackBar({
   required String title,
@@ -172,11 +199,15 @@ class _LoginState extends State<Login> {
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
+                    color: Colors.white,
                   ),
                 ),
                 Text(
                   message,
-                  style: const TextStyle(fontSize: 12),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.white,
+                  ),
                 ),
               ],
             ),
@@ -201,7 +232,7 @@ class _LoginState extends State<Login> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        color: const Color(0xFFB2EBF2),
+        color: cyanColor, // Usando la constante cyan
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -223,7 +254,7 @@ class _LoginState extends State<Login> {
                       borderRadius: BorderRadius.circular(8),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: const Color(0xFF231F20).withOpacity(0.2), // Negro con opacidad
                           blurRadius: 4,
                           spreadRadius: 2,
                           offset: const Offset(0, 2),
@@ -238,11 +269,11 @@ class _LoginState extends State<Login> {
                           height: 20,
                         ),
                         const SizedBox(width: 10),
-                        const Text(
+                        Text(
                           'Continuar con Google',
                           style: TextStyle(
                             fontSize: 16,
-                            color: Colors.black54,
+                            color: const Color(0xFF4D4D4D), // Gris 80%
                           ),
                         ),
                       ],
@@ -250,7 +281,9 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 if (isLoading)
-                  const CircularProgressIndicator(color: Colors.white),
+                  const CircularProgressIndicator(
+                    color: Colors.white,
+                  ),
               ],
             ),
           ],

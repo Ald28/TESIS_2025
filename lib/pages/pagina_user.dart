@@ -13,6 +13,7 @@ class PaginaUser extends StatefulWidget {
 }
 
 class _PaginaUserState extends State<PaginaUser> with TickerProviderStateMixin {
+  static const Color cyanColor = Color(0xFF00AEEF);
   Future<Estudiante?>? _perfilFuture;
   final TextEditingController _fechaController = TextEditingController();
   final TextEditingController _carreraController = TextEditingController();
@@ -163,13 +164,13 @@ class _PaginaUserState extends State<PaginaUser> with TickerProviderStateMixin {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.blue.withOpacity(0.1),
+          color: cyanColor.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.blue.withOpacity(0.3)),
+          border: Border.all(color: cyanColor.withOpacity(0.3)),
         ),
         child: Column(
           children: [
-            Icon(icon, size: 32, color: Colors.blue),
+            Icon(icon, size: 32, color: cyanColor),
             const SizedBox(height: 8),
             Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
           ],
@@ -305,7 +306,7 @@ class _PaginaUserState extends State<PaginaUser> with TickerProviderStateMixin {
       expandedHeight: 200,
       floating: false,
       pinned: true,
-      backgroundColor: Colors.blue,
+      backgroundColor: cyanColor,
       actions: [
         PopupMenuButton<String>(
           onSelected: (value) async {
@@ -328,13 +329,12 @@ class _PaginaUserState extends State<PaginaUser> with TickerProviderStateMixin {
         ),
       ],
       flexibleSpace: FlexibleSpaceBar(
-      
         background: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Colors.blue, Colors.blue.shade700],
+              colors: [cyanColor, cyanColor.withOpacity(0.8)],
             ),
           ),
           child: Center(
@@ -400,7 +400,7 @@ class _PaginaUserState extends State<PaginaUser> with TickerProviderStateMixin {
               child: Container(
                 padding: const EdgeInsets.all(6),
                 decoration: const BoxDecoration(
-                  color: Colors.blue,
+                  color: cyanColor,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.edit, size: 16, color: Colors.white),
@@ -435,7 +435,7 @@ class _PaginaUserState extends State<PaginaUser> with TickerProviderStateMixin {
           children: [
             Row(
               children: [
-                Icon(Icons.person, color: Colors.blue, size: 24),
+                Icon(Icons.person, color: cyanColor, size: 24),
                 const SizedBox(width: 8),
                 const Text(
                   'Información Personal',
@@ -475,7 +475,7 @@ class _PaginaUserState extends State<PaginaUser> with TickerProviderStateMixin {
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
         children: [
-          Icon(icon, color: Colors.grey[600], size: 20),
+          Icon(icon, color: cyanColor, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -510,7 +510,7 @@ class _PaginaUserState extends State<PaginaUser> with TickerProviderStateMixin {
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
         children: [
-          Icon(Icons.cake, color: Colors.grey[600], size: 20),
+          Icon(Icons.cake, color: cyanColor, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: _editando
@@ -519,7 +519,7 @@ class _PaginaUserState extends State<PaginaUser> with TickerProviderStateMixin {
                     readOnly: true,
                     decoration: InputDecoration(
                       labelText: 'Fecha de nacimiento',
-                      suffixIcon: const Icon(Icons.calendar_today),
+                      suffixIcon: Icon(Icons.calendar_today, color: cyanColor),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -569,24 +569,31 @@ class _PaginaUserState extends State<PaginaUser> with TickerProviderStateMixin {
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
         children: [
-          Icon(Icons.school, color: Colors.grey[600], size: 20),
+          Icon(Icons.school, color: cyanColor, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: _editando
                 ? DropdownButtonFormField<String>(
                     value: carreras.contains(_carreraController.text) ? _carreraController.text : null,
+                    iconEnabledColor: cyanColor,
                     decoration: InputDecoration(
                       labelText: 'Carrera',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      prefixIcon: const Icon(Icons.school),
+                      prefixIcon: Icon(Icons.school, color: cyanColor),
                     ),
+                    isExpanded: true,
                     items: carreras.map((carrera) {
                       return DropdownMenuItem<String>(
                         value: carrera,
-                        child: Text(carrera, overflow: TextOverflow.ellipsis),
+                        child: Text(
+                          carrera,
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: false,
+                          maxLines: 1,
+                        ),
                       );
                     }).toList(),
                     onChanged: (value) {
@@ -627,7 +634,7 @@ class _PaginaUserState extends State<PaginaUser> with TickerProviderStateMixin {
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
         children: [
-          Icon(Icons.calendar_view_week, color: Colors.grey[600], size: 20),
+          Icon(Icons.calendar_view_week, color: cyanColor, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: _editando
@@ -639,7 +646,7 @@ class _PaginaUserState extends State<PaginaUser> with TickerProviderStateMixin {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      prefixIcon: const Icon(Icons.calendar_view_week),
+                      prefixIcon: Icon(Icons.calendar_view_week, color: cyanColor),
                     ),
                     items: List.generate(6, (index) {
                       final ciclo = (index + 1).toString();
@@ -694,7 +701,7 @@ class _PaginaUserState extends State<PaginaUser> with TickerProviderStateMixin {
           }
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: _editando ? Colors.green : Colors.blue,
+          backgroundColor: _editando ? Colors.green : cyanColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -712,11 +719,11 @@ class _PaginaUserState extends State<PaginaUser> with TickerProviderStateMixin {
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(_editando ? Icons.save : Icons.edit),
+                  Icon(_editando ? Icons.save : Icons.edit, color: Colors.white),
                   const SizedBox(width: 8),
                   Text(
                     _editando ? "Guardar cambios" : "Editar perfil",
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
                   ),
                 ],
               ),

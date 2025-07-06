@@ -24,6 +24,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
   MetodoRelajacion? _metodoSeleccionado;
   late List<Widget> _paginas;
 
+  static const Color cyanColor = Color(0xFF00AEEF);
 
   @override
   void initState() {
@@ -72,7 +73,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          backgroundColor: Colors.indigo,
+          backgroundColor: cyanColor, 
           title: Row(
             children: [
               Image.asset(
@@ -82,23 +83,59 @@ class _NavigationScreenState extends State<NavigationScreen> {
               const SizedBox(width: 8),
             ],
           ),
+          shape: const Border(
+            bottom: BorderSide(
+              color: Colors.black12,
+              width: 0.5,
+            ),
+          ),
         ),
-        body: _paginas[_paginaActual],
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _paginaActual > 4 ? 0 : _paginaActual,
-          onTap: (index) {
-            setState(() {
-              _paginaActual = index;
-            });
-          },
-          type: BottomNavigationBarType.fixed,
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home, size: 20), label: "Inicio"),
-            BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline, size: 20), label: "Chat"),
-            BottomNavigationBarItem(icon: Icon(Icons.favorite, size: 20), label: "Historial"),
-            BottomNavigationBarItem(icon: Icon(Icons.edit, size: 20), label: "Notificaciones"),
-            BottomNavigationBarItem(icon: Icon(Icons.supervised_user_circle, size: 20), label: "Usuario"),
-          ],
+        body: Container(
+          decoration: const BoxDecoration(
+            border: Border(
+              left: BorderSide(color: Colors.black12, width: 0.5),
+              right: BorderSide(color: Colors.black12, width: 0.5),
+            ),
+          ),
+          child: _paginas[_paginaActual],
+        ),
+        bottomNavigationBar: Container(
+          decoration: const BoxDecoration(
+            border: Border(
+              top: BorderSide(color: Colors.black12, width: 0.5),
+              left: BorderSide(color: Colors.black12, width: 0.5),
+              right: BorderSide(color: Colors.black12, width: 0.5),
+              bottom: BorderSide(color: Colors.black12, width: 0.5),
+            ),
+          ),
+          child: BottomNavigationBar(
+            currentIndex: _paginaActual > 4 ? 0 : _paginaActual,
+            onTap: (index) {
+              setState(() {
+                _paginaActual = index;
+              });
+            },
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: Colors.white, 
+            selectedItemColor: cyanColor, 
+            unselectedItemColor: Colors.grey[600], 
+            selectedLabelStyle: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            ),
+            unselectedLabelStyle: const TextStyle(
+              fontWeight: FontWeight.w400,
+              fontSize: 11,
+            ),
+            elevation: 0,
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.home, size: 20), label: "Inicio"),
+              BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline, size: 20), label: "Chat"),
+              BottomNavigationBarItem(icon: Icon(Icons.favorite, size: 20), label: "Historial"),
+              BottomNavigationBarItem(icon: Icon(Icons.edit, size: 20), label: "Notificaciones"),
+              BottomNavigationBarItem(icon: Icon(Icons.supervised_user_circle, size: 20), label: "Usuario"),
+            ],
+          ),
         ),
       ),
     );

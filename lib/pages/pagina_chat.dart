@@ -15,6 +15,9 @@ class _PaginaChatState extends State<PaginaChat> {
   List<Map<String, dynamic>> mensajes = [];
   bool _isTyping = false;
 
+  // Color cian definido
+  final Color cyanColor = Color(0xFF00AEEF);
+
   @override
   void initState() {
     super.initState();
@@ -44,7 +47,7 @@ class _PaginaChatState extends State<PaginaChat> {
 
     try {
       final respuesta = await http.post(
-        Uri.parse('https://tesis-2025.onrender.com/api/chat-estudiante'),
+        Uri.parse('http://192.168.177.182:8080/api/chat-estudiante'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"mensaje": texto}),
       );
@@ -95,11 +98,9 @@ class _PaginaChatState extends State<PaginaChat> {
             Container(
               width: 32,
               height: 32,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  colors: [Color(0xFF6B73FF), Color(0xFF9B59B6)],
-                ),
+                color: cyanColor,
               ),
               child: const Icon(Icons.psychology, color: Colors.white, size: 16),
             ),
@@ -125,12 +126,8 @@ class _PaginaChatState extends State<PaginaChat> {
         children: [
           // Header del chatbot
           Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFF6B73FF), Color(0xFF9B59B6)],
-              ),
+            decoration: BoxDecoration(
+              color: cyanColor,
               boxShadow: [
                 BoxShadow(
                   color: Color(0x20000000),
@@ -151,9 +148,9 @@ class _PaginaChatState extends State<PaginaChat> {
                         color: Colors.white,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.psychology,
-                        color: Color(0xFF6B73FF),
+                        color: cyanColor,
                         size: 28,
                       ),
                     ),
@@ -228,11 +225,9 @@ class _PaginaChatState extends State<PaginaChat> {
                           Container(
                             width: 32,
                             height: 32,
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              gradient: LinearGradient(
-                                colors: [Color(0xFF6B73FF), Color(0xFF9B59B6)],
-                              ),
+                              color: cyanColor,
                             ),
                             child: const Icon(Icons.psychology, color: Colors.white, size: 16),
                           ),
@@ -245,7 +240,7 @@ class _PaginaChatState extends State<PaginaChat> {
                             ),
                             decoration: BoxDecoration(
                               color: isUser 
-                                  ? const Color(0xFF6B73FF)
+                                  ? cyanColor
                                   : Colors.white,
                               borderRadius: BorderRadius.only(
                                 topLeft: const Radius.circular(20),
@@ -277,8 +272,8 @@ class _PaginaChatState extends State<PaginaChat> {
                           Container(
                             width: 32,
                             height: 32,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF6B73FF),
+                            decoration: BoxDecoration(
+                              color: cyanColor,
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(Icons.person, color: Colors.white, size: 16),
@@ -339,10 +334,8 @@ class _PaginaChatState extends State<PaginaChat> {
                     ),
                     const SizedBox(width: 12),
                     Container(
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Color(0xFF6B73FF), Color(0xFF9B59B6)],
-                        ),
+                      decoration: BoxDecoration(
+                        color: cyanColor,
                         shape: BoxShape.circle,
                       ),
                       child: IconButton(
