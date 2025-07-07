@@ -40,7 +40,7 @@ services:
       dockerfile: Dockerfile
     container_name: frontend_web
     ports:
-      - "5173:80"   # Puerto local 5173, puerto interno 80 (por Nginx probablemente)
+      - "80:80"   # Puerto local 5173, puerto interno 80 (por Nginx probablemente)
     networks:
       - calmatec_net
 
@@ -50,7 +50,7 @@ services:
       dockerfile: Dockerfile
     container_name: admin_frontend
     ports:
-      - "3000:80"  # Admin accede en localhost:3000
+      - "80:80"  # Admin accede en localhost:3000
     networks:
       - calmatec_net
 
