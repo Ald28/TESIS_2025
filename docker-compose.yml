@@ -37,6 +37,8 @@ services:
       context: ./FRONT-WEB
       dockerfile: Dockerfile
     container_name: frontend_web
+    ports:
+      - "8081:80" 
     networks:
       - calmatec_net
 
@@ -45,6 +47,9 @@ services:
       context: ./ADMIN-WEB
       dockerfile: Dockerfile
     container_name: admin_frontend
+    admin-frontend:
+    ports:
+      - "8082:80"
     networks:
       - calmatec_net
 
