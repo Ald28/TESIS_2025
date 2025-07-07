@@ -1,18 +1,22 @@
-# Etapa 1: build
+# Etapa 1: Build del proyecto
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Copiamos dependencias y las instalamos
-COPY package*.json ./
+# Copiar dependencias e instalarlas
+COPY package.json package-lock.json* ./
 RUN npm install
 
-# Copiamos el resto de archivos y hacemos el build
+# Copiar todo el proyecto y construir
 COPY . .
 RUN npm run build
 
-# Etapa 2: producción
+# Etapa 2: Servir con Nginx
 FROM nginx:alpine
+
+# Copiar build generado al directorio de Nginx
 COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Configuración personalizada de Nginx
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80

@@ -1,20 +1,20 @@
-# Usamos Node oficial como base
-FROM node:18
+# Etapa 1: Imagen base oficial
+FROM node:18-alpine
 
-# Establecemos el directorio de trabajo
+# Establecer directorio de trabajo
 WORKDIR /app
 
-# Copiamos los archivos de definición
+# Copiar dependencias primero (mejora cache)
 COPY package*.json ./
 
-# Instalamos dependencias
+# Instalar dependencias
 RUN npm install
 
-# Copiamos el resto del proyecto
+# Copiar el resto de archivos del backend
 COPY . .
 
-# Puerto expuesto
+# Exponer el puerto usado por tu backend
 EXPOSE 8080
 
-# Comando de inicio
+# Comando para iniciar la app
 CMD ["npm", "start"]
