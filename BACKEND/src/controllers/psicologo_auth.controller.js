@@ -196,7 +196,7 @@ const cambiarEstadoCita = async (req, res) => {
 
             const eventoCreado = await crearEventoPsicologo(correoPsicologo, evento);
 
-            console.error('a punto de enviar correo');
+            /*console.error('a punto de enviar correo');
             try {
                 console.error('a punto de enviar correo');
                 await enviarCorreoCitaAceptada({
@@ -209,7 +209,7 @@ const cambiarEstadoCita = async (req, res) => {
             } catch (err) {
                 console.error('❌ Error al enviar correo:', err.message || err);
                 return res.status(500).json({ message: 'Error al enviar correo' });
-            }
+            }*/
 
             console.error('a punto de cambiar');
             try {
