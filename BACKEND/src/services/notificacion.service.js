@@ -16,7 +16,22 @@ const enviarNotificacionSistema = async ({ usuario_id, titulo, mensaje, tipo = '
     token
   };
 
-  await admin.messaging().send(payload);
+  try {
+    await admin.messaging().send(payload);
+  } catch (error) {
+    console.error('❌ Error al enviar notificación push:', error.message || error);
+
+    // Si el token ya no es válido, elimínalo de tu BD
+    if (error.code === 'messaging/registration-token-not-registered') {
+      console.warn(`⚠️ Token inválido. Eliminando token de usuario ${usuario_id}`);
+      await notificacionModel.eliminarTokenFCM(token);
+    }
+
+    // Si deseas que el error no detenga el flujo principal
+    return;
+  }
+
+  // Solo guardar en base de datos si se envió correctamente
   await notificacionModel.crearNotificacion({ titulo, mensaje, tipo, usuario_id });
 };
 

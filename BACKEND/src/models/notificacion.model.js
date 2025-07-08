@@ -60,8 +60,14 @@ const eliminarNotificaciones = async (id) =>{
   return await query(sql, [id]);
 }
 
+const eliminarTokenFCM = async (token) => {
+  const sql = `DELETE FROM notificaciones WHERE token_fcm = ?`;
+  await query(sql, [token]);
+};
+
 module.exports = {
   guardarTokenFCM,
+  eliminarTokenFCM,
   obtenerTokenPorUsuarioId,
   crearNotificacion,
   listarNotificacionesPorUsuarioId,
