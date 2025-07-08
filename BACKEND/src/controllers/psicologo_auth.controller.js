@@ -220,7 +220,14 @@ const cambiarEstadoCita = async (req, res) => {
                 horaInicio: horaInicioLocal,
                 horaFin: horaFinLocal
             });
-/* AQUI */
+
+            await citaModel.actualizarEstadoCita({ cita_id, estado, evento_google_id });
+
+            return res.status(200).json({
+                message: 'Cita aceptada correctamente',
+                evento_google_id,
+            });
+            /* AQUI */
         }
 
         if (estado === 'realizada') {
