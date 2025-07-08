@@ -43,9 +43,9 @@ export default function Psicologo() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const correoValido = nuevoPsicologo.correo.endsWith("@tecsup.edu.pe");
+    //const correoValido = nuevoPsicologo.correo.endsWith("@tecsup.edu.pe");
     // Cambiar al siquiente codigo cuando este en produccion
-    //const correoValido = /^seredu_lim_pra\d{2}@tecsup\.edu\.pe$/.test(nuevoPsicologo.correo);
+    const correoValido = /^seredu_lim_pra\d{2}@tecsup\.edu\.pe$/.test(nuevoPsicologo.correo);
 
     if (!correoValido) {
       toast.error("El correo debe terminar en @tecsup.edu.pe");
