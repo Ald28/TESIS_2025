@@ -48,7 +48,7 @@ export default function Psicologo() {
     const correoValido = /^seredu_lim_pra\d{2}@tecsup\.edu\.pe$/.test(nuevoPsicologo.correo);
 
     if (!correoValido) {
-      toast.error("El correo debe terminar en @tecsup.edu.pe");
+      toast.error("El correo debe tener el formato seredu_lim_praXX@tecsup.edu.pe");
       return;
     }
 
