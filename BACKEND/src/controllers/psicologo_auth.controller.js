@@ -196,6 +196,7 @@ const cambiarEstadoCita = async (req, res) => {
 
             const eventoCreado = await crearEventoPsicologo(correoPsicologo, evento);
 
+            console.error('a punto de enviar correo');
             await enviarCorreoCitaAceptada({
                 para: cita.correo_usuario,
                 nombreEstudiante: estudiante?.nombre_completo || '',
@@ -204,7 +205,9 @@ const cambiarEstadoCita = async (req, res) => {
                 horaFin: new Date(cita.fecha_fin).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })
             });
 
+            console.error('a punto de cambiar');
             try {
+                console.error('cambiar estado');
                 await citaModel.actualizarEstadoCita({
                     cita_id,
                     estado,
