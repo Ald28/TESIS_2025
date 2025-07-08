@@ -168,7 +168,6 @@ class _PaginaFavoritoState extends State<PaginaFavorito> {
     final nombrePsico = "${cita['psicologo_nombre']} ${cita['psicologo_apellido']}";
     final estado = cita['estado'];
 
-    // Formatear fecha
     final fechaFormateada = _formatearFecha(fecha);
 
     return Container(
@@ -227,7 +226,77 @@ class _PaginaFavoritoState extends State<PaginaFavorito> {
                     ],
                   ),
                 ),
-                _buildEstadoChip(estado),
+
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    _buildEstadoChip(estado),
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: () async {
+                        try {
+                          await ApiService.cancelarCita(
+                            citaId: cita['id'],
+                            estudianteId: estudianteId!,
+                            token: token!,
+                          );
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text("Cita cancelada correctamente"),
+                              backgroundColor: Colors.orange,
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              margin: const EdgeInsets.all(16),
+                              duration: const Duration(seconds: 3),
+                            ),
+                          );
+
+                          setState(() {});
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text("No se pudo cancelar la cita"),
+                              backgroundColor: Colors.red,
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              margin: const EdgeInsets.all(16),
+                              duration: const Duration(seconds: 3),
+                            ),
+                          );
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.red.withOpacity(0.3)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Icon(Icons.cancel_outlined, size: 14, color: Colors.red),
+                            SizedBox(width: 4),
+                            Text(
+                              "Cancelar",
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.red,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                  ],
+                ),
               ],
             ),
             const SizedBox(height: 16),
