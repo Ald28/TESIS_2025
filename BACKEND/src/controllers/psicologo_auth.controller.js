@@ -182,52 +182,25 @@ const cambiarEstadoCita = async (req, res) => {
 
         if (estado === 'aceptada') {
             const cita = await psicologoModel.obtenerDetallesCita(cita_id);
-
-            if (!cita) {
-                return res.status(404).json({ message: 'Cita no encontrada' });
-            }
-
             const estudiante = await psicologoModel.obtenerNombreCompletoEstudiante(cita.estudiante_id);
-            const nombreEstudiante = estudiante?.nombre_completo || 'Estudiante';
-
             const psicologo = await psicologoModel.obtenerNombreCompletoPsicologo(cita.usuario_psicologo);
-            const nombrePsicologo = psicologo?.nombre_completo || 'Psicólogo';
             const correoPsicologo = psicologo?.correo;
 
-            if (!correoPsicologo) {
-                return res.status(400).json({ message: 'No se encontró el correo del psicólogo' });
-            }
-
             const evento = {
-                summary: `Cita psicológica: ${nombreEstudiante} con ${nombrePsicologo}`,
-                description: `Sesión entre ${nombreEstudiante} y ${nombrePsicologo}. Consulta programada por el sistema.`,
+                summary: `Cita psicológica: ${estudiante?.nombre_completo} con ${psicologo?.nombre_completo}`,
+                description: 'Consulta programada por el sistema.',
                 start: new Date(cita.fecha_inicio).toISOString(),
                 end: new Date(cita.fecha_fin).toISOString(),
                 attendees: [{ email: cita.correo_usuario }]
             };
 
             const eventoCreado = await crearEventoPsicologo(correoPsicologo, evento);
-            evento_google_id = eventoCreado.id;
 
-            const fechaLocal = new Date(cita.fecha_inicio).toLocaleDateString('es-PE');
-            const horaInicioLocal = new Date(cita.fecha_inicio).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
-            const horaFinLocal = new Date(cita.fecha_fin).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+            // ❌ TEMPORALMENTE comenta lo siguiente:
+            // await enviarCorreoCitaAceptada(...)
+            // await citaModel.actualizarEstadoCita(...)
 
-            await enviarCorreoCitaAceptada({
-                para: cita.correo_usuario,
-                nombreEstudiante,
-                fecha: fechaLocal,
-                horaInicio: horaInicioLocal,
-                horaFin: horaFinLocal
-            });
-
-            await citaModel.actualizarEstadoCita({ cita_id, estado, evento_google_id });
-
-            return res.status(200).json({
-                message: 'Cita aceptada correctamente',
-                evento_google_id,
-            });
-            /* AQUI */
+            return res.status(200).json({ message: 'Cita aceptada', eventoId: eventoCreado.id });
         }
 
         if (estado === 'realizada') {
