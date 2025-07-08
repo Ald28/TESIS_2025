@@ -211,6 +211,27 @@ const cambiarEstadoCita = async (req, res) => {
                 return res.status(500).json({ message: 'Error al enviar correo' });
             }*/
 
+            const estudianteInfo = await estudianteModel.obtenerUsuarioPorEstudianteId(cita.estudiante_id);
+            console.log('estudianteInfo:', estudianteInfo);
+            
+            if (!estudianteInfo || !estudianteInfo.usuario_id) {
+                console.error('Error al obtener información del estudiante:', estudianteInfo);
+                return res.status(404).json({ message: 'Estudiante no encontrado' });
+            } else {
+                try {
+                    console.log('Enviando notificación push al estudiante:', estudianteInfo.usuario_id);
+                    await enviarNotificacionSistema({
+                        usuario_id: estudianteInfo.usuario_id,
+                        titulo: 'Cita Aceptada',
+                        mensaje: 'Tu cita con ${nombrePsicologo} ha sido aceptada.',
+                        tipo: 'sistema'
+                    });
+                } catch (error) {
+                    console.error('Error al enviar notificación push:', error.message || error);
+                }
+                console.log('Notificación enviada al estudiante:', estudianteInfo.usuario_id);
+            }
+
             console.error('a punto de cambiar');
             try {
                 console.error('cambiar estado');
