@@ -197,13 +197,19 @@ const cambiarEstadoCita = async (req, res) => {
             const eventoCreado = await crearEventoPsicologo(correoPsicologo, evento);
 
             console.error('a punto de enviar correo');
-            await enviarCorreoCitaAceptada({
-                para: cita.correo_usuario,
-                nombreEstudiante: estudiante?.nombre_completo || '',
-                fecha: new Date(cita.fecha_inicio).toLocaleDateString('es-PE'),
-                horaInicio: new Date(cita.fecha_inicio).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }),
-                horaFin: new Date(cita.fecha_fin).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })
-            });
+            try {
+                console.error('a punto de enviar correo');
+                await enviarCorreoCitaAceptada({
+                    para: cita.correo_usuario,
+                    nombreEstudiante: estudiante?.nombre_completo || '',
+                    fecha: new Date(cita.fecha_inicio).toLocaleDateString('es-PE'),
+                    horaInicio: new Date(cita.fecha_inicio).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }),
+                    horaFin: new Date(cita.fecha_fin).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })
+                });
+            } catch (err) {
+                console.error('❌ Error al enviar correo:', err.message || err);
+                return res.status(500).json({ message: 'Error al enviar correo' });
+            }
 
             console.error('a punto de cambiar');
             try {
