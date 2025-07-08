@@ -24,9 +24,6 @@ app.use(cors({
   credentials: true,
 }));
 
-app.use(bodyParser.json());
-app.use(express.json());
-
 // Rutas
 app.use("/api/multimedia", perfil); // CAMBIAR PERFIL ESTUDIANTE
 app.use('/auth/psicologo', psicologoAuthRoutes);
