@@ -196,9 +196,19 @@ const cambiarEstadoCita = async (req, res) => {
 
             const eventoCreado = await crearEventoPsicologo(correoPsicologo, evento);
 
-            // ❌ TEMPORALMENTE comenta lo siguiente:
-            // await enviarCorreoCitaAceptada(...)
-            // await citaModel.actualizarEstadoCita(...)
+            await enviarCorreoCitaAceptada({
+                para: cita.correo_usuario,
+                nombreEstudiante: estudiante?.nombre_completo || '',
+                fecha: new Date(cita.fecha_inicio).toLocaleDateString('es-PE'),
+                horaInicio: new Date(cita.fecha_inicio).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }),
+                horaFin: new Date(cita.fecha_fin).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })
+            });
+
+            await citaModel.actualizarEstadoCita({
+                cita_id,
+                estado,
+                evento_google_id: eventoCreado.id
+            });
 
             return res.status(200).json({ message: 'Cita aceptada', eventoId: eventoCreado.id });
         }
