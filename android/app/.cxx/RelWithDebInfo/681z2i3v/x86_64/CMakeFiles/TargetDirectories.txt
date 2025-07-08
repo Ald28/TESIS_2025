@@ -1,0 +1,2 @@
+C:/copia_seguridad/TESIS_2025/android/app/.cxx/RelWithDebInfo/681z2i3v/x86_64/CMakeFiles/edit_cache.dir
+C:/copia_seguridad/TESIS_2025/android/app/.cxx/RelWithDebInfo/681z2i3v/x86_64/CMakeFiles/rebuild_cache.dir

@@ -33,7 +33,7 @@ class _LoginState extends State<Login> {
 
     if (usuarioId != null && token != null) {
       final response = await http.post(
-        Uri.parse('http://192.168.177.182:8080/api/notificaciones/guardar-token-fcm'),///cambiar tambien
+        Uri.parse('https://api.calmatec.es/api/notificaciones/guardar-token-fcm'),///cambiar tambien
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'usuario_id': usuarioId,
@@ -71,7 +71,7 @@ class _LoginState extends State<Login> {
           title: "Cancelado",
           message: "Inicio de sesión cancelado",
           icon: Icons.cancel,
-          color: const Color(0xFF808080), // Gris 50%
+          color: const Color(0xFF808080),
         );
         setState(() => isLoading = false);
         return;
@@ -80,7 +80,7 @@ class _LoginState extends State<Login> {
       final GoogleSignInAuthentication auth = await user.authentication;
 
       final response = await http.post(
-        Uri.parse('http://192.168.177.182:8080/auth/google/estudiante'),
+        Uri.parse('https://api.calmatec.es/auth/google/estudiante'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'credential': auth.idToken}),
       );
@@ -91,7 +91,7 @@ class _LoginState extends State<Login> {
           title: "Cuenta no válida",
           message: data['message'] ?? "Cuenta no autorizada",
           icon: Icons.block,
-          color: const Color(0xFF808080), // Gris 50%
+          color: const Color(0xFF808080), 
         );
         setState(() => isLoading = false);
         return;
@@ -102,7 +102,7 @@ class _LoginState extends State<Login> {
         final token = data['token'];
 
         final perfilResponse = await http.get(
-          Uri.parse('http://192.168.177.182:8080/auth/perfil'),
+          Uri.parse('https://api.calmatec.es/auth/perfil'),
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer $token',
@@ -123,7 +123,7 @@ class _LoginState extends State<Login> {
           title: "Éxito",
           message: "Inicio de sesión exitoso",
           icon: Icons.check_circle,
-          color: const Color(0xFF00AEEF), // Cyan
+          color: const Color(0xFF00AEEF), 
         );
 
           await guardarTokenFCMEnBackend();
@@ -147,7 +147,7 @@ class _LoginState extends State<Login> {
                 title: "Error",
                 message: "No se pudo obtener el perfil del usuario",
                 icon: Icons.error_outline,
-                color: const Color(0xFF231F20), // Negro
+                color: const Color(0xFF231F20), 
               );
             }
           } else {
@@ -155,7 +155,7 @@ class _LoginState extends State<Login> {
               title: "Error",
               message: "No se pudo iniciar sesión.",
               icon: Icons.error_outline,
-              color: const Color(0xFF231F20), // Negro
+              color: const Color(0xFF231F20), 
             );
           }
         } on PlatformException catch (e) {
@@ -163,14 +163,14 @@ class _LoginState extends State<Login> {
             title: "Error",
             message: "Fallo en el inicio de sesión con Google",
             icon: Icons.error,
-            color: const Color(0xFF231F20), // Negro
+            color: const Color(0xFF231F20), 
           );
         } catch (error) {
           _showCustomSnackBar(
             title: "Error",
             message: "Ocurrió un problema inesperado",
             icon: Icons.error,
-            color: const Color(0xFF231F20), // Negro
+            color: const Color(0xFF231F20), 
           );
         }
 
@@ -229,10 +229,11 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: cyanColor, // Esta es la línea clave agregada
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        color: cyanColor, // Usando la constante cyan
+        color: cyanColor, 
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -254,7 +255,7 @@ class _LoginState extends State<Login> {
                       borderRadius: BorderRadius.circular(8),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF231F20).withOpacity(0.2), // Negro con opacidad
+                          color: const Color(0xFF231F20).withOpacity(0.2), 
                           blurRadius: 4,
                           spreadRadius: 2,
                           offset: const Offset(0, 2),
@@ -273,7 +274,7 @@ class _LoginState extends State<Login> {
                           'Continuar con Google',
                           style: TextStyle(
                             fontSize: 16,
-                            color: const Color(0xFF4D4D4D), // Gris 80%
+                            color: const Color(0xFF4D4D4D),
                           ),
                         ),
                       ],

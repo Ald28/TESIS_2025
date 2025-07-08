@@ -44,12 +44,13 @@ flutter:
     - assets/icon/logoi.png 
     - assets/images/default_user.png
 flutter_native_splash:
-  color: "#2196F3" 
+  color: "#0xFF00AEEF" 
   image: assets/logo.png 
   android: true
   ios: true
   web: false
-  fullscreen: true
+  android_gravity: center
+  ios_content_mode: center
 
 
 flutter_launcher_icons:

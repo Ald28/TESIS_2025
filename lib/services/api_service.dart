@@ -14,7 +14,7 @@ import 'package:frondend/classes/notificacion_model.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 class ApiService {
-  static const String baseUrl ='http://192.168.177.182:8080';
+  static const String baseUrl ='https://api.calmatec.es';
 
 ///notificaciones
 static Future<List<Notificacion>> listarNotificacionesGuardadas() async {

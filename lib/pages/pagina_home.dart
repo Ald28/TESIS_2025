@@ -25,7 +25,6 @@ class _PaginaHomeState extends State<PaginaHome> {
   bool mostrarPrivados = false;
   bool _datosCargados = false;
 
-  // Paleta de colores
   static const Color cyanColor = Color(0xFF00AEEF);
   static const Color blackColor = Color(0xFF231F20);
   static const Color gray80Color = Color(0xFF4D4D4D);

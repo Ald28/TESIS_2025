@@ -47,7 +47,7 @@ class _PaginaChatState extends State<PaginaChat> {
 
     try {
       final respuesta = await http.post(
-        Uri.parse('http://192.168.177.182:8080/api/chat-estudiante'),
+        Uri.parse('https://api.calmatec.es/api/chat-estudiante'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"mensaje": texto}),
       );
