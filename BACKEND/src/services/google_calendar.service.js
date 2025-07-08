@@ -4,7 +4,7 @@ const { query } = require('../config/conexion');
 const oAuth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID_WEB,
   process.env.GOOGLE_CLIENT_SECRET,
-  'http://api.calmatec.es:8080/auth/psicologo/google/calendar-callback'
+  'https://api.calmatec.es/auth/psicologo/google/calendar-callback'
 );
 
 const guardarTokensPsicologo = async (correo, tokens) => {
@@ -133,7 +133,7 @@ const verificarEventosGoogleCalendar = async (correo, fechaInicio, fechaFin) => 
   const auth = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID_WEB,
     process.env.GOOGLE_CLIENT_SECRET,
-    'http://api.calmatec.es:8080/auth/google/calendar-callback'
+    'https://api.calmatec.es/auth/google/calendar-callback'
   );
   auth.setCredentials(tokens);
 
@@ -163,7 +163,7 @@ const eliminarEventoGoogleCalendar = async (correo, eventoId) => {
   const auth = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID_WEB,
     process.env.GOOGLE_CLIENT_SECRET,
-    'http://api.calmatec.es:8080/auth/google/calendar-callback'
+    'https://api.calmatec.es/auth/google/calendar-callback'
   );
 
   auth.setCredentials(tokens);
