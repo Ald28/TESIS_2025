@@ -222,7 +222,8 @@ const cambiarEstadoCita = async (req, res) => {
             });
 
             const estudianteInfo = await estudianteModel.obtenerUsuarioPorEstudianteId(cita.estudiante_id);
-
+            console.log('estudianteInfo:', estudianteInfo);
+            
             if (!estudianteInfo || !estudianteInfo.usuario_id) {
                 console.error('Error al obtener información del estudiante:', estudianteInfo);
                 return res.status(404).json({ message: 'Estudiante no encontrado' });
