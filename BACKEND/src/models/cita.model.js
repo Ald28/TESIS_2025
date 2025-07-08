@@ -68,6 +68,7 @@ const obtenerCitasAceptadasPorPsicologo = async (psicologo_id) => {
 
 // El Psicologo acepta o rechaza la cita del estudiante
 const actualizarEstadoCita = async ({ cita_id, estado, evento_google_id }) => {
+    console.log('🔄 Iniciando actualización de estado...');
     let sql;
     let params;
 
@@ -92,6 +93,7 @@ const actualizarEstadoCita = async ({ cita_id, estado, evento_google_id }) => {
         console.log('📦 Con params:', params);
 
         await query(sql, params);
+        console.log('✅ Estado actualizado correctamente');
     } catch (error) {
         console.error('❌ Error en actualizarEstadoCita():', error);
         throw error;
