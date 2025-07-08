@@ -265,14 +265,33 @@ class _PaginaDetallePsicologoState extends State<PaginaDetallePsicologo> {
               itemBuilder: (context, index) {
                 final bloque = bloques[index];
                 final bloqueKey = "${bloque['inicio']}-${bloque['fin']}";
-                final ocupado = horasOcupadasSet.contains(bloqueKey);
+                bool yaOcupado = horasOcupadasSet.contains(bloqueKey);
 
+                final ahora = DateTime.now();
+                final hoy = DateTime(ahora.year, ahora.month, ahora.day);
+                final diaSeleccionado = DateTime(fechaSeleccionada.year, fechaSeleccionada.month, fechaSeleccionada.day);
+
+                if (hoy == diaSeleccionado) {
+                  final partes = bloque['inicio']!.split(":").map(int.parse).toList();
+                  final horaInicioBloque = DateTime(
+                    fechaSeleccionada.year,
+                    fechaSeleccionada.month,
+                    fechaSeleccionada.day,
+                    partes[0],
+                    partes[1],
+                  );
+
+                  if (horaInicioBloque.isBefore(ahora)) {
+                    yaOcupado = true;
+                  }
+                }
                 return _buildHorarioCard(
                   bloque: bloque,
-                  ocupado: ocupado,
+                  ocupado: yaOcupado,
                   turnoColor: turnoColor,
+                  fechaSeleccionada: fechaSeleccionada,
                 );
-              },
+              }
             ),
           ),
         ],
@@ -284,6 +303,7 @@ class _PaginaDetallePsicologoState extends State<PaginaDetallePsicologo> {
     required Map<String, String> bloque,
     required bool ocupado,
     required Color turnoColor,
+    required DateTime fechaSeleccionada,
   }) {
     return Container(
       decoration: BoxDecoration(

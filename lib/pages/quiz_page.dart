@@ -182,7 +182,7 @@ class _QuizPageState extends State<QuizPage> {
   @override
   Widget build(BuildContext context) {
     // Colores principales
-    const Color backgroundColor = Color(0xFFB2EBF2);
+    const Color backgroundColor = Color(0xFF00AEEF);
     const Color cardColor = Colors.white;
     const Color progressColor = Color(0xFF00838F); // Color turquesa oscuro que combina con el fondo
     const Color accentColor = Color(0xFF00ACC1); // Color de acento
