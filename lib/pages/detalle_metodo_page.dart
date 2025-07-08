@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import '../classes/metodo_relajacion.dart';
+import 'package:flutter/services.dart';
+
 
 class PaginaDetalleMetodo extends StatelessWidget {
   final MetodoRelajacion metodo;
@@ -23,56 +25,38 @@ class PaginaDetalleMetodo extends StatelessWidget {
             iconTheme: const IconThemeData(color: Colors.white),
             elevation: 0,
             flexibleSpace: FlexibleSpaceBar(
-              background: Stack(
-                fit: StackFit.expand,
-                children: [
-                  esVideo
-                      ? VideoDetalle(url: metodo.url)
-                      : ClipRRect(
-                          borderRadius: const BorderRadius.only(
-                            bottomLeft: Radius.circular(24),
-                            bottomRight: Radius.circular(24),
-                          ),
-                          child: Image.network(
-                            metodo.url,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Container(
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF4D4D4D),
-                                borderRadius: const BorderRadius.only(
-                                  bottomLeft: Radius.circular(24),
-                                  bottomRight: Radius.circular(24),
-                                ),
+              background: Container(
+                height: 320,
+                child: esVideo
+                    ? VideoDetalle(url: metodo.url)
+                    : ClipRRect(
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(24),
+                          bottomRight: Radius.circular(24),
+                        ),
+                        child: Image.network(
+                          metodo.url,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF4D4D4D),
+                              borderRadius: const BorderRadius.only(
+                                bottomLeft: Radius.circular(24),
+                                bottomRight: Radius.circular(24),
                               ),
-                              child: const Icon(
-                                Icons.image_not_supported, 
-                                size: 50,
-                                color: Color(0xFF808080),
-                              ),
+                            ),
+                            child: const Icon(
+                              Icons.image_not_supported, 
+                              size: 50,
+                              color: Color(0xFF808080),
                             ),
                           ),
                         ),
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(24),
-                        bottomRight: Radius.circular(24),
                       ),
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          const Color(0xFF231F20).withOpacity(0.7),
-                        ],
-                        stops: const [0.6, 1.0],
-                      ),
-                    ),
-                  ),
-                ],
               ),
             ),
           ),
+
           
           SliverToBoxAdapter(
             child: Transform.translate(
@@ -324,9 +308,147 @@ class VideoDetalle extends StatefulWidget {
   State<VideoDetalle> createState() => _VideoDetalleState();
 }
 
+class PantallaVideoCompleto extends StatefulWidget {
+  final VideoPlayerController controller;
+
+  const PantallaVideoCompleto({super.key, required this.controller});
+
+  @override
+  State<PantallaVideoCompleto> createState() => _PantallaVideoCompletoState();
+}
+
+class _PantallaVideoCompletoState extends State<PantallaVideoCompleto> {
+  bool _showControls = true;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Pantalla horizontal y sin UI
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+  }
+
+  @override
+  void dispose() {
+    // Restaurar modo normal al cerrar
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => setState(() => _showControls = !_showControls),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Center(
+              child: AspectRatio(
+                aspectRatio: widget.controller.value.aspectRatio,
+                child: VideoPlayer(widget.controller),
+              ),
+            ),
+
+            // Controles superpuestos
+            if (_showControls) ...[
+              Positioned.fill(
+                child: Container(
+                  color: Colors.black.withOpacity(0.3),
+                ),
+              ),
+
+              // Play / Pause
+              Center(
+                child: IconButton(
+                  iconSize: 64,
+                  icon: Icon(
+                    widget.controller.value.isPlaying
+                        ? Icons.pause_circle_filled
+                        : Icons.play_circle_filled,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      if (widget.controller.value.isPlaying) {
+                        widget.controller.pause();
+                      } else {
+                        widget.controller.play();
+                      }
+                    });
+                  },
+                ),
+              ),
+
+              // Progreso y botón de salir
+              Positioned(
+                bottom: 32,
+                left: 20,
+                right: 20,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: VideoProgressIndicator(
+                        widget.controller,
+                        allowScrubbing: true,
+                        colors: VideoProgressColors(
+                          playedColor: Colors.cyan,
+                          bufferedColor: Colors.grey,
+                          backgroundColor: Colors.white24,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    IconButton(
+                      icon: const Icon(Icons.fullscreen_exit, color: Colors.white),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _VideoDetalleState extends State<VideoDetalle> {
   late VideoPlayerController _controller;
-  bool _showControls = true;
+  bool _showControls = false;
+
+  void _toggleFullScreen() async {
+    final wasPlaying = _controller.value.isPlaying;
+
+    if (wasPlaying) _controller.pause();
+
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PantallaVideoCompleto(controller: _controller),
+      ),
+    );
+
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+
+    if (wasPlaying) _controller.play();
+  }
+
 
   @override
   void initState() {
@@ -335,138 +457,153 @@ class _VideoDetalleState extends State<VideoDetalle> {
       ..initialize().then((_) {
         setState(() {});
         _controller.setLooping(true);
-        _controller.play();
+        //_controller.play();//
       });
   }
 
   @override
   void dispose() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     _controller.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) {
-    return _controller.value.isInitialized
-        ? GestureDetector(
-            onTap: () => setState(() => _showControls = !_showControls),
-            child: ClipRRect(
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(24),
-                bottomRight: Radius.circular(24),
-              ),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  AspectRatio(
-                    aspectRatio: _controller.value.aspectRatio,
-                    child: VideoPlayer(_controller),
-                  ),
+Widget build(BuildContext context) {
+  return _controller.value.isInitialized
+      ? GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => setState(() => _showControls = !_showControls),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(24),
+              bottomRight: Radius.circular(24),
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                AspectRatio(
+                  aspectRatio: _controller.value.aspectRatio,
+                  child: VideoPlayer(_controller),
+                ),
 
-                  if (_showControls) ...[
-                    Positioned.fill(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.only(
-                            bottomLeft: Radius.circular(24),
-                            bottomRight: Radius.circular(24),
-                          ),
-                          color: const Color(0xFF231F20).withOpacity(0.4),
+                if (_showControls) ...[
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(24),
+                          bottomRight: Radius.circular(24),
                         ),
+                        color: const Color(0xFF231F20).withOpacity(0.4),
                       ),
                     ),
-                    Center(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: VideoDetalle.cyanColor.withOpacity(0.9),
-                          borderRadius: BorderRadius.circular(40),
-                          boxShadow: [
-                            BoxShadow(
-                              color: VideoDetalle.cyanColor.withOpacity(0.4),
-                              blurRadius: 20,
-                              offset: const Offset(0, 8),
+                  ),
+                  Center(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: VideoDetalle.cyanColor.withOpacity(0.9),
+                        borderRadius: BorderRadius.circular(40),
+                        boxShadow: [
+                          BoxShadow(
+                            color: VideoDetalle.cyanColor.withOpacity(0.4),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        iconSize: 60,
+                        icon: Icon(
+                          _controller.value.isPlaying
+                              ? Icons.pause_rounded
+                              : Icons.play_arrow_rounded,
+                          color: Colors.white,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            if (_controller.value.isPlaying) {
+                              _controller.pause();
+                            } else {
+                              _controller.play();
+                            }
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 32,
+                    left: 24,
+                    right: 24,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF231F20).withOpacity(0.6),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: VideoProgressIndicator(
+                              _controller,
+                              allowScrubbing: true,
+                              colors: VideoProgressColors(
+                                playedColor: VideoDetalle.cyanColor,
+                                bufferedColor: const Color(0xFF808080),
+                                backgroundColor: const Color(0xFFB3B3B3),
+                              ),
                             ),
-                          ],
-                        ),
-                        child: IconButton(
-                          iconSize: 60,
-                          icon: Icon(
-                            _controller.value.isPlaying
-                                ? Icons.pause_rounded
-                                : Icons.play_arrow_rounded,
-                            color: Colors.white,
                           ),
-                          onPressed: () {
-                            setState(() {
-                              if (_controller.value.isPlaying) {
-                                _controller.pause();
-                              } else {
-                                _controller.play();
-                              }
-                            });
-                          },
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 32,
-                      left: 24,
-                      right: 24,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF231F20).withOpacity(0.6),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: VideoProgressIndicator(
-                          _controller,
-                          allowScrubbing: true,
-                          colors: VideoProgressColors(
-                            playedColor: VideoDetalle.cyanColor,
-                            bufferedColor: const Color(0xFF808080),
-                            backgroundColor: const Color(0xFFB3B3B3),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(Icons.fullscreen), 
+                            onPressed: _toggleFullScreen,
                           ),
-                        ),
+
+                        ],
                       ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          )
-        : Container(
-            height: 320,
-            decoration: BoxDecoration(
-              color: const Color(0xFF4D4D4D).withOpacity(0.1),
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(24),
-                bottomRight: Radius.circular(24),
-              ),
-            ),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 48,
-                    height: 48,
-                    child: CircularProgressIndicator(
-                      color: VideoDetalle.cyanColor,
-                      strokeWidth: 3,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Cargando video...',
-                    style: TextStyle(
-                      color: Color(0xFF808080),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
-              ),
+              ],
             ),
-          );
-  }
+          ),
+        )
+      : Container(
+          height: 320,
+          decoration: BoxDecoration(
+            color: const Color(0xFF4D4D4D).withOpacity(0.1),
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(24),
+              bottomRight: Radius.circular(24),
+            ),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: CircularProgressIndicator(
+                    color: VideoDetalle.cyanColor,
+                    strokeWidth: 3,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Cargando video...',
+                  style: TextStyle(
+                    color: Color(0xFF808080),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+}
+
 }
