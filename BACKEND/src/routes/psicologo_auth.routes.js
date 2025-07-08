@@ -39,7 +39,7 @@ router.delete("/disponibilidad/eliminar/:dia/:turno", verificarToken,disponibili
 // Ruta para listar citas de un psicólogo
 router.get('/citas', authPsicologo, psicologoController.obtenerCitasDelPsicologo);
 // Ruta para cancelar estado de cita
-router.put('/citas/estado', authPsicologo, psicologoController.cambiarEstadoCita);
+router.put('/citas/estado', psicologoController.cambiarEstadoCita);
 // Ruta para obtener citas por estudiante
 router.get('/citas-aceptadas', authPsicologo, psicologoController.obtenerCitasAceptadas);
 // Ruta para cancelar cita activas por estudiante
