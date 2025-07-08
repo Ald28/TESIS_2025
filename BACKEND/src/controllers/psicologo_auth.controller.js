@@ -204,11 +204,16 @@ const cambiarEstadoCita = async (req, res) => {
                 horaFin: new Date(cita.fecha_fin).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })
             });
 
-            await citaModel.actualizarEstadoCita({
-                cita_id,
-                estado,
-                evento_google_id: eventoCreado.id
-            });
+            try {
+                await citaModel.actualizarEstadoCita({
+                    cita_id,
+                    estado,
+                    evento_google_id: eventoCreado?.id || null
+                });
+            } catch (error) {
+                console.error('❌ Fallo al guardar la cita en la BD:', error);
+                return res.status(500).json({ message: 'Error al actualizar la base de datos' });
+            }
 
             return res.status(200).json({ message: 'Cita aceptada', eventoId: eventoCreado.id });
         }

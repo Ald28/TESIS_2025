@@ -71,23 +71,31 @@ const actualizarEstadoCita = async ({ cita_id, estado, evento_google_id }) => {
     let sql;
     let params;
 
-    if (typeof evento_google_id !== 'undefined') {
-        sql = `
-            UPDATE cita
-            SET estado = ?, evento_google_id = ?
-            WHERE id = ?
-        `;
-        params = [estado, evento_google_id, cita_id];
-    } else {
-        sql = `
-            UPDATE cita
-            SET estado = ?
-            WHERE id = ?
-        `;
-        params = [estado, cita_id];
-    }
+    try {
+        if (evento_google_id) {
+            sql = `
+                UPDATE cita
+                SET estado = ?, evento_google_id = ?
+                WHERE id = ?
+            `;
+            params = [estado, evento_google_id, cita_id];
+        } else {
+            sql = `
+                UPDATE cita
+                SET estado = ?
+                WHERE id = ?
+            `;
+            params = [estado, cita_id];
+        }
 
-    await query(sql, params);
+        console.log('🟢 Ejecutando SQL:', sql);
+        console.log('📦 Con params:', params);
+
+        await query(sql, params);
+    } catch (error) {
+        console.error('❌ Error en actualizarEstadoCita():', error);
+        throw error;
+    }
 };
 
 // El estudiante al crear la cita se va a validar la disponibilidad del psicólogo
